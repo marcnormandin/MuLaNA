@@ -35,12 +35,6 @@ function mltp_make_pfstats_excel(obj, session)
 
     pfStats = []; %struct(length(ttname), numTrials);
     for iTT = 1:length(ttname)
-        meanFiringRate = 0;
-        peakFiringRate = 0;
-        informationRate = 0;
-        informationPerSpike = 0;
-        numSpikes = 0;
-
         for iTrial = 1:numTrials
             dataFilename = sprintf('%s_%d_%s', ttname{iTT}, iTrial, placemapFilenameSuffix);
             fprintf('Loading %s\n', dataFilename);
@@ -48,16 +42,16 @@ function mltp_make_pfstats_excel(obj, session)
             x = data.mltetrodeplacemap;
 
             pfStats(iTT, iTrial).ttname = ttname{iTT};
-            pfStats(iTT, iTrial).numSpikes = length(x.si);
+            pfStats(iTT, iTrial).totalSpikesBeforeCriteria = x.totalSpikesBeforeCriteria;
+            pfStats(iTT, iTrial).totalSpikesAfterCriteria = x.totalSpikesAfterCriteria;
             pfStats(iTT, iTrial).meanFiringRate = x.meanFiringRate;
             pfStats(iTT, iTrial).peakFiringRate = x.peakFiringRate;
             pfStats(iTT, iTrial).informationRate = x.informationRate;
             pfStats(iTT, iTrial).informationPerSpike = x.informationPerSpike;
         end
-
     end
 
-    statsVariables = {'numSpikes', 'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike'};
+    statsVariables = {'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria', 'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike'};
     for iStats = 1:length(statsVariables)
         S = zeros(size(pfStats,2)+1, size(pfStats,1)+1);
         for i = 2:size(pfStats,1)+1

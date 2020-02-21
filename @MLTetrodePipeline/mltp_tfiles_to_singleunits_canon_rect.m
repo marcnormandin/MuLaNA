@@ -30,17 +30,20 @@ function mltp_tfiles_to_singleunits_canon_rect(obj, session)
                 spikes(iTrial).meanFiringRateHz = spikes(iTrial).numSpikes / trialTimeTotal_s;
 
                 % This should use interpolation
-                spikes(iTrial).indices = [];
-                for iSpike = 1:length(spikes(iTrial).rate)
-                    % FixMe! Use interpolation to smooth it
-                    spikes(iTrial).indices(iSpike,1) = find(t.timeStamps_mus >= spikes(iTrial).trialSpikeTimes_mus(iSpike), 1, 'first');
-                    % Check that it isn't empty (that a spike didn't occur
-                    % AFTER the ending of the trial.
-                end
+%                 spikes(iTrial).indices = [];
+%                 for iSpike = 1:length(spikes(iTrial).rate)
+%                     % FixMe! Use interpolation to smooth it
+%                     spikes(iTrial).indices(iSpike,1) = find(t.timeStamps_mus >= spikes(iTrial).trialSpikeTimes_mus(iSpike), 1, 'first');
+%                     % Check that it isn't empty (that a spike didn't occur
+%                     % AFTER the ending of the trial.
+%                 end
+                spikes(iTrial).pos.x = interp1( t.timeStamps_mus, t.pos.x,  spikes(iTrial).trialSpikeTimes_mus );
+                spikes(iTrial).pos.y = interp1( t.timeStamps_mus, t.pos.y,  spikes(iTrial).trialSpikeTimes_mus );
+                spikes(iTrial).spe   = interp1( t.timeStamps_mus, t.spe, spikes(iTrial).trialSpikeTimes_mus );
 
                 % Record the position of the spikes
-                spikes(iTrial).pos.x = t.pos.x(spikes(iTrial).indices(:));
-                spikes(iTrial).pos.y = t.pos.y(spikes(iTrial).indices(:));
+%                 spikes(iTrial).pos.x = t.pos.x(spikes(iTrial).indices(:));
+%                 spikes(iTrial).pos.y = t.pos.y(spikes(iTrial).indices(:));
 
                 % include angle
             end

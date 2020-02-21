@@ -55,6 +55,18 @@ function mltp_trial_fnvt_to_trial_can_square(obj, session)
                 canon.stopIndex  = trial.stopIndex;
                 canon.timeStamps_mus = trial.timeStamps_mus;
 
+                                % Compute the velocity components in cm / second
+                dx = diff(canon.pos.x);
+                dy = diff(canon.pos.y);
+                dt = diff(canon.timeStamps_mus./10^6);
+                vx = dx./dt;
+                canon.vel.x = [0, lowpass(vx, obj.config.velocity_lowpass_wpass)];
+                vy = dy./dt;
+                canon.vel.y = [0, lowpass(vy, obj.config.velocity_lowpass_wpass)];
+
+                % Compute the speed, which is the magnitude of the velocity
+                canon.spe = sqrt( canon.vel.x.^2 + canon.vel.y.^2 );
+                
 
                 trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_canon_square.mat', iTrial));
                 fprintf('Saving %s ... ', trialCanonFilename);

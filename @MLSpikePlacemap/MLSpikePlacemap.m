@@ -5,7 +5,7 @@ classdef MLSpikePlacemap < handle
         x = [];
         y = [];
         ts_ms = [];
-        si = [];
+        spike_ts_ms = [];
         
         % Either input or defaults
         boundsx = [];
@@ -18,6 +18,8 @@ classdef MLSpikePlacemap < handle
         p = [];
         
         % Discretized values
+        spike_x = [];
+        spike_y = [];
         xi = [];
         yi = [];
         sxi = [];
@@ -27,6 +29,7 @@ classdef MLSpikePlacemap < handle
         x_bounded = [];
         y_bounded = [];
         passedSpeedSpikei = []; % These are indices into the position of spikes that passed the spike thresholds
+        passed_spike_ts_ms = [];
         speed_cm_per_second = [];
         
         % Two-dimensional maps
@@ -48,13 +51,14 @@ classdef MLSpikePlacemap < handle
         % Computed values
         informationRate = 0;
         informationPerSpike = 0;
-        totalSpikes = 0;
+        totalSpikesAfterCriteria = 0;
+        totalSpikesBeforeCriteria = 0;
         totalDwellTime = 0;
         isPlaceCell = false;
     end
     
     methods
-        function obj = MLSpikePlacemap(x, y, ts_ms, si, varargin)
+        function obj = MLSpikePlacemap(x, y, ts_ms, spike_ts_ms, varargin)
             p = inputParser;
             p.CaseSensitive = false;
             
@@ -67,7 +71,7 @@ classdef MLSpikePlacemap < handle
             addRequired(p, 'x', checkArray);
             addRequired(p, 'y', checkArray);
             addRequired(p, 'ts_ms', checkArray);
-            addRequired(p, 'si', checkArray);
+            addRequired(p, 'spike_ts_ms', checkArray);
      
             % Parameters
             addParameter(p, 'smoothingProtocol', 'SmoothBeforeDivision');
@@ -86,10 +90,10 @@ classdef MLSpikePlacemap < handle
             obj.x = x;
             obj.y = y;
             obj.ts_ms = ts_ms;
-            obj.si = si;
+            obj.spike_ts_ms = spike_ts_ms;
             
             % Process the inputs and optionals
-            parse(p, x, y, ts_ms, si, varargin{:});
+            parse(p, x, y, ts_ms, spike_ts_ms, varargin{:});
             
             % Store the values that will be used
             obj.boundsx = p.Results.boundsx;
@@ -98,6 +102,9 @@ classdef MLSpikePlacemap < handle
             obj.nbinsy = p.Results.nbinsy;
             obj.smoothingKernel = p.Results.smoothingKernel;
             obj.speed_cm_per_second = p.Results.speed_cm_per_second;
+            obj.totalSpikesBeforeCriteria = length(obj.spike_ts_ms);
+            obj.spike_x = interp1( obj.ts_ms, obj.x, obj.spike_ts_ms );
+            obj.spike_y = interp1( obj.ts_ms, obj.y, obj.spike_ts_ms );
             
             obj.p = p;
             
@@ -111,6 +118,7 @@ classdef MLSpikePlacemap < handle
                 error('The timestamp array, ts_ms, must be monotonically increasing, but it is not!');
             end
 
+            
             compute(obj);
         end
         
@@ -123,30 +131,37 @@ classdef MLSpikePlacemap < handle
                 end
                 % For each spike we see if it passes the threshold, if not,
                 % we remove it
-                passedSpeedi1 = find(obj.speed_cm_per_second >= obj.p.Results.criteria_speed_cm_per_second_minimum);
-                passedSpeedi2 = find(obj.speed_cm_per_second <= obj.p.Results.criteria_speed_cm_per_second_maximum);
+                spike_spe = interp1( obj.ts_ms, obj.speed_cm_per_second, obj.spike_ts_ms );
                 
-                obj.passedSpeedSpikei = obj.si(ismember(obj.si, intersect(passedSpeedi1, passedSpeedi2)));
+                passedSpeedi1 = find(spike_spe >= obj.p.Results.criteria_speed_cm_per_second_minimum);
+                passedSpeedi2 = find(spike_spe <= obj.p.Results.criteria_speed_cm_per_second_maximum);
+                
+                obj.passedSpeedSpikei = intersect(passedSpeedi1, passedSpeedi2);
                 % The above finds the unique spike indices, but there may
                 % be more than one spike per index
             else
-                obj.passedSpeedSpikei = obj.si;
+                obj.passedSpeedSpikei = 1:length(obj.spike_ts_ms);
             end
             
-            fprintf('%d spikes have been excluded using the speed criteria.\n', length(obj.si) - length(obj.passedSpeedSpikei));
-            fprintf('%d spikes have passed the speed criteria.\n', length(obj.passedSpeedSpikei));
+            fprintf('%d spikes have been excluded using the speed criteria.\n', length(obj.spike_ts_ms) - length(obj.passed_spike_ts_ms));
+            fprintf('%d spikes have passed the speed criteria.\n', length(obj.passed_spike_ts_ms));
 
             [obj.x_bounded, obj.y_bounded, obj.xi, obj.yi, obj.xedges, obj.yedges] = ...
                 ml_core_compute_binned_positions(obj.x, obj.y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
 
             % Recompute the spike location since we could have potentially changed
             % the subjects location when the spike occurred. 
-            obj.sxi = obj.xi( obj.passedSpeedSpikei );
-            obj.syi = obj.yi( obj.passedSpeedSpikei );
+%             obj.sxi = obj.xi( obj.passedSpeedSpikei );
+%             obj.syi = obj.yi( obj.passedSpeedSpikei );
 
             obj.visitedCountMap = ml_placefield_visitedcountmap( obj.xi, obj.yi, obj.nbinsx, obj.nbinsy);
 
             % The spike count map before applying the criteria
+            passed_spike_x = obj.spike_x(obj.passedSpeedSpikei);
+            passed_spike_y = obj.spike_y(obj.passedSpeedSpikei);
+            [~, ~, obj.sxi, obj.syi, ~, ~] = ...
+                ml_core_compute_binned_positions(passed_spike_x, passed_spike_y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
+            
             obj.spikeCountMapTrue = ml_placefield_spikecountmap( obj.sxi, obj.syi, obj.nbinsx, obj.nbinsy);
             
             % The spike count map after applying the criteria
@@ -185,7 +200,7 @@ classdef MLSpikePlacemap < handle
             [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
 
     
-            obj.totalSpikes = sum(obj.spikeCountMap, 'all');
+            obj.totalSpikesAfterCriteria = sum(obj.spikeCountMap, 'all');
             obj.totalDwellTime = sum(obj.dwellTimeMap, 'all');
             
             if obj.meanFiringRate > 0.1 && obj.meanFiringRate < 5.0 && obj.informationRate > 0.5
@@ -195,10 +210,12 @@ classdef MLSpikePlacemap < handle
         
         
         function plot_path_with_spikes(obj)
-            plot(obj.x_bounded, obj.y_bounded, '-', 'color', [0,0,1,0.8]) %arenaColours(iTrial))
+            %plot(obj.x_bounded, obj.y_bounded, '-', 'color', [0,0,1,0.8]) %arenaColours(iTrial))
+            plot(obj.x, obj.y, '-', 'color', [0,0,1,0.8]) %arenaColours(iTrial))
+
             hold on
             % These are the spikes that passed the velocity check
-            spikeScatter1 = scatter(obj.x_bounded(obj.passedSpeedSpikei), obj.y_bounded(obj.passedSpeedSpikei), 10, 'ro', 'markerfacecolor', 'r');
+            spikeScatter1 = scatter(obj.spike_x, obj.spike_y, 10, 'ro', 'markerfacecolor', 'r');
             spikeScatter1.MarkerFaceAlpha = 0.6;
             spikeScatter1.MarkerEdgeAlpha = 0.6;
             

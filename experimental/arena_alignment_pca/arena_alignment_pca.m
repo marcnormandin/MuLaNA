@@ -8,10 +8,9 @@ CONFIG_NVT_FILE_TRIAL_SEPARATION_THRESHOLD_S = 10;
 numTrials = ml_nlx_nvt_get_num_trials(nvtFullFilename, CONFIG_NVT_FILE_TRIAL_SEPARATION_THRESHOLD_S);
 
 figure
-p = 4; q = 4; k = 1;
+p = 4; q = 6; k = 1;
 for iTrial = 1:numTrials
-    ax(k) = subplot(p,q,k);
-    k = k + 1;
+    
     
     [t_ms, x_px, y_px, theta_deg] =  ml_nlx_nvt_get_raw_trial(iTrial, nvtFullFilename, CONFIG_NVT_FILE_TRIAL_SEPARATION_THRESHOLD_S);
 
@@ -50,16 +49,34 @@ for iTrial = 1:numTrials
     X = [x_hull', y_hull'];
     C = pca(X)
     
+    ax(k) = subplot(p,q,k);
+    k = k + 1;
+    
         plot(x, y, 'k.')
         hold on
         plot([0, C(1,1)*lx/2], [0, ly*C(1,2)/2], 'r-', 'linewidth', 4)
         plot([0, C(2,1)*lx/2], [0, ly*C(2,2)/2], 'g-', 'linewidth', 4)
-        
+        axis equal tight
+    grid on
+    grid minor
+%     set(gca, 'ydir', 'reverse')
+    title(sprintf('Trial %d', iTrial))
+    
+    ax(k) = subplot(p,q,k);
+    k = k + 1;
+    %pr = zeros(size(X));
+    pr = [];
+    XP = [x', y'];
+    for iP = 1:length(x)
+        pr(iP,2) = dot(XP(iP,:), [C(1,1), C(1,2)]');
+        pr(iP,1) = dot(XP(iP,:), [C(2,1), C(2,2)]');
+    end
+    plot(pr(:,1), pr(:,2), 'm.')
     
     axis equal tight
     grid on
     grid minor
-    set(gca, 'ydir', 'reverse')
+%     set(gca, 'ydir', 'reverse')
     title(sprintf('Trial %d', iTrial))
 end
 %linkaxes(ax, 'xy')

@@ -13,7 +13,7 @@ function mltp_compute_best_fit_orientations_within_contexts(obj, session)
             x1 = load(fullfile(outputFolder, fnames{iMap1}));
 
             % Only compare maps that actually have spikes
-            if x1.mltetrodeplacemap.totalSpikes == 0
+            if x1.mltetrodeplacemap.totalSpikesAfterCriteria == 0
                 continue;
             end
 
@@ -43,7 +43,7 @@ function mltp_compute_best_fit_orientations_within_contexts(obj, session)
             for iMap2 = (iMap1+1):length(fnames)
                 x2 = load(fullfile(outputFolder, fnames{iMap2}));
                                             % Only compare maps that actually have spikes
-                if x2.mltetrodeplacemap.totalSpikes == 0
+                if x2.mltetrodeplacemap.totalSpikesAfterCriteria == 0
                     continue;
                 end
 

@@ -58,8 +58,8 @@ function mltp_compute_best_fit_orientations_0_180_per_cell(obj, session)
                 best_fit_orientations_per_cell(iCell).angle_value = [ best_fit_orientations_per_cell(iCell).angle_value, v];
                 best_fit_orientations_per_cell(iCell).context_1 = [best_fit_orientations_per_cell(iCell).context_1, x1.trial_context_id];
                 best_fit_orientations_per_cell(iCell).context_2 = [best_fit_orientations_per_cell(iCell).context_2, x2.trial_context_id];
-                best_fit_orientations_per_cell(iCell).total_spikes_1 = [best_fit_orientations_per_cell(iCell).total_spikes_1, x1.mltetrodeplacemap.totalSpikes];
-                best_fit_orientations_per_cell(iCell).total_spikes_2 = [best_fit_orientations_per_cell(iCell).total_spikes_2, x2.mltetrodeplacemap.totalSpikes];
+                best_fit_orientations_per_cell(iCell).total_spikes_1 = [best_fit_orientations_per_cell(iCell).total_spikes_1, x1.mltetrodeplacemap.totalSpikesAfterCriteria];
+                best_fit_orientations_per_cell(iCell).total_spikes_2 = [best_fit_orientations_per_cell(iCell).total_spikes_2, x2.mltetrodeplacemap.totalSpikesAfterCriteria];
                 best_fit_orientations_per_cell(iCell).use_context_1 = [best_fit_orientations_per_cell(iCell).use_context_1, x1.trial_use];
                 best_fit_orientations_per_cell(iCell).use_context_2 = [best_fit_orientations_per_cell(iCell).use_context_1, x2.trial_use];
                 best_fit_orientations_per_cell(iCell).trial_num_1 = [best_fit_orientations_per_cell(iCell).trial_num_1, x1.trial_num];

@@ -18,7 +18,12 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
             canon = data.canon;
             x = canon.pos.x;
             y = canon.pos.y;
-            si = spikes.indices;
+%             si = spikes.indices;
+%             sx = spikes.x;
+%             sy = spikes.y;
+%             ss = spikes.spe;
+            spike_ts_ms = spikes.trialSpikeTimes_mus(:) / (1.0*10^3);
+            
             ts_ms = canon.timeStamps_mus(:) / (1.0*10^3); 
 
             %mltetrodeplacemap = MLTetrodePlacemap(x, y, ts_ms, si, boundsx, boundsy, nbinsx, nbinsy, ...
@@ -30,7 +35,7 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
             data2 = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', iTrial)));
             spe = data2.canon.spe;
             
-            mltetrodeplacemap = MLSpikePlacemap(x, y, ts_ms, si, ...
+            mltetrodeplacemap = MLSpikePlacemap(x, y, ts_ms, spike_ts_ms, ...
                 'speed_cm_per_second', spe, ...
                 'boundsx', boundsx, ...
                 'boundsy', boundsy, ...
