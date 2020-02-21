@@ -30,6 +30,9 @@ classdef MLSpikePlacemap < handle
         y_bounded = [];
         passedSpeedSpikei = []; % These are indices into the position of spikes that passed the spike thresholds
         passed_spike_ts_ms = [];
+        passed_spike_x = [];
+        passed_spike_y = [];
+
         speed_cm_per_second = [];
         
         % Two-dimensional maps
@@ -142,6 +145,10 @@ classdef MLSpikePlacemap < handle
             else
                 obj.passedSpeedSpikei = 1:length(obj.spike_ts_ms);
             end
+            obj.passed_spike_x = obj.spike_x(obj.passedSpeedSpikei);
+            obj.passed_spike_y = obj.spike_y(obj.passedSpeedSpikei);
+            obj.passed_spike_ts_ms = obj.spike_ts_ms(obj.passedSpeedSpikei);
+                        
             
             fprintf('%d spikes have been excluded using the speed criteria.\n', length(obj.spike_ts_ms) - length(obj.passed_spike_ts_ms));
             fprintf('%d spikes have passed the speed criteria.\n', length(obj.passed_spike_ts_ms));
@@ -157,10 +164,10 @@ classdef MLSpikePlacemap < handle
             obj.visitedCountMap = ml_placefield_visitedcountmap( obj.xi, obj.yi, obj.nbinsx, obj.nbinsy);
 
             % The spike count map before applying the criteria
-            passed_spike_x = obj.spike_x(obj.passedSpeedSpikei);
-            passed_spike_y = obj.spike_y(obj.passedSpeedSpikei);
+
+
             [~, ~, obj.sxi, obj.syi, ~, ~] = ...
-                ml_core_compute_binned_positions(passed_spike_x, passed_spike_y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
+                ml_core_compute_binned_positions(obj.passed_spike_x, obj.passed_spike_y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
             
             obj.spikeCountMapTrue = ml_placefield_spikecountmap( obj.sxi, obj.syi, obj.nbinsx, obj.nbinsy);
             

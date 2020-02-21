@@ -42,6 +42,7 @@ classdef MLTetrodePipeline < MLPipeline
             % Create the experiment structure
             obj.experiment = obj.mltp_create_session_folders( obj.recordingsParentFolder, obj.analysisParentFolder, obj.experimentDescriptionFilename );
             
+            
             % These should go through a registration function to allow for
             % checking of duplicates
             obj.availablePerSessionTasks('nvt_split_into_trial_nvt') = @obj.mltp_nvt_split_into_trial_nvt;

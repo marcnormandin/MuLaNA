@@ -34,6 +34,9 @@ function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder
                 session{iSession}.name = experiment.info.session_folders{iSession};
                 
                 recordFilename = fullfile(sessionFolder, "record.json"); 
+                
+                % Create a default record file if one doesn't exist.
+                % This can aid the user if they forget to add it.
                 if ~isfile(recordFilename)
                     fprintf('Creating default record.json for %s\n', session{iSession}.name);
 
@@ -80,6 +83,11 @@ function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder
                 session{iSession}.num_tfiles = length(tfiles);
                 session{iSession}.tfiles_filename_prefixes = cell(1, session{iSession}.num_tfiles);
                 session{iSession}.tfiles_filename_full = cell(1, session{iSession}.num_tfiles);
+                if length(session{iSession}.tfiles_filename_prefixes) > 0
+                    session{iSession}.hasSingleUnits = true;
+                else
+                    session{iSession}.hasSingleUnits = false;
+                end
                 
                 for iFile = 1:length(tfiles)
                     session{iSession}.tfiles_filename_full{iFile} = tfiles{iFile};
