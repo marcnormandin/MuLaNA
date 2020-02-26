@@ -12,8 +12,10 @@ function mltp_plot_rate_difference_matrices(obj)
 
         fprintf('Processing session: %s\n', sessionName);
 
-        x = xlsread(pfStatsFilename, sprintf('%s_meanFiringRate', sessionName));
-        %x = xlsread(fullfile(tfolder, 'pfStats.xlsx'), sprintf('%s_informationPerSpike', sessionName));
+        % This work on Windows, but not Linux. Loading by name doesn't
+        % work, so we have to load by sheet number.
+        %x = xlsread(pfStatsFilename, sprintf('%s_meanFiringRate', sessionName));
+        x = xlsread(pfStatsFilename, 4); % 4 gives meanFiringRate
 
         MFRT = x(2:end, 2:end);
         numTrials = size(MFRT,1);
