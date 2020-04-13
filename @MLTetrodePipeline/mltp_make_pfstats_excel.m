@@ -1,5 +1,7 @@
 function mltp_make_pfstats_excel(obj, session)
     pfStatsFilename = fullfile(session.analysisFolder, 'pfStats.xlsx');
+    pfStatsMatFilename = fullfile(session.analysisFolder, 'pfStats.mat');
+
     if isfile(pfStatsFilename)
         delete(pfStatsFilename)
     end
@@ -48,6 +50,8 @@ function mltp_make_pfstats_excel(obj, session)
             pfStats(iTT, iTrial).peakFiringRate = x.peakFiringRate;
             pfStats(iTT, iTrial).informationRate = x.informationRate;
             pfStats(iTT, iTrial).informationPerSpike = x.informationPerSpike;
+            pfStats(iTT, iTrial).context_id = data.trial_context_id;
+            pfStats(iTT, iTrial).context_use = data.trial_use;
         end
     end
 
@@ -71,4 +75,6 @@ function mltp_make_pfstats_excel(obj, session)
 
         writetable(Tnew, pfStatsFilename, 'Sheet', sprintf('%s_%s', sessionName, statsVariables{iStats}), 'WriteVariableNames', false);
     end
+    
+    save(pfStatsMatFilename, 'pfStats', 'session');
 end % function

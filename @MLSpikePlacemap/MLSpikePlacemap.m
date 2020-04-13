@@ -58,6 +58,12 @@ classdef MLSpikePlacemap < handle
         totalSpikesBeforeCriteria = 0;
         totalDwellTime = 0;
         isPlaceCell = false;
+        
+        % optional computed values
+        informationRate_pvalue = -1;
+        informationPerSpike_pvalue = -1;
+        informationRateSim = [];
+        informationPerSpikeSim = [];
     end
     
     methods
@@ -150,8 +156,8 @@ classdef MLSpikePlacemap < handle
             obj.passed_spike_ts_ms = obj.spike_ts_ms(obj.passedSpeedSpikei);
                         
             
-            fprintf('%d spikes have been excluded using the speed criteria.\n', length(obj.spike_ts_ms) - length(obj.passed_spike_ts_ms));
-            fprintf('%d spikes have passed the speed criteria.\n', length(obj.passed_spike_ts_ms));
+            %fprintf('%d spikes have been excluded using the speed criteria.\n', length(obj.spike_ts_ms) - length(obj.passed_spike_ts_ms));
+            %fprintf('%d spikes have passed the speed criteria.\n', length(obj.passed_spike_ts_ms));
 
             [obj.x_bounded, obj.y_bounded, obj.xi, obj.yi, obj.xedges, obj.yedges] = ...
                 ml_core_compute_binned_positions(obj.x, obj.y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
@@ -215,6 +221,62 @@ classdef MLSpikePlacemap < handle
             end
         end % function
         
+        function compute_information_rate_pvalue(obj)
+            pmTrue = obj;
+            
+            % The true information
+            mx = pmTrue.x;
+            my = pmTrue.y;
+            ts_ms = pmTrue.ts_ms;
+            spike_ts_ms = pmTrue.spike_ts_ms;
+
+
+            % Now compute the shuffled distribution
+            shiftMin_ms = 20 * 1000;
+            numDraws = 1000;
+
+            tshift_min = shiftMin_ms;
+            tshift_max = ts_ms(end) - ts_ms(1) - tshift_min;
+            tshift_draw = (tshift_max - tshift_min).*rand(1,numDraws) + tshift_min;
+
+            % Allocate memory
+            informationRateSim = zeros(1, numDraws);
+            informationPerSpikeSim = zeros(1, numDraws);
+
+            for iDraw = 1:numDraws
+                sim_spike_ts_ms = spike_ts_ms + tshift_draw(iDraw);
+                outsideRange_indices = find(sim_spike_ts_ms > ts_ms(end));
+                sim_spike_ts_ms(outsideRange_indices) = sim_spike_ts_ms(outsideRange_indices) - ts_ms(end) + ts_ms(1);
+                %disp(outsideRange_indices)
+
+                % We shouldn't need to sort them by time, but lets do it.
+                sim_spike_ts_ms = sort(sim_spike_ts_ms);
+
+                pmSim = MLSpikePlacemap(mx, my, ts_ms, sim_spike_ts_ms, ...
+                    'smoothingProtocol', pmTrue.p.Results.smoothingProtocol, ...
+                    'speed_cm_per_second', pmTrue.p.Results.speed_cm_per_second, ...
+                    'boundsx', pmTrue.p.Results.boundsx, ...
+                    'boundsy', pmTrue.p.Results.boundsy, ...
+                    'nbinsx', pmTrue.p.Results.nbinsx, ...
+                    'nbinsy', pmTrue.p.Results.nbinsy, ...
+                    'smoothingKernel', pmTrue.p.Results.smoothingKernel, ...
+                    'criteriaDwellTimeSecondsPerBinMinimum', pmTrue.p.Results.criteriaDwellTimeSecondsPerBinMinimum, ...
+                    'criteriaSpikesPerBinMinimum', pmTrue.p.Results.criteriaSpikesPerBinMinimum, ...
+                    'criteria_speed_cm_per_second_minimum', pmTrue.p.Results.criteria_speed_cm_per_second_minimum, ...
+                    'criteria_speed_cm_per_second_maximum', pmTrue.p.Results.criteria_speed_cm_per_second_maximum);
+
+                informationRateSim(iDraw) = pmSim.informationRate;
+                informationPerSpikeSim(iDraw) = pmSim.informationPerSpike;
+
+            %     figure
+            %     pmSim.plot_path_with_spikes()
+            end
+
+            obj.informationRate_pvalue = 1 - normcdf(pmTrue.informationRate, mean(informationRateSim), std(informationRateSim));
+            obj.informationPerSpike_pvalue = 1 - normcdf(pmTrue.informationPerSpike, mean(informationPerSpikeSim), std(informationPerSpikeSim));
+            obj.informationRateSim = informationRateSim;
+            obj.informationPerSpikeSim = informationPerSpikeSim;
+        end
         
         function plot_path_with_spikes(obj)
             %plot(obj.x_bounded, obj.y_bounded, '-', 'color', [0,0,1,0.8]) %arenaColours(iTrial))
@@ -222,7 +284,7 @@ classdef MLSpikePlacemap < handle
 
             hold on
             % These are the spikes that passed the velocity check
-            spikeScatter1 = scatter(obj.spike_x, obj.spike_y, 10, 'ro', 'markerfacecolor', 'r');
+            spikeScatter1 = scatter(obj.spike_x, obj.spike_y, 25, 'ro', 'markerfacecolor', 'r');
             spikeScatter1.MarkerFaceAlpha = 0.6;
             spikeScatter1.MarkerEdgeAlpha = 0.6;
             
@@ -238,16 +300,34 @@ classdef MLSpikePlacemap < handle
         
         function plot(obj)
             [nr,nc] = size(obj.meanFiringRateMapSmoothed);
-            pcolor( [obj.meanFiringRateMapSmoothed, nan(nr,1); nan(1,nc+1)] ) 
+            
+            pm = obj.meanFiringRateMapSmoothed;
+            %pm(obj.visitedCountMap == 0) = nan;
+            pcolor( [pm, nan(nr,1); nan(1,nc+1)] ) 
             shading interp;
             set(gca, 'ydir', 'reverse');
 
-            title(sprintf('(%0.2f, %0.2f) Hz | (%0.2f b/s, %0.2f b)', ...
+            title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
                 obj.peakFiringRate, obj.meanFiringRate, obj.informationRate, obj.informationPerSpike ))
             axis image off
             colormap jet 
         end
 
+        function plot_information_rate_distribution(obj)
+            if isempty(obj.informationRateSim)
+                obj.compute_information_rate_pvalue();
+            end
+            nbins = 50;
+            histogram(obj.informationRateSim, nbins, 'normalization', 'pdf');
+            title(sprintf('p = %0.4f', obj.informationRate_pvalue))
+            hold on
+            xline(obj.informationRate, 'r', 'linewidth', 8);
+            xlabel('Information rate, IC (bits/s)')
+            grid on
+            model_x = linspace(min(obj.informationRateSim), max(obj.informationRateSim), 100);
+            model_y = normpdf(model_x, mean(obj.informationRateSim), std(obj.informationRateSim));
+            plot(model_x, model_y, 'k-', 'linewidth', 4)
+        end 
     end
 end
 

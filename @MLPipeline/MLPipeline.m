@@ -3,7 +3,7 @@ classdef MLPipeline < handle
     properties
         experiment;
         
-        verbose = true;
+        verbose = false;
     end
     
     properties %(Access = protected)

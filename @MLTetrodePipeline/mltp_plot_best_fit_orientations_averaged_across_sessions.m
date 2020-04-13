@@ -1,4 +1,11 @@
 function mltp_plot_best_fit_orientations_averaged_across_sessions(obj)
+
+    % Only applicable if experiment has more than one session
+    if obj.experiment.numSessions < 2
+        warning('plot_best_fit_orientations_averaged_across_sessions requires more than one session of data. Skipping.')
+        return
+    end
+    
     tmp = load(fullfile(obj.analysisParentFolder, 'best_fit_orientations_all_contexts.mat'));
     x1 = tmp.best_fit_orientations_all_contexts;
     x1mean = mean(x1,1);
@@ -24,10 +31,10 @@ function mltp_plot_best_fit_orientations_averaged_across_sessions(obj)
     hBar(2).FaceColor = [0, 0, 1.0];
     hBar(2).FaceAlpha = 0.4;
     hBar(2).LineWidth = 2;
-    % Return ‘bar’ Handle
+    % Return ï¿½barï¿½ Handle
     hold on
     for k1 = 1:size(y1,2)
-        ctr(k1,:) = bsxfun(@plus, hBar(k1).XData, hBar(k1).XOffset');    % Note: ‘XOffset’ Is An Undocumented Feature; This Selects The ‘bar’ Centres
+        ctr(k1,:) = bsxfun(@plus, hBar(k1).XData, hBar(k1).XOffset');    % Note: ï¿½XOffsetï¿½ Is An Undocumented Feature; This Selects The ï¿½barï¿½ Centres
         ydt(k1,:) = hBar(k1).YData;% Individual Bar Heights
         err1(k1,:) = xstd(:,k1);
     end

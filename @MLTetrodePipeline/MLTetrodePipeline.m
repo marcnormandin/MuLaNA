@@ -45,6 +45,7 @@ classdef MLTetrodePipeline < MLPipeline
             
             % These should go through a registration function to allow for
             % checking of duplicates
+            %obj.availablePerTrialTasks('
             obj.availablePerSessionTasks('nvt_split_into_trial_nvt') = @obj.mltp_nvt_split_into_trial_nvt;
             obj.availablePerSessionTasks('trial_nvt_to_trial_fnvt') = @obj.mltp_trial_nvt_to_trial_fnvt;
             obj.availablePerSessionTasks('user_define_trial_arenaroi') = @obj.mltp_user_define_trial_arenaroi;
