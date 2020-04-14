@@ -1,13 +1,12 @@
-function mulana_project_create(projectName)
-outputFolder = fullfile(pwd, projectName);
+function mulana_project_create(projectType)
 
-%projectName = 'object_task_consecutive_trials';
 [projectsAvailable, projectFolder] = mulana_project_helper_get_list();
 
-if ismember(projectName, projectsAvailable)
-    inputFolder = fullfile(projectFolder, projectName);
-    
-    copyfile(inputFolder, outputFolder);
+if ismember(projectType, projectsAvailable)
+    referenceFolder = fullfile(projectFolder, projectType);
+        
+    % Execute the projects initialization script
+    eval( sprintf("%s_init('%s')", projectType, referenceFolder) );
     
     fprintf('Project created!\n');
 else
