@@ -13,8 +13,25 @@ MClust 4.4 -- The only functionality we need is "readheader"
 Neuralynx MATLAB import/export library
 
 ```
-Give examples
+Add the external libraries to the MATLAB search path
 ```
+
+### List pre-made projects
+There are some pre-made projects for analyses performed by the ML. List them using the following command
+```
+mulana_project_list()
+```
+Some of the available projects are:
+- object_task_consecutive_trial
+- one_context_tetrode
+- two_contexts_tetrode
+
+### Create a new instance of a pre-made project
+Navigate to a desired folder where you would like to create an instance of the project. Then type
+```
+mulana_project_create( 'projectName' )
+```
+where **projectName** is one of the available projects.
 
 ### Installing
 
@@ -74,8 +91,8 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Marc Normandin** - *Initial work* - [Marc Normandin](https://github.com/marcnormandin)
-* **Celia Gagliardi** - ** - [Celia Gagliardi](https://github.com/celiagagliardi)
+* **Marc Normandin** - *Developer, Muzzio Lab* - [Marc Normandin](https://github.com/marcnormandin)
+* **Celia Gagliardi** - *Developer, Muzzio Lab* - [Celia Gagliardi](https://github.com/celiagagliardi)
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
