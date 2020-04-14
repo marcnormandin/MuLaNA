@@ -8,7 +8,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+MClust 4.4 -- The only functionality we need is "readheader"
+
+Neuralynx MATLAB import/export library
 
 ```
 Give examples
@@ -72,13 +74,14 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Marc Normandin** - *Initial work* - [Marc Normandin](https://github.com/marcnormandin)
+* **Celia Gagliardi** - ** - [Celia Gagliardi](https://github.com/celiagagliardi)
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is PRIVATE to Muzzio Lab members. All Rights Reserved 2020.
 
 ## Acknowledgments
 
