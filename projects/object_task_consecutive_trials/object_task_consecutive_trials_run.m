@@ -82,6 +82,23 @@ for i = 1:length(homeworkIds)
     homework(i).experiment = 'object_task_consecutive_trials';
 end % i
 
+% Ask the user if they want to clean the analysis folder for the subjects
+% that will be analyzed. It is better to do this if t-files change.
+cleanAnalysisFolder = true;
+while true
+    fprintf('It is better to say yes\n');
+    cleanAnalysisFolder = input('Do you want to delete each subjects previous analysis folder [y/n]? ', 's');
+    if strcmpi(cleanAnalysisFolder, 'y')
+        cleanAnalysisFolder = true;
+        break;
+    elseif strcmpi(cleanAnalysisFolder, 'n')
+        cleanAnalysisFolder = false;
+        break;
+    else
+        fprintf('(y)es or (n)o only.\n');
+    end
+end % while
+
 %%
 % remove any previous error file
 if isfile(errorFilename)
@@ -98,6 +115,13 @@ for iHomework = 1:length(homework)
     recordingsParentFolder = fullfile(DATA_FOLDER, subjectName, 'recordings', experiment);
     analysisParentFolder = fullfile(ANALYSIS_FOLDER, subjectName);
 
+    if cleanAnalysisFolder 
+        if exist(analysisParentFolder, 'dir')
+            rmdir(analysisParentFolder, 's');
+            fprintf('Deleted previous analysis results for %s\n', subjectName);
+        end
+    end
+    
 try
     pipe = MLTetrodePipeline( pipeCfgFilename, recordingsParentFolder, analysisParentFolder);
 
