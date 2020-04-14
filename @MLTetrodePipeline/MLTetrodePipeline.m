@@ -42,7 +42,7 @@ classdef MLTetrodePipeline < MLPipeline
             
             % Take care of the possible infinite value for the speed
             obj.config.placemaps.criteria_speed_cm_per_second_maximum = eval(obj.config.placemaps.criteria_speed_cm_per_second_maximum);
-            if obj.config.placemaps.criteria_speed_cm_per_second_maximum < 0)
+            if obj.config.placemaps.criteria_speed_cm_per_second_maximum < 0
                 error('The config value placemaps.criteria_speed_cm_per_second_maximum must be >= 0, but is %f.', obj.config.placemaps.criteria_speed_cm_per_second_maximum);
             end
             if obj.config.placemaps.criteria_speed_cm_per_second_maximum < obj.config.placemaps.criteria_speed_cm_per_second_minimum

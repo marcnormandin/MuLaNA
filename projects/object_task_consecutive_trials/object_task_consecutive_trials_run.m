@@ -6,17 +6,18 @@ tstart = tic;
 
 
 % Don't change these
-projectConfigFilename = fullfile(pwd, 'project_config.json');
+projectCfgFilename = fullfile(pwd, 'project_config.json');
 pipeCfgFilename = fullfile(pwd, 'pipeline_config_square.json');
+errorFilename = fullfile(pwd, 'error.txt');
 
 % Read in the project configuration file
-if ~isfile( projectConfigFilename )
-    error('The project configuration file (%s) does not exist.', projectConfigFilename);
+if ~isfile( projectCfgFilename )
+    error('The project configuration file (%s) does not exist.', projectCfgFilename);
 end
 try 
-    projectConfig = jsondecode( fileread(projectConfigFilename) );
+    projectConfig = jsondecode( fileread(projectCfgFilename) );
 catch ME
-    error('Error encountered while reading project configuration from (%s): %s', projectConfigFilename, ME.identifier)
+    error('Error encountered while reading project configuration from (%s): %s', projectCfgFilename, ME.identifier)
 end
      
 DATA_FOLDER = projectConfig.dataFolder;
@@ -30,7 +31,7 @@ for iFolder = 1:length(folders)
         continue;
     end
     if isfolder(fullfile(DATA_FOLDER, folder))
-        k = length(homework) + 1;
+        k = length(data) + 1;
         data(k).subjectName = folder;
         data(k).experiment = 'object_task_consecutive_trials';
     end
@@ -42,14 +43,27 @@ if isempty(data)
     fprintf('There are no datasets to process! Done!\n');
 else
     while true
+        if ~isempty(homeworkIds)
+            fprintf('We will process:\n');
+            for i = 1:length(homeworkIds)
+                did = homeworkIds(i);
+                fprintf('\t%s\n', data(did).subjectName);
+                %homework(i).experiment = 'object_task_consecutive_trials';
+            end % i
+        end
+        
         fprintf('The following datasets are available:\n');
-        fprintf('%0.2d\tAdd all (Get a coffee!!)\n', 0);
+        fprintf('%0.2d:\t Add all (Get a coffee!!)\n', 0);
         for iData = 1:length(data)
-            fprintf('%0.2d:\t Add %s\n', data(iData).subjectName);
+            if ismember(iData, homeworkIds)
+                continue;
+            else
+                fprintf('%0.2d:\t Add %s\n', iData, data(iData).subjectName);
+            end
         end
         fprintf('%0.2d:\t (stop adding)\n', length(data)+1);
         
-        choice = str2double(input('? '));
+        choice = input('? ');
         if choice == 0
             homeworkIds = 1:length(data);
             break;
@@ -69,6 +83,12 @@ for i = 1:length(homeworkIds)
 end % i
 
 %%
+% remove any previous error file
+if isfile(errorFilename)
+    delete(errorFilename)
+end
+
+% Let's be good and do our homework
 for iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
@@ -78,14 +98,15 @@ for iHomework = 1:length(homework)
     recordingsParentFolder = fullfile(DATA_FOLDER, subjectName, 'recordings', experiment);
     analysisParentFolder = fullfile(ANALYSIS_FOLDER, subjectName);
 
+try
     pipe = MLTetrodePipeline( pipeCfgFilename, recordingsParentFolder, analysisParentFolder);
 
     pipe.executePerSessionTask('nvt_split_into_trial_nvt');
     
     % Run only once
+    
     %pipe.executePerSessionTask('user_define_trial_arenaroi');
 
-%try
     pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
     pipe.executePerSessionTask('trial_fnvt_to_trial_can_rect');
     pipe.executePerSessionTask('trial_fnvt_to_trial_can_square');
@@ -116,17 +137,20 @@ for iHomework = 1:length(homework)
     pipe.executeExperimentTask('plot_best_fit_orientations_all_contexts');
     pipe.executeExperimentTask('plot_best_fit_orientations_within_contexts');
     
-    %Only works if more than one session
-%     pipe.executeExperimentTask('plot_best_fit_orientations_averaged_across_sessions');
+    pipe.executeExperimentTask('plot_best_fit_orientations_averaged_across_sessions');
     
     pipe.executeExperimentTask('plot_rate_difference_matrices');
 
     object_task_correlations(pipe);
-% catch e
-%     fid = fopen('errors.txt', 'w+');
-%     fprintf(fid, 'Error running %s: %s\n', subjectName, getReport(e));
-%     fclose(fid);
-% end
+catch ME
+    fid = fopen(errorFilename, 'w+');
+    if fid == -1
+        error('Unable to create the error file! Doubly-bad!!\n');
+    end
+    
+    fprintf(fid, 'Error running %s: %s\n', subjectName, getReport(ME));
+    fclose(fid);
+end
     copyfile(pipeCfgFilename, analysisParentFolder);
     
 end % for subject

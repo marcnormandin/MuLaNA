@@ -13,7 +13,7 @@ function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder
             experiment.dataset = experiment.info.experiment;
 
             % Create the analysis folder if it doesn't already exist
-            if ~isfolder(analysisParentFolder)
+            if ~exist(analysisParentFolder,'dir')
                 if VERBOSE
                     fprintf('Creating analysis folder (%s) ... ', analysisParentFolder);
                 end
@@ -100,7 +100,7 @@ function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder
                 analysisSessionFolder = fullfile(analysisParentFolder, experiment.info.session_folders{iSession});
                 session{iSession}.analysisFolder = analysisSessionFolder;
 
-                if ~isfolder(analysisSessionFolder)
+                if ~exist(analysisSessionFolder,'dir')
                     if VERBOSE
                         fprintf('Creating analysis session folder (%s) ... ', analysisSessionFolder);
                     end
