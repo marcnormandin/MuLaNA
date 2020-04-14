@@ -1,10 +1,13 @@
-function [h] = ml_nlx_mclust_plot_spikes_for_checking_bits( nvtFilename, tFilename )
+function [h] = ml_nlx_mclust_plot_spikes_for_checking_bits( nvtFilename, tFilenameFull )
 
+    tmp = split(tFilenameFull, filesep);
+    tFilename = tmp{end};
+    
     [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
 
-    x = ml_nlx_mclust_load_spikes_32bit({ tFilename });
+    x = ml_nlx_mclust_load_spikes_32bit({ tFilenameFull });
     ts_mus_32 = x{1}.T .* 10^6;
-    x = ml_nlx_mclust_load_spikes_64bit({ tFilename });
+    x = ml_nlx_mclust_load_spikes_64bit({ tFilenameFull });
     ts_mus_64 = x{1}.T .* 10^6;
 
     h = figure;

@@ -53,7 +53,8 @@ function mltp_plot_singleunit_placemap_data_rect(obj, session)
                 k1 = (iContext-1)*numCols*numPlotsPerTrial + iConTrial;
                 subplot(numRows, numCols, k1);
                 tmp.mltetrodeplacemap.plot_path_with_spikes();
-                title(sprintf('ConId %d, ConTrial %d, Trial %d, Dig (%s)', uniqueContextIds(iContext), iConTrial, iTrial, dig));
+                %title(sprintf('ConId %d, ConTrial %d, Trial %d, Dig (%s)', uniqueContextIds(iContext), iConTrial, iTrial, dig));
+                title(sprintf('T%d C%dT%d\nDig (%s)', iTrial, uniqueContextIds(iContext), iConTrial, dig));
 
                 % Plot the placemap
                 k2 = (iContext-1)*numCols*numPlotsPerTrial + numCols + iConTrial;

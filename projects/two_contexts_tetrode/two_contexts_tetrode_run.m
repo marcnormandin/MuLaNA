@@ -4,9 +4,10 @@ clc
 
 tstart = tic;
 
+
 % Don't change these
 projectCfgFilename = fullfile(pwd, 'project_config.json');
-pipeCfgFilename = fullfile(pwd, 'pipeline_config_square.json');
+pipeCfgFilename = fullfile(pwd, 'pipeline_config.json');
 errorFilename = fullfile(pwd, 'error.txt');
 
 % Read in the project configuration file
@@ -18,68 +19,38 @@ try
 catch ME
     error('Error encountered while reading project configuration from (%s): %s', projectCfgFilename, ME.identifier)
 end
-     
-DATA_FOLDER = projectConfig.dataFolder;
-ANALYSIS_FOLDER = projectConfig.analysisFolder;
 
-data = [];
-folders = dir(DATA_FOLDER);
-for iFolder = 1:length(folders)
-    folder = folders(iFolder).name;
-    if strcmp(folder, '.') || strcmp(folder, '..')
-        continue;
-    end
-    if isfolder(fullfile(DATA_FOLDER, folder))
-        k = length(data) + 1;
-        data(k).subjectName = folder;
-        data(k).experiment = 'object_task_consecutive_trials';
-    end
-end
 
-homeworkIds = [];
+homework = [];
 
-if isempty(data)
-    fprintf('There are no datasets to process! Done!\n');
-else
-    while true
-        if ~isempty(homeworkIds)
-            fprintf('We will process:\n');
-            for i = 1:length(homeworkIds)
-                did = homeworkIds(i);
-                fprintf('\t%s\n', data(did).subjectName);
-                %homework(i).experiment = 'object_task_consecutive_trials';
-            end % i
-        end
-        
-        fprintf('The following datasets are available:\n');
-        fprintf('%0.2d:\t Add all (Get a coffee!!)\n', 0);
-        for iData = 1:length(data)
-            if ismember(iData, homeworkIds)
-                continue;
-            else
-                fprintf('%0.2d:\t Add %s\n', iData, data(iData).subjectName);
-            end
-        end
-        fprintf('%0.2d:\t (stop adding)\n', length(data)+1);
-        
-        choice = input('? ');
-        if choice == 0
-            homeworkIds = 1:length(data);
-            break;
-        elseif choice == length(data)+1
-            break;
-        else
-            homeworkIds(end+1) = choice;
-            homeworkIds = unique(homeworkIds);
-        end
-    end
-end
+% Feature Rich
+homework(1).subjectName = 'AK42_CA1';
+homework(1).experiment = 'chengs_task_2c';
+homework(1).feature = 'feature_rich';
 
-for i = 1:length(homeworkIds)
-    did = homeworkIds(i);
-    homework(i).subjectName = data(did).subjectName;
-    homework(i).experiment = 'object_task_consecutive_trials';
-end % i
+homework(2).subjectName = 'AK74_CA1';
+homework(2).experiment = 'chengs_task_2c';
+homework(2).feature = 'feature_rich';
+
+homework(3).subjectName = 'JJ9_CA1';
+homework(3).experiment = 'chengs_task_2c';
+homework(3).feature = 'feature_rich';
+
+%experimentAnalysisParentFolder = '/work/muzziolab/marc/two_contexts_tetrode/analysis/feature_rich';
+
+% Feature Poor
+homework(4).subjectName = 'K1_CA1';
+homework(4).experiment = 'chengs_task_2c';
+homework(4).feature = 'feature_poor';
+
+homework(5).subjectName = 'MG1_CA1';
+homework(5).experiment = 'chengs_task_2c';
+homework(5).feature = 'feature_poor';
+
+homework(6).subjectName = 'HG1Y_CA1';
+homework(6).experiment = 'chengs_task_2c';
+homework(6).feature = 'feature_poor';
+
 
 % Ask the user if they want to clean the analysis folder for the subjects
 % that will be analyzed. It is better to do this if t-files change.
@@ -103,15 +74,15 @@ if isfile(errorFilename)
     delete(errorFilename)
 end
 
-% Let's be good and do our homework
+
 for iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
     
-    fprintf('Processing %d of %d: %s\n', iHomework, length(homework), subjectName);
-    
-    recordingsParentFolder = fullfile(DATA_FOLDER, subjectName, 'recordings', experiment);
-    analysisParentFolder = fullfile(ANALYSIS_FOLDER, subjectName);
+    experimentAnalysisParentFolder = sprintf('%s/%s', projectConfig.analysisFolder, homework(iHomework).feature);
+
+    recordingsParentFolder = fullfile(projectConfig.dataFolder, subjectName, 'recordings', experiment);
+    analysisParentFolder = fullfile(experimentAnalysisParentFolder, subjectName);
 
     if cleanAnalysisFolder 
         if exist(analysisParentFolder, 'dir')
@@ -145,6 +116,7 @@ try
 
     pipe.executePerSessionTask('compute_singleunit_placemap_data_rect');
     pipe.executePerSessionTask('compute_singleunit_placemap_data_square');
+    
     pipe.executePerSessionTask('make_pfstats_excel')
 
     pipe.executePerSessionTask('compute_best_fit_orientations_within_contexts');
@@ -162,7 +134,6 @@ try
     pipe.executePerSessionTask('plot_singleunit_placemap_data_square');
     pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
     pipe.executePerSessionTask('plot_best_fit_orientations_per_cell');
-
     pipe.executePerSessionTask('plot_across_within_0_180_similarity');
     pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
 
@@ -173,8 +144,6 @@ try
     
     pipe.executeExperimentTask('plot_rate_difference_matrices');
 
-    % custom to this analysis
-    object_task_correlations(pipe);
 catch ME
     % record the error
     fid = fopen(errorFilename, 'w+');
@@ -190,6 +159,12 @@ end
     copyfile(pipeCfgFilename, analysisParentFolder);
 end % for subject
 
+% Now run the code that requires the previous analysis to exist
+ml_two_contexts_plot_best_fit_alignment(projectConfig);
+ml_two_contexts_rates_across_and_within(projectConfig);
+% tinimice_make_combined_orientation_plot
+
+
 % Report the computation time
 telapsed_mins = toc(tstart)/60;
 fprintf('Compute time was %0.3f minutes.\n', telapsed_mins);
@@ -200,3 +175,4 @@ else
     fprintf('An error occurred in the course of this program running.\n');
     fprintf('View the error file (%s) for clues as to what errors occurred.\n', errorFilename);
 end
+

@@ -1,17 +1,17 @@
-function ml_two_contexts_plot_best_fit_alignment()
-    plot_feature_rich_all_contexts();
-    plot_feature_poor_all_contexts();
-    plot_feature_rich_within_contexts();
-    plot_feature_poor_within_contexts();
+function ml_two_contexts_plot_best_fit_alignment(projectConfig)
+    plot_feature_rich_all_contexts(projectConfig);
+    plot_feature_poor_all_contexts(projectConfig);
+    plot_feature_rich_within_contexts(projectConfig);
+    plot_feature_poor_within_contexts(projectConfig);
 end % function
 
-function plot_feature_rich_all_contexts()
+function plot_feature_rich_all_contexts(projectConfig)
     ss = 'best_fit_orientations_all_contexts';
     
     files = {...
-        fullfile(pwd, 'analysis', 'feature_rich', 'AK42_CA1', 'best_fit_orientations_all_contexts.mat'), ...
-        fullfile(pwd, 'analysis', 'feature_rich', 'AK74_CA1', 'best_fit_orientations_all_contexts.mat'), ...
-        fullfile(pwd, 'analysis', 'feature_rich', 'JJ9_CA1', 'best_fit_orientations_all_contexts.mat')};
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK42_CA1', 'best_fit_orientations_all_contexts.mat'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK74_CA1', 'best_fit_orientations_all_contexts.mat'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'JJ9_CA1', 'best_fit_orientations_all_contexts.mat')};
     
     [day1mean, day1std] = get_mice_day_stats(files, [1,1,1], ss);
     [day2mean, day2std] = get_mice_day_stats(files, [2,2,2], ss);
@@ -27,7 +27,7 @@ function plot_feature_rich_all_contexts()
     title(sprintf('Best Fit Orientations (Feature Rich All Contexts)'), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = fullfile(pwd, 'analysis');
+    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
     fnPrefix = 'best_fit_orientations_feature_rich_all_contexts';
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
@@ -38,12 +38,12 @@ function plot_feature_rich_all_contexts()
 
 end % function
 
-function plot_feature_poor_all_contexts()
+function plot_feature_poor_all_contexts(projectConfig)
     ss = 'best_fit_orientations_all_contexts';
     
     files = {...
-        fullfile(pwd, 'analysis', 'feature_poor', 'K1_CA1', 'best_fit_orientations_all_contexts.mat'), ...
-        fullfile(pwd, 'analysis', 'feature_poor', 'MG1_CA1', 'best_fit_orientations_all_contexts.mat')};
+        fullfile(projectConfig.analysisFolder, 'feature_poor', 'K1_CA1', 'best_fit_orientations_all_contexts.mat'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_poor', 'MG1_CA1', 'best_fit_orientations_all_contexts.mat')};
     
     [day1mean, day1std] = get_mice_day_stats(files, [1,3], ss);
     [day2mean, day2std] = get_mice_day_stats(files, [2,4], ss);
@@ -59,7 +59,7 @@ function plot_feature_poor_all_contexts()
     title(sprintf('Best Fit Orientations (Feature Poor All Contexts)'), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = fullfile(pwd, 'analysis');
+    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
     fnPrefix = 'best_fit_orientations_feature_poor_all_contexts';
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
@@ -70,13 +70,13 @@ function plot_feature_poor_all_contexts()
 
 end % function
 
-function plot_feature_rich_within_contexts()
+function plot_feature_rich_within_contexts(projectConfig)
     ss = 'best_fit_orientations_within_contexts';
     
     files = {...
-        fullfile(pwd, 'analysis', 'feature_rich', 'AK42_CA1', 'best_fit_orientations_within_contexts.mat'), ...
-        fullfile(pwd, 'analysis', 'feature_rich', 'AK74_CA1', 'best_fit_orientations_within_contexts.mat'), ...
-        fullfile(pwd, 'analysis', 'feature_rich', 'JJ9_CA1', 'best_fit_orientations_within_contexts.mat')};
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK42_CA1', 'best_fit_orientations_within_contexts.mat'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK74_CA1', 'best_fit_orientations_within_contexts.mat'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'JJ9_CA1', 'best_fit_orientations_within_contexts.mat')};
     
     [day1mean, day1std] = get_mice_day_stats(files, [1,1,1], ss);
     [day2mean, day2std] = get_mice_day_stats(files, [2,2,2], ss);
@@ -92,7 +92,7 @@ function plot_feature_rich_within_contexts()
     title(sprintf('Best Fit Orientations (Feature Rich Within Contexts)'), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = fullfile(pwd, 'analysis');
+    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
     fnPrefix = 'best_fit_orientations_feature_rich_within_contexts';
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
@@ -103,12 +103,12 @@ function plot_feature_rich_within_contexts()
 
 end % function
 
-function plot_feature_poor_within_contexts()
+function plot_feature_poor_within_contexts(projectConfig)
     ss = 'best_fit_orientations_within_contexts';
     
     files = {...
-        fullfile(pwd, 'analysis', 'feature_poor', 'K1_CA1', 'best_fit_orientations_within_contexts.mat'), ...
-        fullfile(pwd, 'analysis', 'feature_poor', 'MG1_CA1', 'best_fit_orientations_within_contexts.mat')};
+        fullfile(projectConfig.analysisFolder, 'feature_poor', 'K1_CA1', 'best_fit_orientations_within_contexts.mat'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_poor', 'MG1_CA1', 'best_fit_orientations_within_contexts.mat')};
     
     [day1mean, day1std] = get_mice_day_stats(files, [1,3], ss);
     [day2mean, day2std] = get_mice_day_stats(files, [2,4], ss);
@@ -124,7 +124,7 @@ function plot_feature_poor_within_contexts()
     title(sprintf('Best Fit Orientations (Feature Poor Within Contexts)'), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = fullfile(pwd, 'analysis');
+    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
     fnPrefix = 'best_fit_orientations_feature_poor_within_contexts';
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')

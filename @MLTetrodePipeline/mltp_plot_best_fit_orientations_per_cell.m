@@ -34,8 +34,8 @@ function mltp_plot_best_fit_orientations_per_cell(obj, session)
     end % iCell
     % Save the figure
         %outputFolder = fullfile(session.analysisFolder);
-        outputFolder = fullfile(pwd,'for_Isabel');
-
+        %outputFolder = fullfile(pwd,'for_Isabel');
+        outputFolder = fullfile(session.analysisFolder, 'best_fit_orientations_per_cell');
         if ~exist(outputFolder, 'dir')
             mkdir(outputFolder)
         end

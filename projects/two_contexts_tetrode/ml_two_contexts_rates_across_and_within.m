@@ -1,23 +1,23 @@
-function ml_two_contexts_rates_across_and_within()
+function ml_two_contexts_rates_across_and_within(projectConfig)
     statField1 = 'meanFiringRate';
-    plot_feature_rich(statField1);
-    plot_feature_poor(statField1);
+    plot_feature_rich(projectConfig, statField1);
+    plot_feature_poor(projectConfig, statField1);
     
     statField2 = 'peakFiringRate';
-    plot_feature_rich(statField2);
-    plot_feature_poor(statField2);
+    plot_feature_rich(projectConfig, statField2);
+    plot_feature_poor(projectConfig, statField2);
     
     statField3 = 'informationRate';
-    plot_feature_rich(statField3);
-    plot_feature_poor(statField3);
+    plot_feature_rich(projectConfig, statField3);
+    plot_feature_poor(projectConfig, statField3);
 end % function
 
-function plot_feature_rich(statField)
+function plot_feature_rich(projectConfig, statField)
     
     files = {...
-        fullfile(pwd, 'analysis', 'feature_rich', 'AK42_CA1'), ...
-        fullfile(pwd, 'analysis', 'feature_rich', 'AK74_CA1'), ...
-        fullfile(pwd, 'analysis', 'feature_rich', 'JJ9_CA1')};
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK42_CA1'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK74_CA1'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_rich', 'JJ9_CA1')};
     
     [day1mean, day1std] = get_mice_day_stats(files, {'d7', 'd1', 'd1'}, statField);
     [day2mean, day2std] = get_mice_day_stats(files, {'d8', 'd2', 'd2'}, statField);
@@ -33,7 +33,7 @@ function plot_feature_rich(statField)
     title(sprintf('%s (Feature Rich)', statField), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = fullfile(pwd, 'analysis');
+    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
     fnPrefix = sprintf('plot_%s_feature_rich', statField);
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
@@ -44,11 +44,11 @@ function plot_feature_rich(statField)
 
 end % function
 
-function plot_feature_poor(statField)
+function plot_feature_poor(projectConfig, statField)
     
     files = {...
-        fullfile(pwd, 'analysis', 'feature_poor', 'K1_CA1'), ...
-        fullfile(pwd, 'analysis', 'feature_poor', 'MG1_CA1')};
+        fullfile(projectConfig.analysisFolder, 'feature_poor', 'K1_CA1'), ...
+        fullfile(projectConfig.analysisFolder, 'feature_poor', 'MG1_CA1')};
     
     [day1mean, day1std] = get_mice_day_stats(files, {'d1', 's9'}, statField);
     [day2mean, day2std] = get_mice_day_stats(files, {'d2', 's10'}, statField);
@@ -61,10 +61,10 @@ function plot_feature_poor(statField)
     
     h = make_plot(xmean, xstd);
     
-    title(sprintf('%s', statField), 'interpreter', 'none')
+    title(sprintf('%s (Feature Poor)', statField), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = fullfile(pwd, 'analysis');
+    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
     fnPrefix = sprintf('plot_%s_feature_poor', statField);
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
@@ -154,18 +154,7 @@ function [h] = make_plot(xmean, xstd)
     hBar(1).FaceColor = [0, 0, 0.5];
     hBar(1).FaceAlpha = 0.6;
     hBar(1).LineWidth = 2;
-%     hBar(2).FaceColor = [0, 0, 1.0];
-%     hBar(2).FaceAlpha = 0.4;
-%     hBar(2).LineWidth = 2;
-    % Return �bar� Handle
-%     hold on
-%     for k1 = 1:size(y1,2)
-%         ctr(k1,:) = bsxfun(@plus, hBar(k1).XData, hBar(k1).XOffset');    % Note: �XOffset� Is An Undocumented Feature; This Selects The �bar� Centres
-%         ydt(k1,:) = hBar(k1).YData;% Individual Bar Heights
-%         err1(k1,:) = xstd(:,k1);
-%     end
-%     hold on
-%     errorbar(ctr, ydt, err1, 'k.', 'linewidth', 2) 
+
     legend({'day 1', 'day 2', 'day 3'});
     grid on
     grid minor

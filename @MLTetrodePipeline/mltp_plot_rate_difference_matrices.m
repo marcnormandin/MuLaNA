@@ -81,7 +81,7 @@ function mltp_plot_rate_difference_matrices(obj)
         xticklabels({'1','3','5','7','9','11','2','4','6','8','10','12'});
         yticks(1:12)
         yticklabels({'1','3','5','7','9','11','2','4','6','8','10','12'});
-        title(sprintf('AVERAGE ACROSS CELLS (%s: %s)', obj.experiment.subjectName, sessionName))
+        title(sprintf('AVERAGE ACROSS CELLS (%s: %s)', obj.experiment.subjectName, sessionName), 'interpreter', 'none')
         hold on;
         rectangle('Position',[0.5,0.5,6,6],...
                   'Curvature',[0,0],...

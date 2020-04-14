@@ -1,6 +1,6 @@
 classdef MLSpikePlacemap < handle
 
-    properties
+    properties (SetAccess = private)
         % Copies of the inputs
         x = [];
         y = [];

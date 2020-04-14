@@ -72,7 +72,9 @@ function mltp_plot_across_within_0_180_similarity(obj, session)
     grid on
     grid minor
     legend({'across', 'within', 'shuffled'})
-
+    
+    title(sprintf('Best Fit 0/180: %s', obj.experiment.subjectName), 'interpreter', 'none')
+    
     % Save the figure
     outputFolder = fullfile(session.analysisFolder, 'best_fit_0_180');
     if ~exist(outputFolder, 'dir')

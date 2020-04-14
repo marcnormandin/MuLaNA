@@ -21,7 +21,7 @@ function mltp_plot_best_fit_orientations_all_contexts(obj)
     bar([0, 90, 180, 270], best_fit_orientations_all_contexts');
     hold on 
     grid on
-    title(sprintf('Best Fit Orientations (all contexts) ( %s )', obj.experiment.subjectName))
+    title(sprintf('Best Fit Orientations (all contexts) ( %s )', obj.experiment.subjectName), 'Interpreter', 'none')
     ylabel('Proportion Best Fit')
     xticklabels({['0' char(176)], ['90' char(176)], ['180' char(176)], ['270' char(176)]});
     legend(plotlegend)
