@@ -103,8 +103,17 @@ try
 
     pipe.executePerSessionTask('nvt_split_into_trial_nvt');
     
-    % Run only once
-    
+    % Ask the user to create the ROIs only when needed (ideally only once)
+    for iSession = 1:pipe.experiment.numSessions
+        session = pipe.experiment.session{iSession};
+        numTrials = session.num_trials_recorded;
+        roiFiles = dir(fullfile(session.rawFolder, 'trial_*_arenaroi.mat'));
+        numRois = length(roiFiles);
+        
+        if numRois ~= numTrials
+            pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
+        end
+    end
     %pipe.executePerSessionTask('user_define_trial_arenaroi');
 
     pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
