@@ -8,9 +8,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-MClust 4.4 -- The only functionality we need is "readheader"
+* MClust 4.4 -- The only functionality we need is "readheader". This requirement will be eliminated.
 
-Neuralynx MATLAB import/export library
+* Neuralynx MATLAB Netcom Utilities -- Download from https://neuralynx.com/software/category/matlab-netcom-utilities
 
 ```
 Add the external libraries to the MATLAB search path
