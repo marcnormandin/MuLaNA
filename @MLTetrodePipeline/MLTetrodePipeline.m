@@ -27,16 +27,33 @@ classdef MLTetrodePipeline < MLPipeline
             catch ME
                 error('Error encountered while reading pipeline configuration from (%s): %s', pipelineConfigFilename, ME.identifier)
             end
-            % Construct the kernel
+            
+            % Construct the kernel. Make sure that it is valid.
+            % The kernel sizes must be odd so that they are symmetric
+            if mod(obj.config.placemaps_rect.smoothingKernelGaussianSize,2) ~= 1
+                error('The config value placemaps_rect.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_rect.smoothingKernelGaussianSize);
+            end
             obj.smoothingKernelRect = fspecial('gaussian', obj.config.placemaps_rect.smoothingKernelGaussianSize, obj.config.placemaps_rect.smoothingKernelGaussianSigma);
+            
+            if mod(obj.config.placemaps_square.smoothingKernelGaussianSize,2) ~= 1
+                error('The config value placemaps_square.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_square.smoothingKernelGaussianSize);
+            end
             obj.smoothingKernelSquare = fspecial('gaussian', obj.config.placemaps_square.smoothingKernelGaussianSize, obj.config.placemaps_square.smoothingKernelGaussianSigma);
             
             % Take care of the possible infinite value for the speed
             obj.config.placemaps.criteria_speed_cm_per_second_maximum = eval(obj.config.placemaps.criteria_speed_cm_per_second_maximum);
+            if obj.config.placemaps.criteria_speed_cm_per_second_maximum < 0)
+                error('The config value placemaps.criteria_speed_cm_per_second_maximum must be >= 0, but is %f.', obj.config.placemaps.criteria_speed_cm_per_second_maximum);
+            end
+            if obj.config.placemaps.criteria_speed_cm_per_second_maximum < obj.config.placemaps.criteria_speed_cm_per_second_minimum
+                error('The config value placemaps.criteria_speed_cm_per_second_maximum (%f) must be greater than the minimum (%f).', ...
+                    obj.config.placemaps.criteria_speed_cm_per_second_maximum, obj.config.placemaps.criteria_speed_cm_per_second_minimum);
+            end
+            
             % Read in the experiment file
             obj.experimentDescriptionFilename = fullfile(obj.recordingsParentFolder, 'experiment_description.json');
             if ~isfile( obj.experimentDescriptionFilename )
-                error('Error! The file (%s) does not exist!', obj.experimentDescriptionFilename);
+                error('Error! The file (%s) does not exist! How do you expect me to work?!', obj.experimentDescriptionFilename);
             end
 
             % Create the experiment structure
