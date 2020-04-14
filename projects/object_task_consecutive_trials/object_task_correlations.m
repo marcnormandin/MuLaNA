@@ -88,7 +88,10 @@ function object_task_correlations(pipe)
     end
     
     outputFilename = fullfile(pipe.analysisParentFolder, sprintf('%s_otcs.xlsx', pipe.experiment.subjectName));
-    delete(outputFilename)
+    if isfile(outputFilename)
+        delete(outputFilename)
+    end
+    
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
     for iSheet = 1:length(sheets)
@@ -126,4 +129,5 @@ function object_task_correlations(pipe)
 
         writetable(Tnew, outputFilename, 'Sheet', sprintf('%s', sheet), 'WriteVariableNames', false);
     end
+    fprintf('Data saved to excel file (%s).\n', outputFilename);
 end % function

@@ -4,7 +4,6 @@ clc
 
 tstart = tic;
 
-
 % Don't change these
 projectCfgFilename = fullfile(pwd, 'project_config.json');
 pipeCfgFilename = fullfile(pwd, 'pipeline_config_square.json');
@@ -99,7 +98,6 @@ while true
     end
 end % while
 
-%%
 % remove any previous error file
 if isfile(errorFilename)
     delete(errorFilename)
@@ -138,7 +136,6 @@ try
             pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
         end
     end
-    %pipe.executePerSessionTask('user_define_trial_arenaroi');
 
     pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
     pipe.executePerSessionTask('trial_fnvt_to_trial_can_rect');
@@ -176,6 +173,7 @@ try
 
     object_task_correlations(pipe);
 catch ME
+    % record the error
     fid = fopen(errorFilename, 'w+');
     if fid == -1
         error('Unable to create the error file! Doubly-bad!!\n');
@@ -184,8 +182,18 @@ catch ME
     fprintf(fid, 'Error running %s: %s\n', subjectName, getReport(ME));
     fclose(fid);
 end
+    % Put a copy of the settings that we used in the analysis folder
+    % so that we will always know what was used.
     copyfile(pipeCfgFilename, analysisParentFolder);
-    
 end % for subject
-telapsed = toc(tstart);
-disp(telapsed/60.0)
+
+% Report the computation time
+telapsed_mins = toc(tstart)/60;
+fprintf('Compute time was %0.3f minutes.\n', telapsed_mins);
+
+if ~isfile(errorFilename)
+    fprintf('Program ended normally! Have a great day!\n');
+else
+    fprintf('An error occurred in the course of this program running.\n');
+    fprintf('View the error file (%s) for clues as to what errors occurred.\n', errorFilename);
+end
