@@ -1,4 +1,4 @@
-function gids = group_points(x, maxsep)
+function gids = ml_util_group_points(x, maxsep)
 
 dx = diff(x);
 
