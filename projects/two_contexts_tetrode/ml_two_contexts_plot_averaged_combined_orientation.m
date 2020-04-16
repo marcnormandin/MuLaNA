@@ -1,4 +1,6 @@
-function ml_two_contexts_plot_averaged_combined_orientation_all_contexts(pc)
+function ml_two_contexts_plot_averaged_combined_orientation(pc, contexts)
+
+% contexts must be "all" or "within"
 
 % This code make the orientation plot averaged across days
 % It has to be so specific and clunky because some mice
@@ -37,8 +39,16 @@ for iMouse = 1:length(tinimice)
        error("Can't find the mouse in either the feature rich or feature poor folder.");
    end
    
-   tmp = load(fullfile(inputFolder, 'best_fit_orientations_all_contexts.mat'));
-   bfo = tmp.best_fit_orientations_all_contexts;
+   
+   if strcmpi(contexts,'all')
+        tmp = load(fullfile(inputFolder, 'best_fit_orientations_all_contexts.mat'));
+        bfo = tmp.best_fit_orientations_all_contexts;
+   elseif strcmpi(contexts, 'within')
+        tmp = load(fullfile(inputFolder, 'best_fit_orientations_within_contexts.mat'));
+        bfo = tmp.best_fit_orientations_within_contexts;
+   else
+       error('contexts parameter must be all or within');
+   end
    
    if strcmp(tinimice{iMouse}, 'K1_CA1') || strcmp(tinimice{iMouse}, 'AK42_CA1') || strcmp(tinimice{iMouse}, 'AK74_CA1') || strcmp(tinimice{iMouse}, 'JJ9_CA1') 
        x = bfo(1:3,:);
@@ -91,18 +101,21 @@ grid minor
 set(gca,'XTickLabel',{['0' char(176)], ['90' char(176)], ['180' char(176)], ['270' char(176)]})
 %xlabel('Orientation [deg]')
 ylabel('Proportion Best Fit', 'fontweight', 'bold')
-title(sprintf('Averaged (%d days) Best Fit Orientations for Tinimice\n%s\nSubjects: %s', numDays, datetime, strjoin(tinimice, ', ')), 'interpreter', 'none')
+title(sprintf('Averaged (%d days) Best Fit Orientations (%s contexts)\n%s\nSubjects: %s', numDays, contexts, datetime, strjoin(tinimice, ', ')), 'interpreter', 'none')
 
     
 % Save the figure to the main analysis folder since it involves all of the
 % mice.
 outputFolder = pc.analysisFolder;
 
+fnPrefix = sprintf('avg_best_fit_orientations_%s_contexts', contexts);
+
 F = getframe(h);
-imwrite(F.cdata, fullfile(outputFolder, 'avg_best_fit_orientations_all_contexts.png'), 'png')
-savefig(h, fullfile(outputFolder, 'avg_best_fit_orientations_all_contexts.fig'));
-saveas(h, fullfile(outputFolder, 'avg_best_fit_orientations_all_contexts.svg'), 'svg');
-print('-painters', '-depsc', fullfile(outputFolder,'avg_best_fit_orientations_all_contexts.eps'))
+imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
+savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)))
+saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg')
+print('-painters', '-depsc', fullfile(outputFolder,sprintf('%s.eps', fnPrefix)))
+
 close(h);
 
 end % function
