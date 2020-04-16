@@ -47,9 +47,11 @@ homework(5).subjectName = 'MG1_CA1';
 homework(5).experiment = 'chengs_task_2c';
 homework(5).feature = 'feature_poor';
 
-homework(6).subjectName = 'HG1Y_CA1';
-homework(6).experiment = 'chengs_task_2c';
-homework(6).feature = 'feature_poor';
+% HG1Y_CA1 is not yet usable because we only have day 4 (currently).
+% 2020-04-15
+% homework(6).subjectName = 'HG1Y_CA1';
+% homework(6).experiment = 'chengs_task_2c';
+% homework(6).feature = 'feature_poor';
 
 
 % Ask the user if they want to clean the analysis folder for the subjects
@@ -161,8 +163,8 @@ end % for subject
 
 % Now run the code that requires the previous analysis to exist
 ml_two_contexts_plot_best_fit_alignment(projectConfig);
-ml_two_contexts_rates_across_and_within(projectConfig);
-% tinimice_make_combined_orientation_plot
+ml_two_contexts_plot_rates_across_and_within(projectConfig);
+ml_two_contexts_plot_averaged_combined_orientation_plot(projectConfig);
 
 
 % Report the computation time

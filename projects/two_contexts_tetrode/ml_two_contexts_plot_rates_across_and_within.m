@@ -1,4 +1,4 @@
-function ml_two_contexts_rates_across_and_within(projectConfig)
+function ml_two_contexts_plot_rates_across_and_within(projectConfig)
     statField1 = 'meanFiringRate';
     plot_feature_rich(projectConfig, statField1);
     plot_feature_poor(projectConfig, statField1);
