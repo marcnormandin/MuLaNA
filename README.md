@@ -8,8 +8,6 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-* MClust 4.4 -- The only functionality we need is "readheader". This requirement will be eliminated.
-
 * Neuralynx MATLAB Netcom Utilities -- Download from https://neuralynx.com/software/category/matlab-netcom-utilities
 
 ```
@@ -22,8 +20,7 @@ There are some pre-made projects for analyses performed by the ML. List them usi
 mulana_project_list()
 ```
 Some of the available projects are:
-- object_task_consecutive_trial
-- one_context_tetrode
+- object_task_consecutive_trials
 - two_contexts_tetrode
 
 ### Create a new instance of a pre-made project
@@ -31,7 +28,8 @@ Navigate to a desired folder where you would like to create an instance of the p
 ```
 mulana_project_create( 'projectName' )
 ```
-where **projectName** is one of the available projects.
+where **projectName** is one of the available projects. The initialization script will then ask you for some information such as the location of your data directory (input) and the location of your analysis directory (output).
+
 
 ### Installing
 
