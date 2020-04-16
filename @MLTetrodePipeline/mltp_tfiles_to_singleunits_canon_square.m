@@ -8,7 +8,7 @@ function mltp_tfiles_to_singleunits_canon_square(obj, session)
         tfiles = { fl.name };
         for iFile = 1:length(tfiles)
             mclustTFilename = tfiles{iFile};
-            spikeTimes_mus = ml_nlx_load_mclust_spikes_as_mus(nlxNvtTimeStamps_mus, {fullfile(session.rawFolder, mclustTFilename)}, obj.experiment.info.mclust_tfile_bits);
+            spikeTimes_mus = ml_nlx_load_mclust_spikes_as_mus(nlxNvtTimeStamps_mus, fullfile(session.rawFolder, mclustTFilename), obj.experiment.info.mclust_tfile_bits);
 
             spikes = [];
             for iTrial = 1:session.num_trials_recorded
