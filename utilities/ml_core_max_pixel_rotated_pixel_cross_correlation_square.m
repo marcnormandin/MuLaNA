@@ -34,7 +34,7 @@ function [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_square(T1
         T2Rot = rot90(T2, k-1);
         W2Rot = rot90(p.Results.W2, k-1);
         
-        r(k) = ml_core_pixel_pixel_cross_correlation_rectangle(T1, T2Rot, 'W1', p.Results.W1, 'W2', W2Rot);
+        r(k) = ml_core_pixel_pixel_cross_correlation_compute(T1, T2Rot, 'W1', p.Results.W1, 'W2', W2Rot);
     end
 
     % Find the maximum correlation

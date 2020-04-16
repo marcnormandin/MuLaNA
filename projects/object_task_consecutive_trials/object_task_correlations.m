@@ -70,7 +70,7 @@ function object_task_correlations(pipe)
         % Now perform the pixel-to-pixel correlations
         r = [];
         for iP = 1:length(placemaps)-1
-           r(iP) = ml_core_pixel_pixel_cross_correlation_rectangle( placemaps{iP}.meanFiringRateMapSmoothed, placemaps{iP+1}.meanFiringRateMapSmoothed ); 
+           r(iP) = ml_core_pixel_pixel_cross_correlation_compute( placemaps{iP}.meanFiringRateMapSmoothed, placemaps{iP+1}.meanFiringRateMapSmoothed ); 
         end
         
         results(iT).tFilePrefix = tFilePrefix;

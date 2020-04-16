@@ -31,10 +31,10 @@ function [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_rectangle
     r = zeros(1,numRotations);
     
     % 0 degrees (no rotation)
-    r(1) = ml_core_pixel_pixel_cross_correlation_rectangle( T1, T2, 'W1', p.Results.W1, 'W2', p.Results.W2 );
+    r(1) = ml_core_pixel_pixel_cross_correlation_compute( T1, T2, 'W1', p.Results.W1, 'W2', p.Results.W2 );
 
     % 180 degrees (2 x 90 degrees)
-    r(2) = ml_core_pixel_pixel_cross_correlation_rectangle( T1, rot90(T2, 2), 'W1', p.Results.W1, 'W2', rot90(p.Results.W2, 2) );
+    r(2) = ml_core_pixel_pixel_cross_correlation_compute( T1, rot90(T2, 2), 'W1', p.Results.W1, 'W2', rot90(p.Results.W2, 2) );
     
     % Find the maximum correlation
     [v,vind] = max(r);
