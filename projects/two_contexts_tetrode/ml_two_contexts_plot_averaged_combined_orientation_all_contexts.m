@@ -1,15 +1,17 @@
-function ml_two_contexts_plot_averaged_combined_orientation_plot(pc)
+function ml_two_contexts_plot_averaged_combined_orientation_all_contexts(pc)
 
 % This code make the orientation plot averaged across days
 % It has to be so specific and clunky because some mice
 % have more than 3 days, and we have to specify unique ones for each mouse.
 
 % Load the project settings
-% pcFilename = fullfile(pwd, 'project_config.json');
-% if ~isfile(pcFilename)
-%     error('Missing file (%s).', pcFilename);
-% end
-% pc = jsondecode(fileread(pcFilename));
+if isempty(pc)
+    pcFilename = fullfile(pwd, 'project_config.json');
+    if ~isfile(pcFilename)
+        error('Missing file (%s).', pcFilename);
+    end
+    pc = jsondecode(fileread(pcFilename));
+end
 
 % Feature rich analysis folder
 frFolder = fullfile(pc.analysisFolder, 'feature_rich');
@@ -23,7 +25,7 @@ tinimice = {'K1_CA1', 'AK42_CA1', 'AK74_CA1', 'JJ9_CA1', 'MG1_CA1'};
 
 % We will average over 3 days
 numDays = 3;
-avgOrientation = zeros(numDays,4);
+avgOrientation = zeros(numDays,4,length(tinimice));
 for iMouse = 1:length(tinimice)
    fprintf('Loading orientation statistics for ( %s )\n', tinimice{iMouse});
    
@@ -48,18 +50,52 @@ for iMouse = 1:length(tinimice)
    end
    disp(x)
    
-   avgOrientation = avgOrientation + x;
+   avgOrientation(:,:,iMouse) = x;
 end
-avgOrientation = avgOrientation ./ length(tinimice);
 
-h = figure('Name', sprintf('Averaged Best Fit Orientations for Tinimice'), 'Position', get(0,'Screensize'));
-bar([0, 90, 180, 270], avgOrientation');
-hold on 
+% Compute over the 3rd dimension which is the mouse
+xmean = mean(avgOrientation,3)';
+xstd = std(avgOrientation,0, 3)';
+
+%h = figure('Name', sprintf('Averaged Best Fit Orientations for Tinimice'), 'Position', get(0,'Screensize'));
+h = figure('Name', sprintf('Averaged Best Fit Orientations for Tinimice'));
+
+y1 = xmean;
+hBar = bar(y1,1);
+hBar(1).FaceColor = [0, 0, 0.33];
+hBar(1).FaceAlpha = 0.6;
+hBar(1).LineWidth = 2;
+
+hBar(2).FaceColor = [0, 0, 0.66];
+hBar(2).FaceAlpha = 0.4;
+hBar(2).LineWidth = 2;
+
+hBar(3).FaceColor = [0, 0, 0.99];
+hBar(3).FaceAlpha = 0.2;
+hBar(3).LineWidth = 2;
+
+hold on
+ctr = [];
+ydt=[];
+err1=[];
+for k1 = 1:size(xmean,2)
+    ctr(k1,:) = bsxfun(@plus, hBar(k1).XData, hBar(k1).XOffset');
+    ydt(k1,:) = hBar(k1).YData;
+    err1(k1,:) = xstd(:,k1);
+end
+hold on
+errorbar(ctr, ydt, err1, 'k.', 'linewidth', 2) 
+legend({'Day 1', 'Day 2', 'Day 3'});
 grid on
+grid minor
+set(gca,'XTickLabel',{['0' char(176)], ['90' char(176)], ['180' char(176)], ['270' char(176)]})
+%xlabel('Orientation [deg]')
+ylabel('Proportion Best Fit', 'fontweight', 'bold')
 title(sprintf('Averaged (%d days) Best Fit Orientations for Tinimice\n%s\nSubjects: %s', numDays, datetime, strjoin(tinimice, ', ')), 'interpreter', 'none')
-ylabel('Proportion Best Fit')
-xticklabels({['0' char(176)], ['90' char(176)], ['180' char(176)], ['270' char(176)]});
 
+    
+% Save the figure to the main analysis folder since it involves all of the
+% mice.
 outputFolder = pc.analysisFolder;
 
 F = getframe(h);

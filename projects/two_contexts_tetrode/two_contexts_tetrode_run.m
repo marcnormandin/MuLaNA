@@ -164,7 +164,7 @@ end % for subject
 % Now run the code that requires the previous analysis to exist
 ml_two_contexts_plot_best_fit_alignment(projectConfig);
 ml_two_contexts_plot_rates_across_and_within(projectConfig);
-ml_two_contexts_plot_averaged_combined_orientation_plot(projectConfig);
+ml_two_contexts_plot_averaged_combined_orientation_all_contexts(projectConfig);
 
 
 % Report the computation time
