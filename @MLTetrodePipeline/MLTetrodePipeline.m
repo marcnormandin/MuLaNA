@@ -143,7 +143,6 @@ classdef MLTetrodePipeline < MLPipeline
             numCols = 0;
             for iContext = 1:length(uniqueContextIds)
                 contextId = uniqueContextIds(iContext);
-                %fprintf('Processing information for context %d\n', contextId);
 
                 for iTrial = 1:session.num_trials_recorded
                     if session.record.trial_info.contexts(iTrial) == contextId && session.record.trial_info.use(iTrial) == 1
