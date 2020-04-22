@@ -36,7 +36,6 @@ homework(3).subjectName = 'JJ9_CA1';
 homework(3).experiment = 'chengs_task_2c';
 homework(3).feature = 'feature_rich';
 
-%experimentAnalysisParentFolder = '/work/muzziolab/marc/two_contexts_tetrode/analysis/feature_rich';
 
 % Feature Poor
 homework(4).subjectName = 'K1_CA1';
@@ -110,40 +109,85 @@ try
         end
     end
 
+    % Remove outliers and smooth the points. Requires the ROI.
     pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
+    
+    % Transform coordinates to standard orientation for a rectangle
     pipe.executePerSessionTask('trial_fnvt_to_trial_can_rect');
+    
+    % Same for square
     pipe.executePerSessionTask('trial_fnvt_to_trial_can_square');
+    
+    % Transform the t-files and separate into trials
     pipe.executePerSessionTask('tfiles_to_singleunits_canon_rect');
     pipe.executePerSessionTask('tfiles_to_singleunits_canon_square');
 
+    % Compute the placemaps, but don't plot them yet.
     pipe.executePerSessionTask('compute_singleunit_placemap_data_rect');
     pipe.executePerSessionTask('compute_singleunit_placemap_data_square');
     
+    % Compute placefield statistics
     pipe.executePerSessionTask('make_pfstats_excel')
 
+    % Compute the pixel-pixel cross-correlations
+    % These require square canonical shape
     pipe.executePerSessionTask('compute_best_fit_orientations_within_contexts');
     pipe.executePerSessionTask('compute_best_fit_orientations_all_contexts');
     pipe.executePerSessionTask('compute_best_fit_orientations_per_cell');
+    
+    % These require being a rectangle
     pipe.executePerSessionTask('compute_best_fit_orientations_0_180_per_cell');
     
+    % Plot the raw position data
     pipe.executePerSessionTask('make_trial_position_plots_raw');
+    
+    % Plot the fixed/smoothed position data
     pipe.executePerSessionTask('make_trial_position_plots_fixed');
+    
+    % Plot a single figure showing the fixed position in video frame
+    % coordinates.
     pipe.executePerSessionTask('make_session_orientation_plot_unaligned');
+    
+    % Plot a single figure show the fixed positions in canonical
+    % coordiantes
     pipe.executePerSessionTask('make_session_orientation_plot_aligned');
 
+    % Make the plot of the speed for each trial.
     pipe.executePerSessionTask('plot_canon_rect_velspe');
+    
+    % Plot the placemaps for the rectangle 
     pipe.executePerSessionTask('plot_singleunit_placemap_data_rect');
+    
+    % Plot the placemaps for the square
     pipe.executePerSessionTask('plot_singleunit_placemap_data_square');
+    
+    % Plot the 0/180 best fit plots per cell/single unit
     pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
+    
+    % Plot the 0,90,180,270 best fit orienations per cell/single unit
+    % Requires square canaonical shape
     pipe.executePerSessionTask('plot_best_fit_orientations_per_cell');
+    
+    % Plot the 0 vs 180 best aligned similarity plots (cumulative)
     pipe.executePerSessionTask('plot_across_within_0_180_similarity');
+    
+    % Plot the spike times for each tfile as 32bit and 64bit, to show
+    % which is correct. Correct is when all the spikes are contained
+    % in the green rectangle.
     pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
 
+    % Plot the 0,90,180,270 for all contexts
     pipe.executeExperimentTask('plot_best_fit_orientations_all_contexts');
+    
+    % Plot the 0,90,180,270 results only comparing trials from the same
+    % context.
     pipe.executeExperimentTask('plot_best_fit_orientations_within_contexts');
     
+    % Plot the averaged results across sessions (for one animal).
     pipe.executeExperimentTask('plot_best_fit_orientations_averaged_across_sessions');
     
+    % Plot the rate difference matrices for each single unit
+    % and the average over all single units.
     pipe.executeExperimentTask('plot_rate_difference_matrices');
 
 catch ME
@@ -162,6 +206,7 @@ end
 end % for subject
 
 % Now run the code that requires the previous analysis to exist
+% These are specific to the Muzzio Lab project.
 ml_two_contexts_plot_best_fit_alignment(projectConfig);
 ml_two_contexts_plot_rates_across_and_within(projectConfig);
 ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'all');
