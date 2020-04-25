@@ -77,21 +77,18 @@ function object_task_correlations(pipe)
         results(iT).r = r;
 
         for iP = 1:length(placemaps)
-           results(iT).meanFiringRate(iP) = placemaps{iP}.meanFiringRate;
-           results(iT).peakFiringRate(iP) = placemaps{iP}.peakFiringRate;
-           results(iT).informationRate(iP) = placemaps{iP}.informationRate;
-           results(iT).informationPerSpike(iP) = placemaps{iP}.informationPerSpike;
-           results(iT).totalDwellTime(iP) = placemaps{iP}.totalDwellTime;
+           results(iT).meanFiringRate(iP) = placemaps{iP}.meanFiringRateSmoothed;
+           results(iT).peakFiringRate(iP) = placemaps{iP}.peakFiringRateSmoothed;
+           results(iT).informationRate(iP) = placemaps{iP}.informationRateSmoothed;
+           results(iT).informationPerSpike(iP) = placemaps{iP}.informationPerSpikeSmoothed;
+           results(iT).totalDwellTime(iP) = placemaps{iP}.totalDwellTime; % not smoothed, otherwise it doesnt make sense
            results(iT).totalSpikesBeforeCriteria(iP) = placemaps{iP}.totalSpikesBeforeCriteria;
            results(iT).totalSpikesAfterCriteria(iP) = placemaps{iP}.totalSpikesAfterCriteria;
         end
     end
     
     outputFilename = fullfile(pipe.analysisParentFolder, sprintf('%s_otcs.xlsx', pipe.experiment.subjectName));
-    if isfile(outputFilename)
-        delete(outputFilename)
-    end
-    
+    delete(outputFilename)
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
     for iSheet = 1:length(sheets)
@@ -129,5 +126,4 @@ function object_task_correlations(pipe)
 
         writetable(Tnew, outputFilename, 'Sheet', sprintf('%s', sheet), 'WriteVariableNames', false);
     end
-    fprintf('Data saved to excel file (%s).\n', outputFilename);
 end % function

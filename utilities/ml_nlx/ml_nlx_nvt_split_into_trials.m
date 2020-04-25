@@ -1,4 +1,12 @@
 function [trial] = ml_nlx_nvt_split_into_trials( nvtFilename, nvt_file_trial_separation_threshold_s )
+    % Check that the inputs are fine
+    if ~isfile( nvtFilename )
+        error('The required file (%s) does not exist.\n', nvtFilename);
+    end
+    if nvt_file_trial_separation_threshold_s <= 0
+        error('The trial separation threshold must be >= 0, but is (%d).', nvt_file_trial_separation_threshold_s);
+    end
+    
     [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
 
     inds = ml_nlx_nvt_find_trial_indices(TimeStamps_mus, nvt_file_trial_separation_threshold_s);

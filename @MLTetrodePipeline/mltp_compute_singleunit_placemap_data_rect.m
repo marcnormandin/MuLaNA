@@ -1,10 +1,10 @@
 function mltp_compute_singleunit_placemap_data_rect(obj, session)
-    if obj.config.use_d1_xlsx == 1
-        d1xlsxFilename = fullfile(session.rawFolder, 'd1.xlsx');
-        fprintf('Reading %s ... ', d1xlsxFilename);
-        [~,~,d1xlsx] = xlsread(d1xlsxFilename);
-        fprintf('done!\n');
-    end
+%     if obj.config.use_d1_xlsx == 1
+%         d1xlsxFilename = fullfile(session.rawFolder, 'd1.xlsx');
+%         fprintf('Reading %s ... ', d1xlsxFilename);
+%         [~,~,d1xlsx] = xlsread(d1xlsxFilename);
+%         fprintf('done!\n');
+%     end
 
     % Form the grid
     boundsx = obj.config.placemaps_rect.bounds_x;
@@ -43,6 +43,7 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
                 'smoothingKernel', obj.smoothingKernelRect, ...
                 'criteriaDwellTimeSecondsPerBinMinimum', obj.config.placemaps.criteria_dwell_time_seconds_per_bin_minimum, ...
                 'criteriaSpikesPerBinMinimum', obj.config.placemaps.criteria_spikes_per_bin_minimum, ...
+                'criteriaSpikesPerMapMinimum', obj.config.placemaps.criteria_spikes_per_map_minimum, ...
                 'criteria_speed_cm_per_second_minimum', obj.config.placemaps.criteria_speed_cm_per_second_minimum, ...
                 'criteria_speed_cm_per_second_maximum', obj.config.placemaps.criteria_speed_cm_per_second_maximum);
             

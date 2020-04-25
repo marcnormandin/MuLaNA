@@ -8,7 +8,7 @@ classdef MLSpikePlacemap < handle
         spike_ts_ms = [];
         
         % Either input or defaults
-        boundsx = [];
+        boundsx = [];%
         boundsy = [];
         nbinsx = [];
         nbinsy = [];
@@ -50,7 +50,12 @@ classdef MLSpikePlacemap < handle
         spikeCountMapSmoothed = [];
         meanFiringRateMapSmoothed = [];
         dwellTimeMapSmoothed = [];
-        
+        positionProbMapSmoothed = [];
+        meanFiringRateSmoothed = [];
+        peakFiringRateSmoothed = [];
+        informationRateSmoothed = [];
+        informationPerSpikeSmoothed = [];
+            
         % Computed values
         informationRate = 0;
         informationPerSpike = 0;
@@ -82,6 +87,9 @@ classdef MLSpikePlacemap < handle
             addRequired(p, 'ts_ms', checkArray);
             addRequired(p, 'spike_ts_ms', checkArray);
      
+            defaultKernel = fspecial('gaussian', 15, 3);
+            defaultKernel = defaultKernel ./ max(defaultKernel(:));
+            
             % Parameters
             addParameter(p, 'smoothingProtocol', 'SmoothBeforeDivision');
             addParameter(p, 'speed_cm_per_second', []);
@@ -89,9 +97,10 @@ classdef MLSpikePlacemap < handle
             addParameter(p, 'boundsy', [min(y), max(y)], checkBounds);
             addParameter(p, 'nbinsx', 20, checkPositive);
             addParameter(p, 'nbinsy', 30, checkPositive);
-            addParameter(p, 'smoothingKernel', fspecial('gaussian', 9, 1.5), @(x) isnumeric(x) );
+            addParameter(p, 'smoothingKernel', defaultKernel, @(x) isnumeric(x) );
             addParameter(p, 'criteriaDwellTimeSecondsPerBinMinimum', 0, checkPositiveOrZero);
             addParameter(p, 'criteriaSpikesPerBinMinimum', 0, checkPositiveOrZero);
+            addParameter(p, 'criteriaSpikesPerMapMinimum', 15, checkPositiveOrZero);
             addParameter(p, 'criteria_speed_cm_per_second_minimum', 0, checkPositiveOrZero);
             addParameter(p, 'criteria_speed_cm_per_second_maximum', inf, checkPositiveOrZero);
 
@@ -181,6 +190,15 @@ classdef MLSpikePlacemap < handle
             obj.spikeCountMap = obj.spikeCountMapTrue;
             obj.spikeCountMap(obj.spikeCountMap < obj.p.Results.criteriaSpikesPerBinMinimum) = 0;
             
+            % Check the order because the results will be different if we
+            % check number of spikes per bin after the total
+            if sum(obj.spikeCountMap, 'all') < obj.p.Results.criteriaSpikesPerMapMinimum
+                fprintf('Not enough spikes per map. Found (%d), but require (%d).\n', ...
+                    sum(obj.spikeCountMap,'all'), obj.p.Results.criteriaSpikesPerMapMinimum);
+            
+                obj.spikeCountMap = zeros(size(obj.spikeCountMap));
+            end
+            
             obj.spikeCountMapSmoothed = imfilter( obj.spikeCountMap, obj.smoothingKernel );
             
             % The dwell time map before applying the criteria
@@ -189,7 +207,7 @@ classdef MLSpikePlacemap < handle
 
             % The dwell time map after applying the criteria
             obj.dwellTimeMap = obj.dwellTimeMapTrue;
-            obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
+            %obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
             
             obj.dwellTimeMapSmoothed = imfilter( obj.dwellTimeMap, obj.smoothingKernel );
             
@@ -212,6 +230,26 @@ classdef MLSpikePlacemap < handle
             [obj.meanFiringRate, obj.peakFiringRate] = ml_placefield_firingrate( obj.meanFiringRateMap, obj.positionProbMap );
             [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
 
+            % Calculate the values using the smoothed maps
+            obj.positionProbMapSmoothed = ml_placefield_positionprobmap( obj.dwellTimeMapSmoothed );
+%             [obj.meanFiringRateSmoothed, obj.peakFiringRateSmoothed] = ml_placefield_firingrate( obj.meanFiringRateMapSmoothed, obj.positionProbMapSmoothed );
+            
+%
+            % 
+            %obj.peakFiringRateSmoothed = max( obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > 
+            tmp1 = obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum);
+            tmp1 = tmp1(:);
+            tmp1(tmp1 == 0) = [];
+            
+            tmp2 = obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum);
+            
+            obj.meanFiringRateSmoothed = mean(tmp1, 'all');
+            obj.peakFiringRateSmoothed = max(tmp2, [], 'all');
+            
+            [obj.informationRateSmoothed, obj.informationPerSpikeSmoothed] = ml_placefield_informationcontent( obj.meanFiringRateSmoothed, obj.meanFiringRateMapSmoothed, obj.positionProbMapSmoothed );
+
+
+            
     
             obj.totalSpikesAfterCriteria = sum(obj.spikeCountMap, 'all');
             obj.totalDwellTime = sum(obj.dwellTimeMap, 'all');
@@ -308,7 +346,7 @@ classdef MLSpikePlacemap < handle
             set(gca, 'ydir', 'reverse');
 
             title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
-                obj.peakFiringRate, obj.meanFiringRate, obj.informationRate, obj.informationPerSpike ))
+                obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
             colormap jet 
         end

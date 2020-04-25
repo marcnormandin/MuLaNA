@@ -34,12 +34,14 @@ classdef MLTetrodePipeline < MLPipeline
                 error('The config value placemaps_rect.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_rect.smoothingKernelGaussianSize);
             end
             obj.smoothingKernelRect = fspecial('gaussian', obj.config.placemaps_rect.smoothingKernelGaussianSize, obj.config.placemaps_rect.smoothingKernelGaussianSigma);
+            obj.smoothingKernelRect = obj.smoothingKernelRect ./ max(obj.smoothingKernelRect(:)); % Isabel wants this like the other
             
             if mod(obj.config.placemaps_square.smoothingKernelGaussianSize,2) ~= 1
                 error('The config value placemaps_square.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_square.smoothingKernelGaussianSize);
             end
             obj.smoothingKernelSquare = fspecial('gaussian', obj.config.placemaps_square.smoothingKernelGaussianSize, obj.config.placemaps_square.smoothingKernelGaussianSigma);
-            
+            obj.smoothingKernelSquare = obj.smoothingKernelSquare ./ max(obj.smoothingKernelSquare(:)); % Isabel wants this like the other
+
             % Take care of the possible infinite value for the speed
             obj.config.placemaps.criteria_speed_cm_per_second_maximum = eval(obj.config.placemaps.criteria_speed_cm_per_second_maximum);
             if obj.config.placemaps.criteria_speed_cm_per_second_maximum < 0

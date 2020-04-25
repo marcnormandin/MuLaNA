@@ -20,7 +20,8 @@
     "placemaps": {
         "smoothingProtocol": "SmoothBeforeDivision",
         "criteria_dwell_time_seconds_per_bin_minimum": 0.05,
-        "criteria_spikes_per_bin_minimum": 1,
+        "criteria_spikes_per_bin_minimum": 0,
+        "criteria_spikes_per_map_minimum": 15,
         "criteria_speed_cm_per_second_minimum": 2,
         "criteria_speed_cm_per_second_maximum": "inf"
     },
