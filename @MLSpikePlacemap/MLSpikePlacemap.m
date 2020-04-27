@@ -87,11 +87,25 @@ classdef MLSpikePlacemap < handle
             addRequired(p, 'ts_ms', checkArray);
             addRequired(p, 'spike_ts_ms', checkArray);
      
+            
+            
+            % Parameters
+
+                        
+                        
             defaultKernel = fspecial('gaussian', 15, 3);
             defaultKernel = defaultKernel ./ max(defaultKernel(:));
             
-            % Parameters
-            addParameter(p, 'smoothingProtocol', 'SmoothBeforeDivision');
+            
+            
+
+            availableSmoothingProtocols = {...
+                'SmoothAfterDivision', ...
+                'SmoothBeforeDivision' ...
+                };
+            
+            addParameter(p,'smoothingProtocol','SmoothBeforeDivision',...
+                 @(x) any(validatestring(x,availableSmoothingProtocols)));
             addParameter(p, 'speed_cm_per_second', []);
             addParameter(p, 'boundsx', [min(x), max(x)], checkBounds);
             addParameter(p, 'boundsy', [min(y), max(y)], checkBounds);
@@ -199,7 +213,7 @@ classdef MLSpikePlacemap < handle
                 obj.spikeCountMap = zeros(size(obj.spikeCountMap));
             end
             
-            obj.spikeCountMapSmoothed = imfilter( obj.spikeCountMap, obj.smoothingKernel, 'replicate', 'same', 'conv' );
+            obj.spikeCountMapSmoothed = imfilter( obj.spikeCountMap, obj.smoothingKernel);
             
             % The dwell time map before applying the criteria
             ts_s = (obj.ts_ms - obj.ts_ms(1)) ./ (1.0*10^3);
@@ -209,7 +223,7 @@ classdef MLSpikePlacemap < handle
             obj.dwellTimeMap = obj.dwellTimeMapTrue;
             %obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
             
-            obj.dwellTimeMapSmoothed = imfilter( obj.dwellTimeMap, obj.smoothingKernel, 'replicate', 'same', 'conv' );
+            obj.dwellTimeMapSmoothed = imfilter( obj.dwellTimeMap, obj.smoothingKernel);
             
             
             % Use the unsmoothed maps that passed the criteria
@@ -220,7 +234,7 @@ classdef MLSpikePlacemap < handle
                 obj.meanFiringRateMapSmoothed = ml_placefield_meanfiringratemap( obj.spikeCountMapSmoothed, obj.dwellTimeMapSmoothed );
             elseif strcmpi(obj.p.Results.smoothingProtocol, 'SmoothAfterDivision')
             % Method 2
-                obj.meanFiringRateMapSmoothed = imfilter( ml_placefield_meanfiringratemap( obj.spikeCountMap, obj.dwellTimeMap ), obj.smoothingKernel, 'replicate', 'same', 'conv' );
+                obj.meanFiringRateMapSmoothed = imfilter( ml_placefield_meanfiringratemap( obj.spikeCountMap, obj.dwellTimeMap ), obj.smoothingKernel);
             else
                 error('Invalid value for placemaps.smoothingProtocol (%s). Must be SmoothBeforeDivision or SmoothAfterDivision.', obj.p.Results.smoothingProtocol);
             end
