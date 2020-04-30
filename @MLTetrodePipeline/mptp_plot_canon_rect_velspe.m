@@ -4,8 +4,12 @@ function mptp_plot_canon_rect_velspe(obj, session)
         mkdir(outputFolder)
     end
     
-    for iTrial = 1:session.num_trials_recorded
-        fn = fullfile( session.analysisFolder, sprintf('trial_%d_canon_rect.mat', iTrial) );
+    sr = session.sessionRecord;
+    ti = sr.getTrialsToProcess();
+    for iTrial = 1:sr.getNumTrialsToProcess()
+        trialId = ti(iTrial).id;
+                
+        fn = fullfile( session.analysisFolder, sprintf('trial_%d_canon_rect.mat', trialId) );
         if ~isfile(fn)
             error('The required file (%s) does not exist:', fn);
         end
@@ -39,7 +43,7 @@ function mptp_plot_canon_rect_velspe(obj, session)
 %         yline(-obj.config.placemaps.criteria_speed_cm_per_second_minimum,'k', 'linewidth', 2)
         grid on
         ylabel('v_x(t) [cm/s]')
-        title(sprintf('%s %s Trial %d', obj.experiment.subjectName, session.name, iTrial), 'interpreter', 'none');
+        title(sprintf('%s %s Trial %d', obj.experiment.subjectName, session.name, trialId), 'interpreter', 'none');
 
         ax(k) = subplot(p,q,k);
         k = k + 1;
@@ -70,10 +74,10 @@ function mptp_plot_canon_rect_velspe(obj, session)
         linkaxes(ax, 'x')
         axis tight
         
-        trialPlotFilenamePrefix = fullfile(outputFolder, sprintf('trial_%d_canrectvelspe', iTrial));
+        trialPlotFilenamePrefix = fullfile(outputFolder, sprintf('trial_%d_canrectvelspe', trialId));
         savefig(h, sprintf('%s.fig', trialPlotFilenamePrefix))
         saveas(h, sprintf('%s.png', trialPlotFilenamePrefix), 'png');
                 
         close(h);
-    end % iTrial
+    end % trialId
 end % function

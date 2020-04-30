@@ -1,4 +1,11 @@
 function mltp_compute_best_fit_orientations_per_cell(obj, session)
+    % Allow the function to run so that other functions do not break,
+    % but give a warning.
+    sr = session.sessionRecord;
+    if sr.getNumTrialsToProcess() < 2
+        warning('This function requires the session to have more than 1 trial.');
+    end
+    
     outputFolder = fullfile(session.analysisFolder, obj.config.canon_square_placemaps_folder);
 
     numCells = length(session.tfiles_filename_prefixes);

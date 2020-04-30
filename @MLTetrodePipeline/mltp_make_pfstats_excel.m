@@ -28,9 +28,13 @@ function mltp_make_pfstats_excel(obj, session)
     end
     
     numTFiles = length(tFilesToUse);
-    numTrials = session.num_trials_to_use;
     
-    fprintf('Found %d tfiles present in %s.\n', length(tFilesToUse), session.name);
+    sr = session.sessionRecord;
+    ti = sr.getTrialsToProcess();
+    
+    numTrials = sr.getNumTrialsToProcess();
+    
+    fprintf('Found %d tfiles present in %s.\n', length(tFilesToUse), sr.getName());
     
     % Get the correct placemap data
     if strcmpi(obj.getArena().shape, 'rectangle')
@@ -56,7 +60,8 @@ function mltp_make_pfstats_excel(obj, session)
    
         placemapDataFolder = fullfile(session.analysisFolder, placemapSubFolder);
         for iTrial = 1:numTrials
-            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, iTrial, placemapFilenameSuffix)) );
+            trialId = ti(iTrial).id;
+            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
             placemaps{iTrial} = tmp.mltetrodeplacemap;
         end
         
@@ -93,7 +98,7 @@ function mltp_make_pfstats_excel(obj, session)
             tFilePrefix = tFilesToUse{iTFile};
             S{1,iTFile+1} = tFilePrefix;
             for iTrial = 1:numTrials
-                S{iTrial+1,1} = iTrial;
+                S{iTrial+1,1} = ti(iTrial).sequenceNum; % name the trial
                 d = results(iTFile).(sheet);
                 S{iTrial+1,iTFile+1} = d(iTrial);
             end

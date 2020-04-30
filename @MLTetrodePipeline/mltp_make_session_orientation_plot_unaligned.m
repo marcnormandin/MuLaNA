@@ -7,14 +7,18 @@ function mltp_make_session_orientation_plot_unaligned(obj, session)
         p = obj.config.session_orientation_plot.subplot_num_rows; 
         q = obj.config.session_orientation_plot.subplot_num_cols; 
         k = 1;
-        for iTrial = 1:session.num_trials_recorded
-            trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', iTrial));
+        sr = session.sessionRecord;
+        ti = sr.getTrialsToProcess();
+        for iTrial = 1:sr.getNumTrialsToProcess()
+            trialId = ti(iTrial).id;
+                
+            trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
             fprintf('Loading %s ... ', trialFnvtFilename);
             data = load(trialFnvtFilename);
             fprintf('done!\n');
             trial = data.trial;
 
-            trialArenaroiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', iTrial));
+            trialArenaroiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialId));
             fprintf('Loading %s ... ', trialArenaroiFilename);
             data = load(trialArenaroiFilename);
             fprintf('done!\n');
@@ -24,7 +28,7 @@ function mltp_make_session_orientation_plot_unaligned(obj, session)
             subplot(p,q,k)
             plot(trial.extractedX, trial.extractedY, '.', 'color', obj.config.session_orientation_plot.trial_pos_colours(k));
             if obj.config.session_orientation_plot.subplot_show_title == 1
-                title(sprintf('Trial %d', iTrial))
+                title(sprintf('Trial %d', trialId))
             end
             hold on
             for iVertex = 1:length(arenaroi.xVertices)

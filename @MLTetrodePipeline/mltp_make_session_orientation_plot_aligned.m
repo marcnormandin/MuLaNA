@@ -4,11 +4,16 @@ function mltp_make_session_orientation_plot_aligned(obj, session)
     end
 
     h = figure('name', sprintf('Session %s', session.name), 'Position', get(0,'Screensize'));
+    % Fixme! Increase the size if it wont fit the number of trials
     p = obj.config.session_orientation_plot.subplot_num_rows; 
     q = obj.config.session_orientation_plot.subplot_num_cols; 
     k = 1;
-    for iTrial = 1:session.num_trials_recorded
-        trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', iTrial));
+    sr = session.sessionRecord;
+    ti = sr.getTrialsToProcess();
+    for iTrial = 1:sr.getNumTrialsToProcess()
+        trialId = ti(iTrial).id;
+                
+        trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', trialId));
         fprintf('Loading %s ... ', trialCanonFilename);
         data = load(trialCanonFilename);
         fprintf('done!\n');
@@ -20,7 +25,7 @@ function mltp_make_session_orientation_plot_aligned(obj, session)
         subplot(p,q,k)
         plot(canon.pos.x, canon.pos.y, '.', 'color', obj.config.session_orientation_plot.trial_pos_colours(k));
         if obj.config.session_orientation_plot.subplot_show_title == 1
-            title(sprintf('Trial %d', iTrial))
+            title(sprintf('Trial %d', trialId))
         end
         hold on
         for iVertex = 1:length(arenaroi.xVertices)

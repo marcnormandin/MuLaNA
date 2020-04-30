@@ -1,7 +1,13 @@
 function mltp_plot_singleunit_placemap_data_square(obj, session)
+    sr = session.sessionRecord;
+    ti = sr.getTrialsToProcess();
+            
+                
     % Get unique ids for the contexts. Dont assume that
     % they are just 1 or 1 and 2.
-    uniqueContextIds = sort(unique(session.record.trial_info.contexts));
+    %uniqueContextIds = sort(unique(session.record.trial_info.contexts));
+    %numContexts = length(uniqueContextIds); % or use session.num_contexts;
+    uniqueContextIds = sort(unique([ti.context]));
     numContexts = length(uniqueContextIds); % or use session.num_contexts;
 
     % Find the number of trials to use for each context
@@ -10,18 +16,12 @@ function mltp_plot_singleunit_placemap_data_square(obj, session)
     contextTrialIds = cell(numContexts,1);
     numCols = 0;
     for iContext = 1:length(uniqueContextIds)
-        contextId = uniqueContextIds(iContext);
-        fprintf('Processing information for context %d\n', contextId);
-
-        for iTrial = 1:session.num_trials_recorded
-            if session.record.trial_info.contexts(iTrial) == contextId && session.record.trial_info.use(iTrial) == 1
-                contextTrialIds{iContext} = [contextTrialIds{iContext} iTrial];
-            end
-        end
-        if length(contextTrialIds(iContext)) > numCols
+        contexts = [ti.context];
+        ids = [ti.id];
+        contextTrialIds{iContext} = ids(contexts == uniqueContextIds(iContext));
+        if length(contextTrialIds{iContext}) > numCols
             numCols = length(contextTrialIds{iContext});
         end
-
     end
 
 

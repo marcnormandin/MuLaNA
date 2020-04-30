@@ -1,4 +1,4 @@
-function mltp_plot_best_fit_orientations_within_contexts(obj)
+function mltp_plot_best_fit_orientations_within_contexts(obj)    
     numAngles = 4;
     best_fit_orientations_within_contexts = zeros(obj.experiment.numSessions, numAngles);
     plotlegend = cell(obj.experiment.numSessions, 1);

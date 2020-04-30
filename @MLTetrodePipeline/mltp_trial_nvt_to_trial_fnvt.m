@@ -3,8 +3,12 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
                 fprintf('Fixing the trial data.\n');
             end
 
-            for iTrial = 1:session.num_trials_recorded
-                trialNvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_nvt.mat', iTrial));
+            sr = session.sessionRecord;
+            ti = sr.getTrialsToProcess();
+            for iTrial = 1:sr.getNumTrialsToProcess()
+                trialId = ti(iTrial).id;
+                
+                trialNvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_nvt.mat', trialId));
                 fprintf('Loading %s ... ', trialNvtFilename);
                 data = load(trialNvtFilename);
                 t = data.trial;
@@ -12,7 +16,7 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
 
                 % Load the ROI so that we can exclude points (set them to
                 % zero if outside the ROI).
-                troiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', iTrial));
+                troiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialId));
                 if ~isfile(troiFilename)
                     error('Required file (%s) does not exist.', troiFilename);
                 end
@@ -51,7 +55,7 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
                 trial.points = t.points;
                 trial.header = t.header;
 
-                trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', iTrial));
+                trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
                 fprintf('Saving %s ... ', trialFnvtFilename);
                 save(trialFnvtFilename, 'trial')
                 fprintf('done!\n');

@@ -11,31 +11,35 @@ function mltp_tfiles_to_singleunits_canon_square(obj, session)
             spikeTimes_mus = ml_nlx_load_mclust_spikes_as_mus(nlxNvtTimeStamps_mus, fullfile(session.rawFolder, mclustTFilename), obj.experiment.info.mclust_tfile_bits);
 
             spikes = [];
-            for iTrial = 1:session.num_trials_recorded
-                data = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_square.mat', iTrial)));
+            sr = session.sessionRecord;
+            ti = sr.getTrialsToProcess();
+            for iTrial = 1:sr.getNumTrialsToProcess()
+                trialId = ti(iTrial).id;
+                
+                data = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_square.mat', trialId)));
 
                 t = data.canon;
-                spikes(iTrial).trialSpikeTimes_mus = spikeTimes_mus(find(spikeTimes_mus >= t.timeStamps_mus(1) & spikeTimes_mus <= t.timeStamps_mus(end)));
-                spikes(iTrial).dt_s = diff([t.timeStamps_mus(1); spikes(iTrial).trialSpikeTimes_mus(:)]) / 10^6;
-                spikes(iTrial).rate = 1 ./spikes(iTrial).dt_s;
+                spikes(trialId).trialSpikeTimes_mus = spikeTimes_mus(find(spikeTimes_mus >= t.timeStamps_mus(1) & spikeTimes_mus <= t.timeStamps_mus(end)));
+                spikes(trialId).dt_s = diff([t.timeStamps_mus(1); spikes(trialId).trialSpikeTimes_mus(:)]) / 10^6;
+                spikes(trialId).rate = 1 ./spikes(trialId).dt_s;
 
-                spikes(iTrial).numSpikes = length(spikes(iTrial).trialSpikeTimes_mus);
+                spikes(trialId).numSpikes = length(spikes(trialId).trialSpikeTimes_mus);
                 trialTimeTotal_s = (t.timeStamps_mus(end) - t.timeStamps_mus(1)) / 10^6;
 
-                spikes(iTrial).meanFiringRateHz = spikes(iTrial).numSpikes / trialTimeTotal_s;
+                spikes(trialId).meanFiringRateHz = spikes(trialId).numSpikes / trialTimeTotal_s;
 
                 % This should use interpolation
-%                 spikes(iTrial).indices = [];
-%                 for iSpike = 1:length(spikes(iTrial).rate)
-%                     spikes(iTrial).indices(iSpike,1) = find(t.timeStamps_mus >= spikes(iTrial).trialSpikeTimes_mus(iSpike), 1, 'first');
+%                 spikes(trialId).indices = [];
+%                 for iSpike = 1:length(spikes(trialId).rate)
+%                     spikes(trialId).indices(iSpike,1) = find(t.timeStamps_mus >= spikes(trialId).trialSpikeTimes_mus(iSpike), 1, 'first');
 %                 end
 % 
 %                 % Record the position of the spikes
-%                 spikes(iTrial).pos.x = t.pos.x(spikes(iTrial).indices(:));
-%                 spikes(iTrial).pos.y = t.pos.y(spikes(iTrial).indices(:));
-                spikes(iTrial).pos.x = interp1( t.timeStamps_mus, t.pos.x,  spikes(iTrial).trialSpikeTimes_mus );
-                spikes(iTrial).pos.y = interp1( t.timeStamps_mus, t.pos.y,  spikes(iTrial).trialSpikeTimes_mus );
-                spikes(iTrial).spe   = interp1( t.timeStamps_mus, t.spe, spikes(iTrial).trialSpikeTimes_mus );
+%                 spikes(trialId).pos.x = t.pos.x(spikes(trialId).indices(:));
+%                 spikes(trialId).pos.y = t.pos.y(spikes(trialId).indices(:));
+                spikes(trialId).pos.x = interp1( t.timeStamps_mus, t.pos.x,  spikes(trialId).trialSpikeTimes_mus );
+                spikes(trialId).pos.y = interp1( t.timeStamps_mus, t.pos.y,  spikes(trialId).trialSpikeTimes_mus );
+                spikes(trialId).spe   = interp1( t.timeStamps_mus, t.spe, spikes(trialId).trialSpikeTimes_mus );
                 % include angle
             end
 

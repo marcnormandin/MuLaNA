@@ -4,14 +4,18 @@ function mltp_trial_fnvt_to_trial_can_rect(obj, session)
                 fprintf('Converting the trial fixed position data to canonical coordinates using the arena ROI.\n');
             end
 
-            for iTrial = 1:session.num_trials_recorded
-                trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', iTrial));
+            sr = session.sessionRecord;
+            ti = sr.getTrialsToProcess();
+            for iTrial = 1:sr.getNumTrialsToProcess()
+                trialId = ti(iTrial).id;
+                
+                trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
                 fprintf('Loading %s ... ', trialFnvtFilename);
                 data = load(trialFnvtFilename);
                 fprintf('done!\n');
                 trial = data.trial;
 
-                arenaRoiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', iTrial));
+                arenaRoiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialId));
                 fprintf('Loading %s ... ', arenaRoiFilename);
                 data = load(arenaRoiFilename);
                 fprintf('done!\n');
@@ -72,7 +76,7 @@ function mltp_trial_fnvt_to_trial_can_rect(obj, session)
                 % Compute the speed, which is the magnitude of the velocity
                 canon.spe = sqrt( canon.vel.x.^2 + canon.vel.y.^2 );
                 
-                trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', iTrial));
+                trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', trialId));
                 fprintf('Saving %s ... ', trialCanonFilename);
                 save(trialCanonFilename, 'canon')
                 fprintf('done!\n');

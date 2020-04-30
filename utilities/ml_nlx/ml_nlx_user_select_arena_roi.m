@@ -12,10 +12,15 @@ plot(posX, posY, 'b.')
 hold on
 
 if PLOT_CONVEX_HULL    
-    [convHullK, convHullAv] = convhull([posX', posY']);
-    hullX = posX(convHullK);
-    hullY = posY(convHullK);
-    plot(hullX, hullY, 'k-', 'linewidth',1)
+    % If not enough points are given, then this will throw exception
+    try
+        [convHullK, convHullAv] = convhull([posX', posY']);
+        hullX = posX(convHullK);
+        hullY = posY(convHullK);
+        plot(hullX, hullY, 'k-', 'linewidth',1)
+    catch e
+        warning('Not enough points to draw the convex hull.');
+    end
 end
 title( titleStr )
 set(gca, 'ydir', 'reverse')

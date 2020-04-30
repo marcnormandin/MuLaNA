@@ -11,10 +11,14 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
         data = load(singleUnitFilename);
         singleunit = data.singleunit;
 
-        for iTrial = 1:session.num_trials_recorded
+        sr = session.sessionRecord;
+        ti = sr.getTrialsToProcess();
+        for iTrial = 1:sr.getNumTrialsToProcess()
+            trialId = ti(iTrial).id;
+            
             % Load the data
-            spikes = singleunit.trialSpikes(iTrial);
-            data = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_square.mat', iTrial)));
+            spikes = singleunit.trialSpikes(trialId);
+            data = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_square.mat', trialId)));
             canon = data.canon;
             x = canon.pos.x;
             y = canon.pos.y;
@@ -32,7 +36,7 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
             % FixMe! We need the true velocity, but should probably get it
             % another way. This could be improved. It gets the speed from
             % the rectangle mapping.
-            data2 = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', iTrial)));
+            data2 = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', trialId)));
             spe = data2.canon.spe;
             
             mltetrodeplacemap = MLSpikePlacemap(x, y, ts_ms, spike_ts_ms, ...
@@ -56,29 +60,46 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
             end
 
             % Record the context in the mat file
-            trial_num = iTrial;
-            context_trial_num = []; % The trial number within the context
-            context_index = [];
-            for iContext = 1:session.num_contexts
-                context_index = iContext;
-                context_trial_num = find(session.context_trial_ids{iContext} == trial_num);
-                if isempty(context_trial_num)
-                    continue
-                else
-                    break
-                end
+%             trial_num = ti(trialId).sequenceNum;
+            
+%             context_trial_num = []; % The trial number within the context
+%             context_index = [];
+%             for iContext = 1:session.num_contexts
+%                 context_index = iContext;
+%                 context_trial_num = find(session.context_trial_ids{iContext} == trial_num);
+%                 if isempty(context_trial_num)
+%                     continue
+%                 else
+%                     break
+%                 end
+%             end
+% 
+%             trial_context_index = context_index;
+%             trial_context_num = context_trial_num;
+% 
+%             trial_context_id = session.record.trial_info.contexts(trialId);
+%             trial_use = session.record.trial_info.use(trialId) == 1; 
+%             trial_first_dig = session.record.trial_info.digs(trialId);
+
+            trial_num = ti(trialId).sequenceNum;
+            trial_use = ti(trialId).use;
+            trial_first_dig = ti(trialId).digs;
+            % FixMe!
+            trial_context_index = ti(trialId).context;
+            trial_context_id = ti(trialId).context;
+            
+            % Record this trial with respect to the context
+            contexts = [ti.context]; % all the contexts (which will be processes)
+            ids = [ti.id];
+            trial_context_num = find(ids(contexts == ti(trialId).context) == ti(trialId).id);
+            if isempty(trial_context_num)
+                error('Logic error!');
             end
-
-            trial_context_index = context_index;
-            trial_context_num = context_trial_num;
-
-            trial_context_id = session.record.trial_info.contexts(iTrial);
-            trial_use = session.record.trial_info.use(iTrial) == 1; 
-            trial_first_dig = session.record.trial_info.digs(iTrial);
+             
 
             fnPrefix = split(singleunit.tfileName,'.');
             fnPrefix = fnPrefix{1};
-            placemapFilename = fullfile(outputFolder, sprintf('%s_%d_mltetrodeplacemapsquare.mat', fnPrefix, iTrial));
+            placemapFilename = fullfile(outputFolder, sprintf('%s_%d_mltetrodeplacemapsquare.mat', fnPrefix, trialId));
             fprintf('Saving placemap data to file: %s\n', placemapFilename);
             save(placemapFilename, 'mltetrodeplacemap', 'trial_num', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
         end % trial

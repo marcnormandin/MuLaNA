@@ -9,6 +9,8 @@ function mltp_plot_best_fit_orientations_0_180_per_cell(obj, session)
 
     numCells = length(data);
 
+    sr = session.sessionRecord;
+    
     h = figure('Position', get(0,'Screensize'));
     p = 5; q = 5; k = 1;
     for iCell = 1:numCells
@@ -39,7 +41,7 @@ function mltp_plot_best_fit_orientations_0_180_per_cell(obj, session)
         mkdir(outputFolder)
     end
     F = getframe(h);
-    fnPrefix = sprintf('%s_%s_best_fit_orientations_0_180_per_cell', obj.experiment.subjectName, session.name);
+    fnPrefix = sprintf('%s_%s_best_fit_orientations_0_180_per_cell', obj.experiment.subjectName, sr.getName());
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
     savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
     saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');

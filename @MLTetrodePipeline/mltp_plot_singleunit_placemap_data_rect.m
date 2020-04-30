@@ -1,7 +1,14 @@
 function mltp_plot_singleunit_placemap_data_rect(obj, session)
+
+    sr = session.sessionRecord;
+    ti = sr.getTrialsToProcess();
+            
+                
     % Get unique ids for the contexts. Dont assume that
     % they are just 1 or 1 and 2.
-    uniqueContextIds = sort(unique(session.record.trial_info.contexts));
+    %uniqueContextIds = sort(unique(session.record.trial_info.contexts));
+    %numContexts = length(uniqueContextIds); % or use session.num_contexts;
+    uniqueContextIds = sort(unique([ti.context]));
     numContexts = length(uniqueContextIds); % or use session.num_contexts;
 
     % Find the number of trials to use for each context
@@ -10,15 +17,10 @@ function mltp_plot_singleunit_placemap_data_rect(obj, session)
     contextTrialIds = cell(numContexts,1);
     numCols = 0;
     for iContext = 1:length(uniqueContextIds)
-        contextId = uniqueContextIds(iContext);
-        fprintf('Processing information for context %d\n', contextId);
-
-        for iTrial = 1:session.num_trials_recorded
-            if session.record.trial_info.contexts(iTrial) == contextId && session.record.trial_info.use(iTrial) == 1
-                contextTrialIds{iContext} = [contextTrialIds{iContext} iTrial];
-            end
-        end
-        if length(contextTrialIds(iContext)) > numCols
+        contexts = [ti.context];
+        ids = [ti.id];
+        contextTrialIds{iContext} = ids(contexts == uniqueContextIds(iContext));
+        if length(contextTrialIds{iContext}) > numCols
             numCols = length(contextTrialIds{iContext});
         end
     end
@@ -34,27 +36,27 @@ function mltp_plot_singleunit_placemap_data_rect(obj, session)
 
         h = figure('Name', sprintf('%s (%s) tfile: %s', session.record.session_info.name, session.record.session_info.date, fnPrefix), 'Position', get(0,'Screensize'));
 
-        numPlotsPerTrial = 2;
+        numPlotsPerTrial = 2; % scatter + placemap
         numRows = session.num_contexts * numPlotsPerTrial; % Show spikes and placemap
 
         for iContext = 1:numContexts
             conTrialIds = contextTrialIds{iContext};
             for iConTrial = 1:length(contextTrialIds{iContext})
-                iTrial = conTrialIds(iConTrial);
+                trialId = conTrialIds(iConTrial);
                 % Load the data
                 fn = fullfile(session.analysisFolder, obj.config.canon_rect_placemaps_folder, ...
-                    sprintf('%s_%d_mltetrodeplacemaprect.mat', fnPrefix, iTrial));
+                    sprintf('%s_%d_mltetrodeplacemaprect.mat', fnPrefix, trialId));
                 tmp = load(fn);
 
                 % Plots contexts as single rows
-                dig = session.record.trial_info.digs{iTrial};
+                dig = session.record.trial_info.digs{trialId};
 
                 % Plot the scatter plot
                 k1 = (iContext-1)*numCols*numPlotsPerTrial + iConTrial;
                 subplot(numRows, numCols, k1);
                 tmp.mltetrodeplacemap.plot_path_with_spikes();
-                %title(sprintf('ConId %d, ConTrial %d, Trial %d, Dig (%s)', uniqueContextIds(iContext), iConTrial, iTrial, dig));
-                title(sprintf('T%d C%dT%d\nDig (%s)', iTrial, uniqueContextIds(iContext), iConTrial, dig));
+                %title(sprintf('ConId %d, ConTrial %d, Trial %d, Dig (%s)', uniqueContextIds(iContext), iConTrial, trialId, dig));
+                title(sprintf('T%d C%dT%d\nDig (%s)', trialId, uniqueContextIds(iContext), iConTrial, dig));
 
                 % Plot the placemap
                 k2 = (iContext-1)*numCols*numPlotsPerTrial + numCols + iConTrial;

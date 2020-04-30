@@ -9,8 +9,12 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             mkdir(folder)
         end
 
-        for iTrial = 1:session.num_trials_recorded
-            trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', iTrial));
+        sr = session.sessionRecord;
+        ti = sr.getTrialsToProcess();
+        for iTrial = 1:sr.getNumTrialsToProcess()
+            trialId = ti(iTrial).id;
+                
+            trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
             fprintf('Loading %s ... ', trialFnvtFilename);
             data = load(trialFnvtFilename);
             fprintf('done!\n');
@@ -23,7 +27,7 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             axis equal off
 
             % Save the data here
-            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', iTrial, 'pos_scatter'));
+            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', trialId, 'pos_scatter'));
             fprintf('Saving plots %s ... ', trialPlotFilenamePrefix);
             savefig(h, sprintf('%s.fig', trialPlotFilenamePrefix))
             saveas(h, sprintf('%s.png', trialPlotFilenamePrefix), 'png');
@@ -61,7 +65,7 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             linkaxes(ax, 'x');
 
             % Save the data here
-            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', iTrial, 'pos_timeseries'));
+            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', trialId, 'pos_timeseries'));
             fprintf('Saving plots %s ... ', trialPlotFilenamePrefix);
             savefig(h, sprintf('%s.fig', trialPlotFilenamePrefix))
             saveas(h, sprintf('%s.png', trialPlotFilenamePrefix), 'png');

@@ -76,6 +76,9 @@ function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder
                 session{iSession}.context_trial_ids = obj.get_context_trial_ids(session{iSession});
                 session{iSession}.num_contexts = length(session{iSession}.context_trial_ids);
                 
+                % Refactor to using the class
+                session{iSession}.sessionRecord = MLSessionRecord( fullfile(session{iSession}.rawFolder, 'record.json') );
+                
                 % Get the tfile names
                 fl = dir(fullfile(session{iSession}.rawFolder, 'TT*.t'));
                 tfiles = { fl.name };

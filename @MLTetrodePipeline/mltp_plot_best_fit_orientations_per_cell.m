@@ -8,8 +8,13 @@ function mltp_plot_best_fit_orientations_per_cell(obj, session)
     data = tmp.best_fit_orientations_per_cell;
 
     numCells = length(data);
+    
+    sr = session.sessionRecord;
 
     h = figure('Position', get(0,'Screensize'));
+    
+    % FixMe! Pick the number of subplots based on the number that will
+    % actually be plotted
     p = 5; q = 5; k = 1;
     for iCell = 1:numCells
 
@@ -40,7 +45,7 @@ function mltp_plot_best_fit_orientations_per_cell(obj, session)
             mkdir(outputFolder)
         end
         F = getframe(h);
-        fnPrefix = sprintf('%s_%s_best_fit_orientations_per_cell', obj.experiment.subjectName, session.name);
+        fnPrefix = sprintf('%s_%s_best_fit_orientations_per_cell', obj.experiment.subjectName, sr.getName());
         imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
         savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
         saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');
