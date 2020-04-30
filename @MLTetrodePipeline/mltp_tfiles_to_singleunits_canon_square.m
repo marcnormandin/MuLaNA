@@ -28,15 +28,6 @@ function mltp_tfiles_to_singleunits_canon_square(obj, session)
 
                 spikes(trialId).meanFiringRateHz = spikes(trialId).numSpikes / trialTimeTotal_s;
 
-                % This should use interpolation
-%                 spikes(trialId).indices = [];
-%                 for iSpike = 1:length(spikes(trialId).rate)
-%                     spikes(trialId).indices(iSpike,1) = find(t.timeStamps_mus >= spikes(trialId).trialSpikeTimes_mus(iSpike), 1, 'first');
-%                 end
-% 
-%                 % Record the position of the spikes
-%                 spikes(trialId).pos.x = t.pos.x(spikes(trialId).indices(:));
-%                 spikes(trialId).pos.y = t.pos.y(spikes(trialId).indices(:));
                 spikes(trialId).pos.x = interp1( t.timeStamps_mus, t.pos.x,  spikes(trialId).trialSpikeTimes_mus );
                 spikes(trialId).pos.y = interp1( t.timeStamps_mus, t.pos.y,  spikes(trialId).trialSpikeTimes_mus );
                 spikes(trialId).spe   = interp1( t.timeStamps_mus, t.spe, spikes(trialId).trialSpikeTimes_mus );
@@ -49,7 +40,8 @@ function mltp_tfiles_to_singleunits_canon_square(obj, session)
             singleunit.cellName = fnPrefix{1}; % eg. TT3_2
             singleunit.spikeTimes_mus = spikeTimes_mus;
             singleunit.trialSpikes = spikes;
-            singleunit.numTrials = session.num_trials_recorded;
+            % FixMe!
+            singleunit.numTrials = sr.getTrialsToProcess();
             singleunit.sessionName = session.name;
             singleunit.subjectName = obj.experiment.subjectName;
             singleunit.dataset = obj.experiment.dataset;

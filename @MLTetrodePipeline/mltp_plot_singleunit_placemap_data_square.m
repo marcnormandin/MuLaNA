@@ -5,10 +5,8 @@ function mltp_plot_singleunit_placemap_data_square(obj, session)
                 
     % Get unique ids for the contexts. Dont assume that
     % they are just 1 or 1 and 2.
-    %uniqueContextIds = sort(unique(session.record.trial_info.contexts));
-    %numContexts = length(uniqueContextIds); % or use session.num_contexts;
     uniqueContextIds = sort(unique([ti.context]));
-    numContexts = length(uniqueContextIds); % or use session.num_contexts;
+    numContexts = length(uniqueContextIds);
 
     % Find the number of trials to use for each context
     % since they may not be identical (eg. 4 trials for
@@ -31,37 +29,49 @@ function mltp_plot_singleunit_placemap_data_square(obj, session)
     for iCell = 1:numCells
         fnPrefix = session.tfiles_filename_prefixes{iCell};
 
-%                       arenaColours = obj.config.session_orientation_plot.trial_pos_colours;
-
         h = figure('Name', sprintf('%s (%s) tfile: %s', session.record.session_info.name, session.record.session_info.date, fnPrefix), 'Position', get(0,'Screensize'));
 
         numPlotsPerTrial = 2;
-        numRows = session.num_contexts * numPlotsPerTrial; % Show spikes and placemap
+        numRows = numContexts * numPlotsPerTrial; % Show spikes and placemap
 
         for iContext = 1:numContexts
             conTrialIds = contextTrialIds{iContext};
             for iConTrial = 1:length(contextTrialIds{iContext})
-                iTrial = conTrialIds(iConTrial);
+                trialId = conTrialIds(iConTrial);
                 % Load the data
                 fn = fullfile(session.analysisFolder, obj.config.canon_square_placemaps_folder, ...
-                    sprintf('%s_%d_mltetrodeplacemapsquare.mat', fnPrefix, iTrial));
+                    sprintf('%s_%d_mltetrodeplacemapsquare.mat', fnPrefix, trialId));
                 tmp = load(fn);
 
                 % Plots contexts as single rows
-                dig = session.record.trial_info.digs{iTrial};
+                digs = ti(trialId).digs{1};
+                
+                % Only show the digs if it is relevant
+                showDigs = true;
+                if length(digs) == 1
+                    if strcmp(digs, '?') == 1
+                        showDigs = false;
+                    end
+                end
 
                 % Plot the scatter plot
                 k1 = (iContext-1)*numCols*numPlotsPerTrial + iConTrial;
                 subplot(numRows, numCols, k1);
                 tmp.mltetrodeplacemap.plot_path_with_spikes();
-                title(sprintf('T%d C%dT%d\nDig (%s)', iTrial, uniqueContextIds(iContext), iConTrial, dig));
+                
+                % To show or not to show, that is the question --
+                % Shakespere
+                if showDigs
+                    title(sprintf('T%d S%d C%dT%d\nDigs (%s)', trialId, ti(trialId).sequenceNum, uniqueContextIds(iContext), iConTrial, digs));
+                else
+                    title(sprintf('T%d S%d C%dT%d', trialId, ti(trialId).sequenceNum, uniqueContextIds(iContext), iConTrial));
+                end
+                
 
                 % Plot the placemap
                 k2 = (iContext-1)*numCols*numPlotsPerTrial + numCols + iConTrial;
                 subplot(numRows, numCols, k2);
                 tmp.mltetrodeplacemap.plot();
-
-                % 
             end
         end
 

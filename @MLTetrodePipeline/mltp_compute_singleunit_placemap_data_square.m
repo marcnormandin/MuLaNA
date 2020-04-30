@@ -22,10 +22,7 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
             canon = data.canon;
             x = canon.pos.x;
             y = canon.pos.y;
-%             si = spikes.indices;
-%             sx = spikes.x;
-%             sy = spikes.y;
-%             ss = spikes.spe;
+
             spike_ts_ms = spikes.trialSpikeTimes_mus(:) / (1.0*10^3);
             
             ts_ms = canon.timeStamps_mus(:) / (1.0*10^3); 
@@ -60,26 +57,7 @@ function mltp_compute_singleunit_placemap_data_square(obj, session)
             end
 
             % Record the context in the mat file
-%             trial_num = ti(trialId).sequenceNum;
-            
-%             context_trial_num = []; % The trial number within the context
-%             context_index = [];
-%             for iContext = 1:session.num_contexts
-%                 context_index = iContext;
-%                 context_trial_num = find(session.context_trial_ids{iContext} == trial_num);
-%                 if isempty(context_trial_num)
-%                     continue
-%                 else
-%                     break
-%                 end
-%             end
-% 
-%             trial_context_index = context_index;
-%             trial_context_num = context_trial_num;
-% 
-%             trial_context_id = session.record.trial_info.contexts(trialId);
-%             trial_use = session.record.trial_info.use(trialId) == 1; 
-%             trial_first_dig = session.record.trial_info.digs(trialId);
+
 
             trial_num = ti(trialId).sequenceNum;
             trial_use = ti(trialId).use;

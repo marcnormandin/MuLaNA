@@ -131,32 +131,7 @@ classdef MLTetrodePipeline < MLPipeline
         mltp_plot_rate_difference_matrices(obj);
         mltp_nlx_mclust_plot_spikes_for_checking_bits(obj, session);
         mptp_plot_canon_rect_velspe(obj, session);
-        
-        function [contextTrialIds] = get_context_trial_ids(obj, session)
-            % Get unique ids for the contexts. Dont assume that
-            % they are just 1 or 1 and 2.
-            uniqueContextIds = sort(unique(session.record.trial_info.contexts));
-            numContexts = length(uniqueContextIds); % or use session.num_contexts;
-
-            % Find the number of trials to use for each context
-            % since they may not be identical (eg. 4 trials for
-            % context 1, but 5 for context 2.
-            contextTrialIds = cell(numContexts,1);
-            numCols = 0;
-            for iContext = 1:length(uniqueContextIds)
-                contextId = uniqueContextIds(iContext);
-
-                for iTrial = 1:session.num_trials_recorded
-                    if session.record.trial_info.contexts(iTrial) == contextId && session.record.trial_info.use(iTrial) == 1
-                        contextTrialIds{iContext} = [contextTrialIds{iContext} iTrial];
-                    end
-                end
-                if length(contextTrialIds(iContext)) > numCols
-                    numCols = length(contextTrialIds{iContext});
-                end
-            end
-        end % function
-        
+         
         function [arena] = getArena(obj)
             arena = obj.experiment.info.arena;
         end % function

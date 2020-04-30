@@ -6,9 +6,6 @@ function mltp_make_pfstats_excel(obj, session)
         delete(pfStatsFilename)
     end
 
-    % Maybe only use the trials that are desired, instead of all of them.
-    %numTrials = session.num_trials_recorded;
-    
     % Sort them (hackish)
     % Remove the TT
     tmp2 = [];

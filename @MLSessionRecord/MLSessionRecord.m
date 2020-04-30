@@ -9,16 +9,11 @@ classdef MLSessionRecord < handle
     
     methods (Access = public)
         function obj = MLSessionRecord( filename )
-            % Read the data into the json structure
-            obj.readJSON( filename );
-            
-            % Make sure that the data makes sense logically
-            % i.e. same number of array elements
-            obj.validateJSON();
-            
             % Store the filename so that we can update the file
             % if needed
             obj.jsonFilename = filename;
+            
+            obj.loadFile(obj.jsonFilename);
             
         end % function
         
@@ -30,11 +25,23 @@ classdef MLSessionRecord < handle
             d = obj.json.session_info.date;
         end
         
+        % Total number of trials, including those we dont want to process
         function [numTrials] = getNumTrials(obj)
             numTrials = length(obj.json.trial_info.sequence_num);
         end % function
         
-        % Called as getNumTrials() if only valid trials are desired
+        % This returns information for every trial regardless
+        % of context or use (not filtered).
+        function [trialInfo] = getTrials(obj)
+            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', []);
+
+            numTrials = obj.getNumTrials();
+            for iTrial = 1:numTrials
+                trialInfo(iTrial) = obj.getTrialInfo_single(iTrial);
+            end
+        end
+        
+        % The number of trials we want to process (marked use = 1).
         function [numTrials] = getNumTrialsToProcess(obj)
             ti = obj.getTrialInfoAll();
             numTrials = sum([ti.use] == 1);
@@ -48,9 +55,7 @@ classdef MLSessionRecord < handle
         end % function
         
         function [trialIds] = getTrialIdsToProcess(obj)
-            trialInfoAll = obj.getTrialInfoAll();
-            use = [trialInfoAll.use];
-            
+            trialInfo = obj.getTrialsToProcess();
             trialIds = [trialInfo.id];
         end % function
         
@@ -242,7 +247,16 @@ classdef MLSessionRecord < handle
     end % methods
     
     methods (Access = private)
-        function readJSON(obj, filename)
+        function loadFile(obj, filename)
+            % Read the data into the json structure
+            obj.readJSON(filename);
+            
+            % Make sure that the data makes sense logically
+            % i.e. same number of array elements
+            obj.validateJSON();
+        end % function 
+        
+        function readJSON(obj, filename)            
             % Read record file
             if ~isfile( filename )
                 error('The session record (%s) does not exist.', filename);
@@ -264,9 +278,9 @@ classdef MLSessionRecord < handle
                if isfield(obj.json, topField)
                    subFields = row{2};
                    for iSub = 1:length(subFields)
-                       subField = subFields(iSub);
+                       subField = subFields{iSub};
                        if ~isfield(obj.json.(topField), subField)
-                           error('Error. Unable to find (%s.%s).\n', topField, subField);
+                           error('Error. Unable to find (%s.%s) in (%s).\n', topField, subField, obj.jsonFilename);
                        end
                    end
                else
@@ -327,10 +341,40 @@ classdef MLSessionRecord < handle
             
             trialInfo.context = obj.json.trial_info.contexts(iTrial);
             trialInfo.use = obj.json.trial_info.use(iTrial);
-            trialInfo.sequenceNum = obj.json.trial_info.use(iTrial);
+            trialInfo.sequenceNum = obj.json.trial_info.sequence_num(iTrial);
             trialInfo.digs = obj.json.trial_info.digs(iTrial);
             trialInfo.id = iTrial;
         end
-    end
+    end % private methods
+    
+    methods ( Static )
+        function createDefaultFile(numTrials, numAlternatingContexts, sessionName, sessionDate, outputFilename)
+            %fprintf('Creating default record.json for %s\n', outputFilename);
+
+            record.session_info.name = sessionName;
+            record.session_info.date = sessionDate;
+            
+            record.trial_info = struct('contexts', [], 'use', [], 'sequence_num', [], 'digs', []);
+
+            tmp = repmat(1:numAlternatingContexts, 1, ceil(numTrials/numAlternatingContexts));
+            record.trial_info.contexts = tmp(1:numTrials);
+            
+            record.trial_info.sequence_num = 1:numTrials;
+            record.trial_info.use = ones(1,numTrials);
+            record.trial_info.digs = cell(1,numTrials);
+            for iTmp = 1:numTrials
+                record.trial_info.digs{iTmp} = "?";
+            end
+
+            txt = jsonencode(record);
+            fid = fopen(outputFilename,'w');
+            if fid == -1
+                error('Unable to create default record.json file.\n');
+            end
+            fwrite(fid, txt, 'char');
+            fclose(fid);
+            %fprintf('Default MLSessionRecord saved to: %s\n', outputFilename);
+        end % function
+    end % static methods
     
 end % classdef

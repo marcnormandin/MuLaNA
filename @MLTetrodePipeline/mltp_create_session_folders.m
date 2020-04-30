@@ -33,51 +33,33 @@ function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder
                 session{iSession}.rawFolder = sessionFolder;
                 session{iSession}.name = experiment.info.session_folders{iSession};
                 
-                recordFilename = fullfile(sessionFolder, "record.json"); 
+                recordFilename = fullfile(sessionFolder, "session_record.json"); 
                 
                 % Create a default record file if one doesn't exist.
                 % This can aid the user if they forget to add it.
                 if ~isfile(recordFilename)
                     fprintf('Creating default record.json for %s\n', session{iSession}.name);
 
-                    defaultRecord.session_info.name = experiment.info.session_folders{iSession};
-                    defaultRecord.session_info.date = "unknown";
+                    defaultRecordName = experiment.info.session_folders{iSession};
+                    defaultRecordDate = "unknown";
                     
                     % We need to load the nvt to figure out the number of
                     % trials (which is slow)
                     nvtFullFilename = fullfile(sessionFolder, obj.config.nvt_filename);
-                    numTrials = ml_nlx_nvt_get_num_trials(nvtFullFilename, obj.config.nvt_file_trial_separation_threshold_s);
+                    defaultRecordNumTrialsTotal = ml_nlx_nvt_get_num_trials(nvtFullFilename, obj.config.nvt_file_trial_separation_threshold_s);
+                    defaultRecordNumContexts = experiment.info.num_contexts;
                     
-                    tmp = repmat([1,2], 1, ceil(numTrials/2));
-                    defaultRecord.trial_info.contexts = tmp(1:numTrials);
+                    MLSessionRecord.createDefaultFile(...
+                        defaultRecordNumTrialsTotal, defaultRecordNumContexts, ...
+                        defaultRecordName, defaultRecordDate, recordFilename);
                     
-                    defaultRecord.trial_info.use = ones(1,numTrials);
-                    defaultRecord.trial_info.digs = cell(1,numTrials);
-                    for iTmp = 1:numTrials
-                        defaultRecord.trial_info.digs{iTmp} = "?";
-                    end
-                    
-                    txt = jsonencode(defaultRecord);
-                    fid = fopen(recordFilename,'w');
-                    if fid == -1
-                        error('Unable to create default record.json file.\n');
-                    end
-                    fwrite(fid, txt, 'char');
-                    fclose(fid);
                     fprintf('Default record.json saved to: %s\n', recordFilename);
                 end
                 recordData = fileread( recordFilename );
                 session{iSession}.record = jsondecode( recordData );
-                session{iSession}.num_trials_to_use = sum(session{iSession}.record.trial_info.use == 1);
-                session{iSession}.num_trials_recorded = length(session{iSession}.record.trial_info.use);
-                %session{iSession}.num_contexts = length(unique(session{iSession}.record.trial_info.contexts));
-                
-                % Get the trial ids associated with each context
-                session{iSession}.context_trial_ids = obj.get_context_trial_ids(session{iSession});
-                session{iSession}.num_contexts = length(session{iSession}.context_trial_ids);
                 
                 % Refactor to using the class
-                session{iSession}.sessionRecord = MLSessionRecord( fullfile(session{iSession}.rawFolder, 'record.json') );
+                session{iSession}.sessionRecord = MLSessionRecord( fullfile(session{iSession}.rawFolder, 'session_record.json') );
                 
                 % Get the tfile names
                 fl = dir(fullfile(session{iSession}.rawFolder, 'TT*.t'));

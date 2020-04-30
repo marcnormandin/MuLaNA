@@ -100,11 +100,22 @@ try
     % Ask the user to create the ROIs only when needed (ideally only once)
     for iSession = 1:pipe.experiment.numSessions
         session = pipe.experiment.session{iSession};
-        numTrials = session.num_trials_recorded;
-        roiFiles = dir(fullfile(session.rawFolder, 'trial_*_arenaroi.mat'));
-        numRois = length(roiFiles);
         
-        if numRois ~= numTrials
+        sr = session.sessionRecord;
+        ti = sr.getTrialsToProcess();
+        trialIds = [ti.id];
+        
+        % Check if we have all of the ROI needs for the analysis
+        missingRoi = false;
+        for iTrial = 1:sr.getNumTrialsToProcess()
+            % Check if we are missing the required ROI
+            if ~isfile(fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialIds(iTrial))))
+                missingRoi = true;
+                break;
+            end
+        end
+        
+        if missingRoi
             pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
         end
     end

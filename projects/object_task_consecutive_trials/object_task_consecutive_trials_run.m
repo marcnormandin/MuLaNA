@@ -128,11 +128,22 @@ try
     % Ask the user to create the ROIs only when needed (ideally only once)
     for iSession = 1:pipe.experiment.numSessions
         session = pipe.experiment.session{iSession};
-        numTrials = session.num_trials_recorded;
-        roiFiles = dir(fullfile(session.rawFolder, 'trial_*_arenaroi.mat'));
-        numRois = length(roiFiles);
         
-        if numRois ~= numTrials
+        sr = session.sessionRecord;
+        ti = sr.getTrialsToProcess();
+        trialIds = [ti.id];
+        
+        % Check if we have all of the ROI needs for the analysis
+        missingRoi = false;
+        for iTrial = 1:sr.getNumTrialsToProcess()
+            % Check if we are missing the required ROI
+            if ~isfile(fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialIds(iTrial))))
+                missingRoi = true;
+                break;
+            end
+        end
+        
+        if missingRoi
             pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
         end
     end
@@ -158,8 +169,13 @@ try
     pipe.executePerSessionTask('make_session_orientation_plot_aligned');
 
     pipe.executePerSessionTask('plot_canon_rect_velspe');
-    pipe.executePerSessionTask('plot_singleunit_placemap_data_rect');
-    pipe.executePerSessionTask('plot_singleunit_placemap_data_square');
+    
+    if strcmpi(pipe.getArena().shape, 'rectangle')
+        pipe.executePerSessionTask('plot_singleunit_placemap_data_rect');
+    elseif strcmpi(pipe.getArena().shape, 'square')
+        pipe.executePerSessionTask('plot_singleunit_placemap_data_square');
+    end
+    
     pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
     pipe.executePerSessionTask('plot_best_fit_orientations_per_cell');
 
