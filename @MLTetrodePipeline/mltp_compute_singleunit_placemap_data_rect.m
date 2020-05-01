@@ -7,10 +7,9 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
 %     end
 
     % Form the grid
-    boundsx = obj.config.placemaps_rect.bounds_x;
-    boundsy = obj.config.placemaps_rect.bounds_y;
-    nbinsx = obj.config.placemaps_rect.nbins_x;
-    nbinsy = obj.config.placemaps_rect.nbins_y;
+    %boundsx = obj.config.placemaps_rect.bounds_x;
+    %boundsy = obj.config.placemaps_rect.bounds_y;
+    
 
     fl = dir(fullfile(session.analysisFolder, '*_singleunit_canon_rect.mat'));
     for iFile = 1:length(fl)
@@ -29,11 +28,19 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
             canon = data.canon;
             x = canon.pos.x;
             y = canon.pos.y;
+            boundsx = canon.bounds_x;
+            boundsy = canon.bounds_y;
             %si = spikes.indices;
             ts_ms = canon.timeStamps_mus(:) ./ (1.0*10^3); 
             spe = canon.spe;
 
             spike_ts_ms = spikes.trialSpikeTimes_mus(:) / (1.0*10^3);
+            
+            % Compute the number of bins we need in each dimension
+            % The bounds are in cm
+            cm_per_bin = obj.config.placemaps.cm_per_bin;
+            nbinsx = ceil(boundsx(2)/cm_per_bin); %obj.config.placemaps_rect.nbins_x;
+            nbinsy = ceil(boundsy(2)/cm_per_bin); %obj.config.placemaps_rect.nbins_y;
 
             %mltetrodeplacemap = MLTetrodePlacemap(x, y, ts_ms, si, boundsx, boundsy, nbinsx, nbinsy, ...
             %    obj.config.placemaps_rect.kernel_gaussian_size_bins, obj.config.placemaps_rect.kernel_gaussian_sigma_cm);
@@ -44,7 +51,7 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
                 'nbinsx', nbinsx, ...
                 'nbinsy', nbinsy, ...
                 'SmoothingProtocol', obj.config.placemaps.smoothingProtocol, ...
-                'smoothingKernel', obj.smoothingKernelRect, ...
+                'smoothingKernel', obj.smoothingKernel, ...
                 'criteriaDwellTimeSecondsPerBinMinimum', obj.config.placemaps.criteria_dwell_time_seconds_per_bin_minimum, ...
                 'criteriaSpikesPerBinMinimum', obj.config.placemaps.criteria_spikes_per_bin_minimum, ...
                 'criteriaSpikesPerMapMinimum', obj.config.placemaps.criteria_spikes_per_map_minimum, ...
@@ -77,7 +84,7 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
             fnPrefix = fnPrefix{1};
             placemapFilename = fullfile(outputFolder, sprintf('%s_%d_mltetrodeplacemaprect.mat', fnPrefix, trialId));
             fprintf('Saving placemap data to file: %s\n', placemapFilename);
-            save(placemapFilename, 'mltetrodeplacemap', 'trial_num', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
+            save(placemapFilename, 'mltetrodeplacemap', 'cm_per_bin', 'trial_num', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
         end % trial
 
 

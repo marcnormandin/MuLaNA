@@ -33,10 +33,14 @@ function mltp_trial_fnvt_to_trial_can_rect(obj, session)
 %                 b = [0, 0];
 %                 c = [0, obj.experiment.info.arena.length_cm];
 %                 d = [obj.experiment.info.arena.width_cm, obj.experiment.info.arena.length_cm];
-                a = [obj.config.placemaps_rect.bounds_x(2), obj.config.placemaps_rect.bounds_y(1)];
-                b = [obj.config.placemaps_rect.bounds_x(1), obj.config.placemaps_rect.bounds_y(1)];
-                c = [obj.config.placemaps_rect.bounds_x(1), obj.config.placemaps_rect.bounds_y(2)];
-                d = [obj.config.placemaps_rect.bounds_x(2), obj.config.placemaps_rect.bounds_y(2)];
+                arena = obj.getArena();
+                bounds_x = [0, arena.width_cm]; %obj.config.placemaps_rect.bounds_x;
+                bounds_y = [0, arena.height_cm]; %obj.config.placemaps_rect.bounds_y;
+                
+                a = [bounds_x(2), bounds_y(1)];
+                b = [bounds_x(1), bounds_y(1)];
+                c = [bounds_x(1), bounds_y(2)];
+                d = [bounds_x(2), bounds_y(2)];
                 refCanPts = [a(1), b(1), c(1), d(1); a(2), b(2), c(2), d(2)];
 
                 % Get the transformation matrix
@@ -51,7 +55,11 @@ function mltp_trial_fnvt_to_trial_can_rect(obj, session)
                 xPts(2,:) = arenaroi.yVertices(:);
                 y = homography_transform(xPts, vtrans); % Just to check
 
+                % CAUTION: The transformed points will not all be within
+                % the "bounds"
 
+                canon.bounds_x = bounds_x;
+                canon.bounds_y = bounds_y;
                 canon.vtrans = vtrans;
                 canon.pos.x = canonPts(1,:);
                 canon.pos.y = canonPts(2,:);

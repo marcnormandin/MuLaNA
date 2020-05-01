@@ -8,7 +8,7 @@ classdef MLTetrodePipeline < MLPipeline
         config = '';
         
         % Kernel used to smooth the placemaps
-        smoothingKernelRect = [];
+        smoothingKernel = [];
         smoothingKernelSquare = [];
     end % properties
     
@@ -28,13 +28,24 @@ classdef MLTetrodePipeline < MLPipeline
                 error('Error encountered while reading pipeline configuration from (%s): %s', pipelineConfigFilename, ME.identifier)
             end
             
+            % Read in the experiment file
+            obj.experimentDescriptionFilename = fullfile(obj.recordingsParentFolder, 'experiment_description.json');
+            if ~isfile( obj.experimentDescriptionFilename )
+                error('Error! The file (%s) does not exist! How do you expect me to work?!', obj.experimentDescriptionFilename);
+            end
+
+            
+            % Create the experiment structure
+            obj.experiment = obj.mltp_create_session_folders( obj.recordingsParentFolder, obj.analysisParentFolder, obj.experimentDescriptionFilename );
+            
+            
             % Construct the kernel. Make sure that it is valid.
             % The kernel sizes must be odd so that they are symmetric
-            if mod(obj.config.placemaps_rect.smoothingKernelGaussianSize,2) ~= 1
-                error('The config value placemaps_rect.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_rect.smoothingKernelGaussianSize);
+            if mod(obj.config.placemaps.smoothingKernelGaussianSize_cm,2) ~= 1
+                error('The config value placemaps.smoothingKernelGaussianSize_cm must be odd, but it is %d.', obj.config.placemaps.smoothingKernelGaussianSize_cm);
             end
-            obj.smoothingKernelRect = fspecial('gaussian', obj.config.placemaps_rect.smoothingKernelGaussianSize, obj.config.placemaps_rect.smoothingKernelGaussianSigma);
-            obj.smoothingKernelRect = obj.smoothingKernelRect ./ max(obj.smoothingKernelRect(:)); % Isabel wants this like the other
+            obj.smoothingKernel = fspecial('gaussian', obj.config.placemaps.smoothingKernelGaussianSize_cm / obj.config.placemaps.cm_per_bin, obj.config.placemaps.smoothingKernelGaussianSigma_cm / obj.config.placemaps.cm_per_bin);
+            obj.smoothingKernel = obj.smoothingKernel ./ max(obj.smoothingKernel(:)); % Isabel wants this like the other
             
             if mod(obj.config.placemaps_square.smoothingKernelGaussianSize,2) ~= 1
                 error('The config value placemaps_square.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_square.smoothingKernelGaussianSize);
@@ -52,15 +63,7 @@ classdef MLTetrodePipeline < MLPipeline
                     obj.config.placemaps.criteria_speed_cm_per_second_maximum, obj.config.placemaps.criteria_speed_cm_per_second_minimum);
             end
             
-            % Read in the experiment file
-            obj.experimentDescriptionFilename = fullfile(obj.recordingsParentFolder, 'experiment_description.json');
-            if ~isfile( obj.experimentDescriptionFilename )
-                error('Error! The file (%s) does not exist! How do you expect me to work?!', obj.experimentDescriptionFilename);
-            end
 
-            % Create the experiment structure
-            obj.experiment = obj.mltp_create_session_folders( obj.recordingsParentFolder, obj.analysisParentFolder, obj.experimentDescriptionFilename );
-            
             
             % These should go through a registration function to allow for
             % checking of duplicates
