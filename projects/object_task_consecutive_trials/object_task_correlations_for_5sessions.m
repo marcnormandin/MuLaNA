@@ -38,17 +38,20 @@ function object_task_correlations_for_5sessions(pipe)
 
     
     % Get the correct placemap data
-    if strcmpi(pipe.getArena().shape, 'rectangle')
-        fprintf('Computing placefield stats excel file using rectangle data.\n');
-        placemapSubFolder = 'placemaps_rectangle';
-        placemapFilenameSuffix = 'mltetrodeplacemaprect.mat';
-    elseif strcmpi(pipe.getArena().shape, 'square')
-        fprintf('Computing placefield stats excel file using square data.\n');
-        placemapSubFolder = 'placemaps_square';
-        placemapFilenameSuffix = 'mltetrodeplacemapsquare.mat';
-    else
-        error('Placefield stats excel file creation is only valid for rectangle or square, not %s.', obj.getArena().shape);
-    end
+%     if strcmpi(pipe.getArena().shape, 'rectangle')
+%         fprintf('Computing placefield stats excel file using rectangle data.\n');
+%         placemapSubFolder = 'placemaps_rectangle';
+%         placemapFilenameSuffix = 'mltetrodeplacemaprect.mat';
+%     elseif strcmpi(pipe.getArena().shape, 'square')
+%         fprintf('Computing placefield stats excel file using square data.\n');
+%         placemapSubFolder = 'placemaps_square';
+%         placemapFilenameSuffix = 'mltetrodeplacemapsquare.mat';
+%     else
+%         error('Placefield stats excel file creation is only valid for rectangle or square, not %s.', obj.getArena().shape);
+%     end
+    placemapSubFolder = pipe.config.placemaps.outputFolder;
+    placemapFilenameSuffix = pipe.config.placemaps.filenameSuffix;
+    
     
     % Make a result structure for each common tfile
     results = [];
