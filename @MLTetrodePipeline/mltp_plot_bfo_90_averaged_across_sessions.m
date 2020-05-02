@@ -1,4 +1,4 @@
-function mltp_plot_best_fit_orientations_averaged_across_sessions(obj)
+function mltp_plot_bfo_90_averaged_across_sessions(obj)
 
     % Only applicable if experiment has more than one session
     if obj.experiment.numSessions < 2

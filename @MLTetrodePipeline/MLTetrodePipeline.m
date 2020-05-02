@@ -61,7 +61,6 @@ classdef MLTetrodePipeline < MLPipeline
             
             % These should go through a registration function to allow for
             % checking of duplicates
-            %obj.availablePerTrialTasks('
             obj.availablePerSessionTasks('nvt_split_into_trial_nvt') = @obj.mltp_nvt_split_into_trial_nvt;
             obj.availablePerSessionTasks('trial_nvt_to_trial_fnvt') = @obj.mltp_trial_nvt_to_trial_fnvt;
             obj.availablePerSessionTasks('user_define_trial_arenaroi') = @obj.mltp_user_define_trial_arenaroi;
@@ -70,32 +69,25 @@ classdef MLTetrodePipeline < MLPipeline
             obj.availablePerSessionTasks('make_session_orientation_plot_unaligned') = @obj.mltp_make_session_orientation_plot_unaligned;
             obj.availablePerSessionTasks('make_session_orientation_plot_aligned') = @obj.mltp_make_session_orientation_plot_aligned;
             
-            % new
             obj.availablePerSessionTasks('trial_fnvt_to_trial_can_movement') = @obj.mltp_trial_fnvt_to_trial_can_movement;
-            
-            
-            %obj.availablePerSessionTasks('trial_fnvt_to_trial_can_rect') = @obj.mltp_trial_fnvt_to_trial_can_rect;
-            %obj.availablePerSessionTasks('trial_fnvt_to_trial_can_square') = @obj.mltp_trial_fnvt_to_trial_can_square;   
-            %obj.availablePerSessionTasks('tfiles_to_singleunits_canon_rect') = @obj.mltp_tfiles_to_singleunits_canon_rect;
-            
-            % new
+
             obj.availablePerSessionTasks('tfiles_to_singleunits') = @obj.mltp_tfiles_to_singleunits;
             obj.availablePerSessionTasks('compute_singleunit_placemap_data') = @obj.mltp_compute_singleunit_placemap_data;
+            obj.availablePerSessionTasks('compute_singleunit_placemap_data_shrunk') = @obj.mltp_compute_singleunit_placemap_data_shrunk;
             obj.availablePerSessionTasks('plot_singleunit_placemap_data') = @obj.mltp_plot_singleunit_placemap_data;
             
+  
+            % Best fit orientations for 0, 90, 180, 270
+            obj.availablePerSessionTasks('compute_bfo_90_ac') = @obj.mltp_compute_bfo_90_ac;
+            obj.availablePerSessionTasks('compute_bfo_90_wc') = @obj.mltp_compute_bfo_90_wc;
+            obj.availablePerSessionTasks('compute_bfo_90_ac_per_cell') = @obj.mltp_compute_bfo_90_ac_per_cell;
+            obj.availablePerExperimentTasks('plot_bfo_90_wc') = @obj.mltp_plot_bfo_90_wc;
+            obj.availablePerExperimentTasks('plot_bfo_90_ac') = @obj.mltp_plot_bfo_90_ac;
+            obj.availablePerSessionTasks('plot_bfo_90_ac_per_cell') = @obj.mltp_plot_bfo_90_ac_per_cell;
+            obj.availablePerExperimentTasks('plot_bfo_90_averaged_across_sessions') = @obj.mltp_plot_bfo_90_averaged_across_sessions;   
             
-            %obj.availablePerSessionTasks('compute_singleunit_placemap_data_rect') = @obj.mltp_compute_singleunit_placemap_data_rect;
-            %obj.availablePerSessionTasks('plot_singleunit_placemap_data_rect') = @obj.mltp_plot_singleunit_placemap_data_rect;
-            %obj.availablePerSessionTasks('plot_singleunit_placemap_data_square') = @obj.mltp_plot_singleunit_placemap_data_square;
-
-            %obj.availablePerSessionTasks('tfiles_to_singleunits_canon_square') = @obj.mltp_tfiles_to_singleunits_canon_square;
-            %obj.availablePerSessionTasks('compute_singleunit_placemap_data_square') = @obj.mltp_compute_singleunit_placemap_data_square;
-            obj.availablePerSessionTasks('compute_best_fit_orientations_within_contexts') = @obj.mltp_compute_best_fit_orientations_within_contexts;
-            obj.availablePerSessionTasks('compute_best_fit_orientations_all_contexts') = @obj.mltp_compute_best_fit_orientations_all_contexts;
-            obj.availablePerSessionTasks('compute_best_fit_orientations_per_cell') = @obj.mltp_compute_best_fit_orientations_per_cell;
             obj.availablePerSessionTasks('compute_best_fit_orientations_0_180_per_cell') = @obj.mltp_compute_best_fit_orientations_0_180_per_cell;
             obj.availablePerSessionTasks('plot_across_within_0_180_similarity') = @obj.mltp_plot_across_within_0_180_similarity;
-            obj.availablePerSessionTasks('plot_best_fit_orientations_per_cell') = @obj.mltp_plot_best_fit_orientations_per_cell;
             obj.availablePerSessionTasks('make_pfstats_excel') = @obj.mltp_make_pfstats_excel;
             
             obj.availablePerSessionTasks('plot_movement') = @obj.mltp_plot_movement;
@@ -103,10 +95,7 @@ classdef MLTetrodePipeline < MLPipeline
             obj.availablePerSessionTasks('plot_nlx_mclust_plot_spikes_for_checking_bits') = @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits;
             
             obj.availablePerExperimentTasks('plot_rate_difference_matrices') = @obj.mltp_plot_rate_difference_matrices;
-            obj.availablePerExperimentTasks('plot_best_fit_orientations_within_contexts') = @obj.mltp_plot_best_fit_orientations_within_contexts;
-            obj.availablePerExperimentTasks('plot_best_fit_orientations_all_contexts') = @obj.mltp_plot_best_fit_orientations_all_contexts;
-            obj.availablePerExperimentTasks('plot_best_fit_orientations_averaged_across_sessions') = @obj.mltp_plot_best_fit_orientations_averaged_across_sessions;   
-            
+
             
         end % function
         
@@ -114,42 +103,47 @@ classdef MLTetrodePipeline < MLPipeline
         
         mltp_nvt_split_into_trial_nvt(obj, session);
         mltp_trial_nvt_to_trial_fnvt(obj, session);
-        % new
         mltp_trial_fnvt_to_trial_can_movement(obj, session);
-        
-        %mltp_trial_fnvt_to_trial_can_rect(obj, session);
-        %mltp_trial_fnvt_to_trial_can_square(obj, session);
+        mltp_tfiles_to_singleunits(obj, session);
+
+        mltp_compute_singleunit_placemap_data(obj, session);
+        mltp_compute_singleunit_placemap_data_shrunk(obj, session);
+        mltp_plot_singleunit_placemap_data(obj, session);
+
         mltp_make_trial_position_plots_raw(obj, session);
         mltp_make_trial_position_plots_fixed(obj, session);
         mltp_user_define_trial_arenaroi(obj, session);
         
-        % new
-        mltp_tfiles_to_singleunits(obj, session);
+
         
-        %mltp_tfiles_to_singleunits_canon_rect(obj, session);
-        %mltp_tfiles_to_singleunits_canon_square(obj, session);
         
-        % new
-        mltp_compute_singleunit_placemap_data(obj, session); % new
+
         
-        %mltp_compute_singleunit_placemap_data_square(obj, session);
-        %mltp_compute_singleunit_placemap_data_rect(obj, session);
-        mltp_compute_best_fit_orientations_all_contexts(obj, session);
-        mltp_compute_best_fit_orientations_within_contexts(obj, session);
-        mltp_compute_best_fit_orientations_per_cell(obj, session);
+        % 0, 90, 180, 270
+        mltp_compute_bfo_90_ac(obj, session);
+        mltp_compute_bfo_90_wc(obj, session);
+        mltp_compute_bfo_90_ac_per_cell(obj, session);
+        mltp_plot_bfo_90_ac(obj) % all contexts
+        mltp_plot_bfo_90_wc(obj); % within contexts
+        mltp_plot_bfo_90_ac_per_cell(obj, session);
+        mltp_plot_bfo_90_averaged_across_sessions(obj);
+
+        
+        % 0, 180
         mltp_compute_best_fit_orientations_0_180_per_cell(obj, session);
-        %mltp_plot_singleunit_placemap_data_rect(obj, session);
-        %mltp_plot_singleunit_placemap_data_square(obj, session);
+        mltp_plot_best_fit_orientations_0_180_per_cell(obj, session);
+        mltp_plot_across_within_0_180_similarity(obj, session);      
+        
         mltp_make_session_orientation_plot_unaligned(obj, session);
         mltp_make_session_orientation_plot_aligned(obj, session);
-        mltp_plot_best_fit_orientations_within_contexts(obj);
-        mltp_plot_best_fit_orientations_all_contexts(obj)
-        mltp_plot_best_fit_orientations_averaged_across_sessions(obj);
-        mltp_plot_best_fit_orientations_per_cell(obj, session);
-        mltp_plot_best_fit_orientations_0_180_per_cell(obj, session);
-        mltp_plot_across_within_0_180_similarity(obj, session);
+        
+        
+
+
+
         mltp_make_pfstats_excel(obj, session);
         mltp_plot_rate_difference_matrices(obj);
+        
         mltp_nlx_mclust_plot_spikes_for_checking_bits(obj, session);
         
         % new

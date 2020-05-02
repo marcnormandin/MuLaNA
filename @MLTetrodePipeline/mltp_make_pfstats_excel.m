@@ -33,19 +33,8 @@ function mltp_make_pfstats_excel(obj, session)
     
     fprintf('Found %d tfiles present in %s.\n', length(tFilesToUse), sr.getName());
     
-    % Get the correct placemap data
-    if strcmpi(obj.getArena().shape, 'rectangle')
-        fprintf('Computing placefield stats excel file using rectangle data.\n');
-        placemapSubFolder = 'placemaps_rectangle';
-        placemapFilenameSuffix = 'mltetrodeplacemaprect.mat';
-    elseif strcmpi(obj.getArena().shape, 'square')
-        fprintf('Computing placefield stats excel file using square data.\n');
-        placemapSubFolder = 'placemaps_square';
-        placemapFilenameSuffix = 'mltetrodeplacemapsquare.mat';
-    else
-        error('Placefield stats excel file creation is only valid for rectangle or square, not %s.', obj.getArena().shape);
-    end
-    
+    placemapSubFolder = obj.config.placemaps.outputFolder;
+    placemapFilenameSuffix = obj.config.placemaps.filenameSuffix;
     
     % Make a result structure for each common tfiles
     results = [];
@@ -75,22 +64,11 @@ function mltp_make_pfstats_excel(obj, session)
         end
     end
     
-    %outputFilename = fullfile(obj.analysisParentFolder, sprintf('%s_pfStats.xlsx', session.name));
-    %delete(outputFilename)
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
     for iSheet = 1:length(sheets)
         sheet = sheets{iSheet};
         S = cell(length(tFilesToUse)+1, length(placemaps)+1);
-        %S(1,:) = {'','hab','t1','t2','t3','test'};
-%         for iTFile = 1:numTFiles
-%             tFilePrefix = tFilesToUse{iTFile};
-%             S{iTFile+1,1} = tFilePrefix;
-%             for iTrial = 1:numTrials
-%                 d = results(iTFile).(sheet);
-%                 S{iTFile+1,iTrial+1} = d(iTrial);
-%             end
-%         end
          for iTFile = 1:numTFiles
             tFilePrefix = tFilesToUse{iTFile};
             S{1,iTFile+1} = tFilePrefix;

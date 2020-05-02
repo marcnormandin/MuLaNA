@@ -28,7 +28,8 @@ function mltp_trial_fnvt_to_trial_can_movement(obj, session)
         fprintf('done!\n');
         arenaroi = data.arenaroi;
 
-        % Construct the appropriate arena
+        % Construct the appropriate arena. All the shapes have 4 control
+        % points that serve as references.
         refP = reshape(arenaroi.xVertices, 1, 4);
         refQ = reshape(arenaroi.yVertices, 1, 4);
         a = obj.getArena();
@@ -54,6 +55,8 @@ function mltp_trial_fnvt_to_trial_can_movement(obj, session)
         movement.arena = arena;
         movement.arenaShape = arena.getShapeType();
         [movement.boundsX, movement.boundsY] = arena.getCanonicalBounds();
+        movement.x_px = trial.extractedX; % store the video coordinates
+        movement.y_px = trial.extractedY; % store the video coordinates
         movement.x_cm = x_cm;
         movement.y_cm = y_cm;
         movement.isInsideArena = arena.inInterior( x_cm, y_cm );

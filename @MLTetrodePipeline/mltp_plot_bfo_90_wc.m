@@ -1,10 +1,18 @@
-function mltp_plot_best_fit_orientations_within_contexts(obj)    
+function mltp_plot_bfo_90_wc(obj)    
     numAngles = 4;
     best_fit_orientations_within_contexts = zeros(obj.experiment.numSessions, numAngles);
     plotlegend = cell(obj.experiment.numSessions, 1);
     for iSession = 1:obj.experiment.numSessions
         session = obj.experiment.session{iSession};
-        tmp = load(fullfile(session.analysisFolder, obj.config.canon_square_placemaps_folder,'best_fit_orientations_within_contexts.mat'));
+        
+        % We have to use the shrunk data if the shape is a rectangle
+        if strcmpi(obj.getArena().shape, 'rectangle')
+            dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolderShrunk);
+        else
+            dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder);
+        end
+        tmp = load(fullfile(dataFolder,'bfo_90_wc.mat'));
+        
         % Use only those angles whose result was not zero
         nonZeroIndices = find(tmp.v > 0);
         x = tmp.vind(nonZeroIndices);
@@ -27,10 +35,10 @@ function mltp_plot_best_fit_orientations_within_contexts(obj)
     legend(plotlegend)
     outputFolder = obj.analysisParentFolder;
     F = getframe(h);
-    imwrite(F.cdata, fullfile(outputFolder, 'best_fit_orientations_within_contexts.png'), 'png')
-    savefig(h, fullfile(outputFolder, 'best_fit_orientations_within_contexts.fig'));
-    saveas(h, fullfile(outputFolder, 'best_fit_orientations_within_contexts.svg'), 'svg');
-    print('-painters', '-depsc', fullfile(outputFolder,'best_fit_orientations_within_contexts.eps'))
+    imwrite(F.cdata, fullfile(outputFolder, 'bfo_90_wc.png'), 'png')
+    savefig(h, fullfile(outputFolder, 'bfo_90_wc.fig'));
+    saveas(h, fullfile(outputFolder, 'bfo_90_wc.svg'), 'svg');
+    print('-painters', '-depsc', fullfile(outputFolder,'bfo_90_wc.eps'))
     close(h);
     save(fullfile(outputFolder, 'best_fit_orientations_within_contexts.mat'), 'best_fit_orientations_within_contexts');
 

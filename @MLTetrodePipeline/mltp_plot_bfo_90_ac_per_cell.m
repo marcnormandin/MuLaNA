@@ -1,6 +1,13 @@
-function mltp_plot_best_fit_orientations_per_cell(obj, session)
+function mltp_plot_bfo_90_ac_per_cell(obj, session)
+    % We have to use the shrunk data if the shape is a rectangle
+    if strcmpi(obj.getArena().shape, 'rectangle')
+        dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolderShrunk);
+    else
+        dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder);
+    end
+    
     % Load the data
-    matFilename = fullfile(session.analysisFolder, obj.config.canon_square_placemaps_folder, 'best_fit_orientations_per_cell.mat');
+    matFilename = fullfile(dataFolder, 'bfo_90_ac_per_cell.mat');
     if ~isfile(matFilename)
         error('The data file (%s) does not exist. Make sure it has been computed.\n', matFilename);
     end   
@@ -45,7 +52,7 @@ function mltp_plot_best_fit_orientations_per_cell(obj, session)
             mkdir(outputFolder)
         end
         F = getframe(h);
-        fnPrefix = sprintf('%s_%s_best_fit_orientations_per_cell', obj.experiment.subjectName, sr.getName());
+        fnPrefix = sprintf('%s_%s_bfo_90_ac_per_cell', obj.experiment.subjectName, sr.getName());
         imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
         savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
         saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');

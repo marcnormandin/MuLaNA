@@ -41,7 +41,7 @@ function mltp_plot_singleunit_placemap_data(obj, session)
                 trialId = conTrialIds(iConTrial);
                 % Load the data
                 fn = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder, ...
-                    sprintf('%s_%d_mltetrodeplacemap.mat', fnPrefix, trialId));
+                    sprintf('%s_%d_%s', fnPrefix, trialId, obj.config.placemaps.filenameSuffix));
                 tmp = load(fn);
 
                 % Plots contexts as single rows

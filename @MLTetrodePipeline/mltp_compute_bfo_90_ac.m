@@ -1,5 +1,10 @@
-function mltp_compute_best_fit_orientations_all_contexts(obj, session)
-    outputFolder = fullfile(session.analysisFolder, obj.config.canon_square_placemaps_folder);
+function mltp_compute_bfo_90_ac(obj, session)
+    % We have to use the shrunk data if the shape is a rectangle
+    if strcmpi(obj.getArena().shape, 'rectangle')
+        outputFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolderShrunk);
+    else
+        outputFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder);
+    end
 
     % Allow the function to run so that other functions do not break,
     % but give a warning.
@@ -13,7 +18,7 @@ function mltp_compute_best_fit_orientations_all_contexts(obj, session)
     vind = [];
     v = [];
     for iCell = 1:numCells
-        fl = dir(fullfile(outputFolder, sprintf('%s_*_mltetrodeplacemapsquare.mat', session.tfiles_filename_prefixes{iCell})));
+        fl = dir(fullfile(outputFolder, sprintf('%s_*_%s', session.tfiles_filename_prefixes{iCell}, obj.config.placemaps.filenameSuffix)));
         fnames = {fl.name};
         
         % We need more than one map to perform a correlation since we don't
@@ -61,7 +66,7 @@ function mltp_compute_best_fit_orientations_all_contexts(obj, session)
         mkdir(outputFolder)
     end
 
-    outputFilename = fullfile(outputFolder, 'best_fit_orientations_all_contexts.mat');
+    outputFilename = fullfile(outputFolder, 'bfo_90_ac.mat');
     fprintf('Saving best fit orientation data (all contexts) to file: %s\n', outputFilename);
     save(outputFilename, 'v', 'vind');  
 end % function
