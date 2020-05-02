@@ -20,6 +20,7 @@ There are some pre-made projects for analyses performed by the ML. List them usi
 mulana_project_list()
 ```
 Some of the available projects are:
+- general_tetrode
 - object_task_consecutive_trials
 - two_contexts_tetrode
 
@@ -31,61 +32,41 @@ mulana_project_create( 'projectName' )
 where **projectName** is one of the available projects. The initialization script will then ask you for some information such as the location of your data directory (input) and the location of your analysis directory (output).
 
 
-### Installing
+### Requirements of the user
+Each experiment requires a file named 'experiment_description.json'. This file contains information about the experiment that is not part of the tetrode dataset. Below are examples.
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
+## Example of a rectangular arena, two alternating contexts, used for chengs_task_2c. The tfiles are specified as '-1', which tells the system to load them as the appropriate bits.
 ```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
+{
+	"animal": "JJ9_CA1",
+	"imaging_region": "CA1",
+	"experiment": "chengs_task_two_context",
+	"arena": {
+		"shape": "rectangle",
+		"x_length_cm": 20.0,
+		"y_length_cm": 30.0
+	},
+	"num_contexts": 2,
+	"session_folders": ["d1", "d2", "d3"],
+	"mclust_tfile_bits": -1
+}
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
-
+## Example of a square arena, one context, used for the consecutive object task. The tfiles are specified as '64', which forces the system to load them as 64 bit valued timestamps (the other options are '32' or '-1').
 ```
-Give an example
+{
+	"animal": "MG1_CA1",
+	"imaging_region": "hippocampus",
+	"experiment": "object_task_consecutive_trials",
+	"arena": {
+		"shape": "square",
+		"length_cm": 35.0
+	},
+	"num_contexts": 1,
+	"session_folders": ["hab","test"],
+	"mclust_tfile_bits": 64
+}
 ```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
 
 ## Authors
 
@@ -101,5 +82,4 @@ This project is PRIVATE to Muzzio Lab members. All Rights Reserved 2020.
 ## Acknowledgments
 
 * Hat tip to anyone whose code was used
-* Inspiration
-* etc
+* Thanks to StackOverflow
