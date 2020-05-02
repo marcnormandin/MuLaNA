@@ -11,7 +11,7 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
     %boundsy = obj.config.placemaps_rect.bounds_y;
     
 
-    fl = dir(fullfile(session.analysisFolder, '*_singleunit_canon_rect.mat'));
+    fl = dir(fullfile(session.analysisFolder, '*_singleunit.mat'));
     for iFile = 1:length(fl)
         singleUnitFilename = fullfile(session.analysisFolder, fl(iFile).name);
         data = load(singleUnitFilename);
@@ -24,30 +24,21 @@ function mltp_compute_singleunit_placemap_data_rect(obj, session)
                 
             % Load the data
             spikes = singleunit.trialSpikes(trialId);
-            data = load(fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', trialId)));
-            canon = data.canon;
-            x = canon.pos.x;
-            y = canon.pos.y;
-            boundsx = canon.bounds_x;
-            boundsy = canon.bounds_y;
-            %si = spikes.indices;
-            ts_ms = canon.timeStamps_mus(:) ./ (1.0*10^3); 
-            spe = canon.spe;
-
+            tmp = load(fullfile(session.analysisFolder, sprintf('trial_%d_movement.mat', trialId)));
+            movement = tmp.movement;
+            
             spike_ts_ms = spikes.trialSpikeTimes_mus(:) / (1.0*10^3);
             
             % Compute the number of bins we need in each dimension
             % The bounds are in cm
             cm_per_bin = obj.config.placemaps.cm_per_bin;
-            nbinsx = ceil(boundsx(2)/cm_per_bin); %obj.config.placemaps_rect.nbins_x;
-            nbinsy = ceil(boundsy(2)/cm_per_bin); %obj.config.placemaps_rect.nbins_y;
+            nbinsx = ceil((movement.boundsX(2) - movement.boundsX(1))/cm_per_bin); 
+            nbinsy = ceil((movement.boundsY(2) - movement.boundsY(1))/cm_per_bin);
 
-            %mltetrodeplacemap = MLTetrodePlacemap(x, y, ts_ms, si, boundsx, boundsy, nbinsx, nbinsy, ...
-            %    obj.config.placemaps_rect.kernel_gaussian_size_bins, obj.config.placemaps_rect.kernel_gaussian_sigma_cm);
-            mltetrodeplacemap = MLSpikePlacemap(x, y, ts_ms, spike_ts_ms, ...
-                'speed_cm_per_second', spe, ...
-                'boundsx', boundsx, ...
-                'boundsy', boundsy, ...
+            mltetrodeplacemap = MLSpikePlacemap(movement.x_cm, movement.y_cm, movement.timestamps_ms, spike_ts_ms, ...
+                'speed_cm_per_second', movement.speed_smoothed_cm_per_s, ...
+                'boundsx', movement.boundsX, ...
+                'boundsy', movement.boundsY, ...
                 'nbinsx', nbinsx, ...
                 'nbinsy', nbinsy, ...
                 'SmoothingProtocol', obj.config.placemaps.smoothingProtocol, ...

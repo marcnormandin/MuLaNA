@@ -1,4 +1,7 @@
-function mltp_trial_fnvt_to_trial_can_rect(obj, session)
+function mltp_trial_fnvt_to_trial_can_square(obj, session)
+
+% Set whether or not this is being called because the true arena shape is a
+% square or because it is needed for the 90 degree correlations.
 
             if obj.verbose
                 fprintf('Converting the trial fixed position data to canonical coordinates using the arena ROI.\n');
@@ -9,48 +12,21 @@ function mltp_trial_fnvt_to_trial_can_rect(obj, session)
             for iTrial = 1:sr.getNumTrialsToProcess()
                 trialId = ti(iTrial).id;
                 
+                % Load the trial position data
                 trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
                 fprintf('Loading %s ... ', trialFnvtFilename);
                 data = load(trialFnvtFilename);
                 fprintf('done!\n');
                 trial = data.trial;
 
+                % Load the trial ROI
                 arenaRoiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialId));
                 fprintf('Loading %s ... ', arenaRoiFilename);
                 data = load(arenaRoiFilename);
                 fprintf('done!\n');
                 arenaroi = data.arenaroi;
 
-                % Must be a 2xN matrix of points
-                % The coordinates of the reference points in the video frame (pixels)
-                refVidPts = zeros(2,length(arenaroi.xVertices));
-                refVidPts(1,:) = arenaroi.xVertices(:);
-                refVidPts(2,:) = arenaroi.yVertices(:);
-
-                % The coordinates of the reference points in the canonical frame
-                % For the rectangle/square, the feature is at the top/north
-                arena = obj.getArena();
-                bounds_x = [0, arena.width_cm]; %obj.config.placemaps_rect.bounds_x;
-                bounds_y = [0, arena.height_cm]; %obj.config.placemaps_rect.bounds_y;
                 
-                a = [bounds_x(2), bounds_y(1)];
-                b = [bounds_x(1), bounds_y(1)];
-                c = [bounds_x(1), bounds_y(2)];
-                d = [bounds_x(2), bounds_y(2)];
-                refCanPts = [a(1), b(1), c(1), d(1); a(2), b(2), c(2), d(2)];
-
-                % Get the transformation matrix
-                vtrans = homography_solve(refVidPts, refCanPts);
-
-                % Tranform the subject position
-                canonPts = homography_transform([trial.extractedX; trial.extractedY], vtrans);
-
-                % Transform the arena vertices
-                xPts = zeros(2,length(arenaroi.xVertices));
-                xPts(1,:) = arenaroi.xVertices(:);
-                xPts(2,:) = arenaroi.yVertices(:);
-                y = homography_transform(xPts, vtrans); % Just to check
-
                 % CAUTION: The transformed points will not all be within
                 % the "bounds"
 

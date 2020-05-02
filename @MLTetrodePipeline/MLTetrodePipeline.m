@@ -47,12 +47,6 @@ classdef MLTetrodePipeline < MLPipeline
             obj.smoothingKernel = fspecial('gaussian', obj.config.placemaps.smoothingKernelGaussianSize_cm / obj.config.placemaps.cm_per_bin, obj.config.placemaps.smoothingKernelGaussianSigma_cm / obj.config.placemaps.cm_per_bin);
             obj.smoothingKernel = obj.smoothingKernel ./ max(obj.smoothingKernel(:)); % Isabel wants this like the other
             
-            if mod(obj.config.placemaps_square.smoothingKernelGaussianSize,2) ~= 1
-                error('The config value placemaps_square.smoothingKernelGaussianSize must be odd, but it is %d.', obj.config.placemaps_square.smoothingKernelGaussianSize);
-            end
-            obj.smoothingKernelSquare = fspecial('gaussian', obj.config.placemaps_square.smoothingKernelGaussianSize, obj.config.placemaps_square.smoothingKernelGaussianSigma);
-            obj.smoothingKernelSquare = obj.smoothingKernelSquare ./ max(obj.smoothingKernelSquare(:)); % Isabel wants this like the other
-
             % Take care of the possible infinite value for the speed
             obj.config.placemaps.criteria_speed_cm_per_second_maximum = eval(obj.config.placemaps.criteria_speed_cm_per_second_maximum);
             if obj.config.placemaps.criteria_speed_cm_per_second_maximum < 0
@@ -75,14 +69,27 @@ classdef MLTetrodePipeline < MLPipeline
             obj.availablePerSessionTasks('make_trial_position_plots_fixed') = @obj.mltp_make_trial_position_plots_fixed;
             obj.availablePerSessionTasks('make_session_orientation_plot_unaligned') = @obj.mltp_make_session_orientation_plot_unaligned;
             obj.availablePerSessionTasks('make_session_orientation_plot_aligned') = @obj.mltp_make_session_orientation_plot_aligned;
-            obj.availablePerSessionTasks('trial_fnvt_to_trial_can_rect') = @obj.mltp_trial_fnvt_to_trial_can_rect;
-            obj.availablePerSessionTasks('trial_fnvt_to_trial_can_square') = @obj.mltp_trial_fnvt_to_trial_can_square;   
-            obj.availablePerSessionTasks('tfiles_to_singleunits_canon_rect') = @obj.mltp_tfiles_to_singleunits_canon_rect;
-            obj.availablePerSessionTasks('compute_singleunit_placemap_data_rect') = @obj.mltp_compute_singleunit_placemap_data_rect;
-            obj.availablePerSessionTasks('plot_singleunit_placemap_data_rect') = @obj.mltp_plot_singleunit_placemap_data_rect;
-            obj.availablePerSessionTasks('tfiles_to_singleunits_canon_square') = @obj.mltp_tfiles_to_singleunits_canon_square;
-            obj.availablePerSessionTasks('compute_singleunit_placemap_data_square') = @obj.mltp_compute_singleunit_placemap_data_square;
-            obj.availablePerSessionTasks('plot_singleunit_placemap_data_square') = @obj.mltp_plot_singleunit_placemap_data_square;
+            
+            % new
+            obj.availablePerSessionTasks('trial_fnvt_to_trial_can_movement') = @obj.mltp_trial_fnvt_to_trial_can_movement;
+            
+            
+            %obj.availablePerSessionTasks('trial_fnvt_to_trial_can_rect') = @obj.mltp_trial_fnvt_to_trial_can_rect;
+            %obj.availablePerSessionTasks('trial_fnvt_to_trial_can_square') = @obj.mltp_trial_fnvt_to_trial_can_square;   
+            %obj.availablePerSessionTasks('tfiles_to_singleunits_canon_rect') = @obj.mltp_tfiles_to_singleunits_canon_rect;
+            
+            % new
+            obj.availablePerSessionTasks('tfiles_to_singleunits') = @obj.mltp_tfiles_to_singleunits;
+            obj.availablePerSessionTasks('compute_singleunit_placemap_data') = @obj.mltp_compute_singleunit_placemap_data;
+            obj.availablePerSessionTasks('plot_singleunit_placemap_data') = @obj.mltp_plot_singleunit_placemap_data;
+            
+            
+            %obj.availablePerSessionTasks('compute_singleunit_placemap_data_rect') = @obj.mltp_compute_singleunit_placemap_data_rect;
+            %obj.availablePerSessionTasks('plot_singleunit_placemap_data_rect') = @obj.mltp_plot_singleunit_placemap_data_rect;
+            %obj.availablePerSessionTasks('plot_singleunit_placemap_data_square') = @obj.mltp_plot_singleunit_placemap_data_square;
+
+            %obj.availablePerSessionTasks('tfiles_to_singleunits_canon_square') = @obj.mltp_tfiles_to_singleunits_canon_square;
+            %obj.availablePerSessionTasks('compute_singleunit_placemap_data_square') = @obj.mltp_compute_singleunit_placemap_data_square;
             obj.availablePerSessionTasks('compute_best_fit_orientations_within_contexts') = @obj.mltp_compute_best_fit_orientations_within_contexts;
             obj.availablePerSessionTasks('compute_best_fit_orientations_all_contexts') = @obj.mltp_compute_best_fit_orientations_all_contexts;
             obj.availablePerSessionTasks('compute_best_fit_orientations_per_cell') = @obj.mltp_compute_best_fit_orientations_per_cell;
@@ -91,7 +98,7 @@ classdef MLTetrodePipeline < MLPipeline
             obj.availablePerSessionTasks('plot_best_fit_orientations_per_cell') = @obj.mltp_plot_best_fit_orientations_per_cell;
             obj.availablePerSessionTasks('make_pfstats_excel') = @obj.mltp_make_pfstats_excel;
             
-            obj.availablePerSessionTasks('plot_canon_rect_velspe') = @obj.mptp_plot_canon_rect_velspe;
+            obj.availablePerSessionTasks('plot_movement') = @obj.mltp_plot_movement;
             
             obj.availablePerSessionTasks('plot_nlx_mclust_plot_spikes_for_checking_bits') = @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits;
             
@@ -107,21 +114,32 @@ classdef MLTetrodePipeline < MLPipeline
         
         mltp_nvt_split_into_trial_nvt(obj, session);
         mltp_trial_nvt_to_trial_fnvt(obj, session);
-        mltp_trial_fnvt_to_trial_can_rect(obj, session);
-        mltp_trial_fnvt_to_trial_can_square(obj, session);
+        % new
+        mltp_trial_fnvt_to_trial_can_movement(obj, session);
+        
+        %mltp_trial_fnvt_to_trial_can_rect(obj, session);
+        %mltp_trial_fnvt_to_trial_can_square(obj, session);
         mltp_make_trial_position_plots_raw(obj, session);
         mltp_make_trial_position_plots_fixed(obj, session);
         mltp_user_define_trial_arenaroi(obj, session);
-        mltp_tfiles_to_singleunits_canon_rect(obj, session);
-        mltp_tfiles_to_singleunits_canon_square(obj, session);
-        mltp_compute_singleunit_placemap_data_square(obj, session);
+        
+        % new
+        mltp_tfiles_to_singleunits(obj, session);
+        
+        %mltp_tfiles_to_singleunits_canon_rect(obj, session);
+        %mltp_tfiles_to_singleunits_canon_square(obj, session);
+        
+        % new
+        mltp_compute_singleunit_placemap_data(obj, session); % new
+        
+        %mltp_compute_singleunit_placemap_data_square(obj, session);
+        %mltp_compute_singleunit_placemap_data_rect(obj, session);
         mltp_compute_best_fit_orientations_all_contexts(obj, session);
         mltp_compute_best_fit_orientations_within_contexts(obj, session);
         mltp_compute_best_fit_orientations_per_cell(obj, session);
         mltp_compute_best_fit_orientations_0_180_per_cell(obj, session);
-        mltp_compute_singleunit_placemap_data_rect(obj, session);
-        mltp_plot_singleunit_placemap_data_rect(obj, session);
-        mltp_plot_singleunit_placemap_data_square(obj, session);
+        %mltp_plot_singleunit_placemap_data_rect(obj, session);
+        %mltp_plot_singleunit_placemap_data_square(obj, session);
         mltp_make_session_orientation_plot_unaligned(obj, session);
         mltp_make_session_orientation_plot_aligned(obj, session);
         mltp_plot_best_fit_orientations_within_contexts(obj);
@@ -133,7 +151,9 @@ classdef MLTetrodePipeline < MLPipeline
         mltp_make_pfstats_excel(obj, session);
         mltp_plot_rate_difference_matrices(obj);
         mltp_nlx_mclust_plot_spikes_for_checking_bits(obj, session);
-        mptp_plot_canon_rect_velspe(obj, session);
+        
+        % new
+        mltp_plot_movement(obj, session);
          
         function [arena] = getArena(obj)
             arena = obj.experiment.info.arena;

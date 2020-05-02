@@ -31,6 +31,8 @@ function mltp_make_session_orientation_plot_unaligned(obj, session)
                 title(sprintf('Trial %d', trialId))
             end
             hold on
+            % FixMe! This will probably mess up if not a square or
+            % rectangle
             for iVertex = 1:length(arenaroi.xVertices)
                 plot(arenaroi.xVertices(iVertex), arenaroi.yVertices(iVertex), 'o', 'markerfacecolor', obj.config.session_orientation_plot.arenaroi_vertex_markerfacecolours(iVertex), ...
                     'markeredgecolor', obj.config.session_orientation_plot.arenaroi_vertex_markeredgecolours(iVertex))

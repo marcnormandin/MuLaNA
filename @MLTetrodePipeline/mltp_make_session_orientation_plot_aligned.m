@@ -13,29 +13,20 @@ function mltp_make_session_orientation_plot_aligned(obj, session)
     for iTrial = 1:sr.getNumTrialsToProcess()
         trialId = ti(iTrial).id;
                 
-        trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_canon_rect.mat', trialId));
+        trialCanonFilename = fullfile(session.analysisFolder, sprintf('trial_%d_movement.mat', trialId));
         fprintf('Loading %s ... ', trialCanonFilename);
-        data = load(trialCanonFilename);
+        tmp = load(trialCanonFilename);
         fprintf('done!\n');
-        canon = data.canon;
-
-        arenaroi = canon.arenaroi;
-
+        movement = tmp.movement;
 
         subplot(p,q,k)
-        plot(canon.pos.x, canon.pos.y, '.', 'color', obj.config.session_orientation_plot.trial_pos_colours(k));
+        plot(movement.x_cm, movement.y_cm, '.', 'color', obj.config.session_orientation_plot.trial_pos_colours(k));
         if obj.config.session_orientation_plot.subplot_show_title == 1
             title(sprintf('Trial %d', trialId))
         end
         hold on
-        for iVertex = 1:length(arenaroi.xVertices)
-            plot(arenaroi.xVertices(iVertex), arenaroi.yVertices(iVertex), 'o', 'markerfacecolor', obj.config.session_orientation_plot.arenaroi_vertex_markerfacecolours(iVertex), ...
-                'markeredgecolor', obj.config.session_orientation_plot.arenaroi_vertex_markeredgecolours(iVertex))
-        end
-        % draw a line representing the feature
-        if obj.config.session_orientation_plot.draw_feature == 1
-            plot(arenaroi.xVertices(1:2), arenaroi.yVertices(1:2), 'k-', 'linewidth', 2)
-        end
+        % Have the arena draw itself so this will work with any arena shape
+        movement.arena.plotCanon();
         set(gca, 'ydir', 'reverse');
         axis equal off
         hold on

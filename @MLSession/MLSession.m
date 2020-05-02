@@ -5,7 +5,7 @@ classdef MLSession < handle
         name;
         
         dataFolder;
-        resultsFolder;
+        analysisFolder;
         
         % Trials that will be processed by the tasks
         trialIndexList;

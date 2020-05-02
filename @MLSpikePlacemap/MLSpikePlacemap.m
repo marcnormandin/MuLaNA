@@ -331,21 +331,14 @@ classdef MLSpikePlacemap < handle
         end
         
         function plot_path_with_spikes(obj)
-            %plot(obj.x_bounded, obj.y_bounded, '-', 'color', [0,0,1,0.8]) %arenaColours(iTrial))
-            plot(obj.x, obj.y, '-', 'color', [0,0,1,0.8]) %arenaColours(iTrial))
+            plot(obj.x, obj.y, '-', 'color', [0,0,1,0.8]);
 
             hold on
             % These are the spikes that passed the velocity check
             spikeScatter1 = scatter(obj.spike_x, obj.spike_y, 25, 'ro', 'markerfacecolor', 'r');
             spikeScatter1.MarkerFaceAlpha = 0.6;
             spikeScatter1.MarkerEdgeAlpha = 0.6;
-            
-%             hold on
-            
-            % These are the all of the spikes
-%             spikeScatter2 = scatter(obj.x_bounded(obj.si), obj.y_bounded(obj.si), 10, 'ko', 'markerfacecolor', 'k');
-%             spikeScatter2.MarkerFaceAlpha = 0.6;
-%             spikeScatter2.MarkerEdgeAlpha = 0.6;
+
             set(gca, 'ydir', 'reverse')
             axis equal off
         end
@@ -355,7 +348,7 @@ classdef MLSpikePlacemap < handle
             
             pm = obj.meanFiringRateMapSmoothed;
             %pm(obj.visitedCountMap == 0) = nan;
-            pcolor( [pm, nan(nr,1); nan(1,nc+1)] ) 
+            pcolor( [pm, nan(nr,1); nan(1,nc+1)] );
             shading interp;
             set(gca, 'ydir', 'reverse');
 
@@ -374,11 +367,11 @@ classdef MLSpikePlacemap < handle
             title(sprintf('p = %0.4f', obj.informationRate_pvalue))
             hold on
             xline(obj.informationRate, 'r', 'linewidth', 8);
-            xlabel('Information rate, IC (bits/s)')
+            xlabel('Information rate, IC (bits/s)');
             grid on
             model_x = linspace(min(obj.informationRateSim), max(obj.informationRateSim), 100);
             model_y = normpdf(model_x, mean(obj.informationRateSim), std(obj.informationRateSim));
-            plot(model_x, model_y, 'k-', 'linewidth', 4)
+            plot(model_x, model_y, 'k-', 'linewidth', 4);
         end 
     end
 end
