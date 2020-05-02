@@ -12,14 +12,16 @@ function mltp_plot_singleunit_placemap_data(obj, session)
     % Find the number of trials to use for each context
     % since they may not be identical (eg. 4 trials for
     % context 1, but 5 for context 2.
-    contextTrialIds = cell(numContexts,1);
+    %contextTrialIds = cell(numContexts,1);
     numCols = 0;
+    tiPerContext = cell(numContexts,1); % split the trial info based on context
     for iContext = 1:length(uniqueContextIds)
         contexts = [ti.context];
-        ids = [ti.id];
-        contextTrialIds{iContext} = ids(contexts == uniqueContextIds(iContext));
-        if length(contextTrialIds{iContext}) > numCols
-            numCols = length(contextTrialIds{iContext});
+        %ids = [ti.id];        
+        tiPerContext{iContext} = ti(contexts == uniqueContextIds(iContext));
+        %contextTrialIds{iContext} = ids(matches);
+        if length(tiPerContext{iContext}) > numCols
+            numCols = length(tiPerContext{iContext});
         end
     end
 
@@ -36,16 +38,18 @@ function mltp_plot_singleunit_placemap_data(obj, session)
         numRows = numContexts * numPlotsPerTrial; % Show spikes and placemap
 
         for iContext = 1:numContexts
-            conTrialIds = contextTrialIds{iContext};
-            for iConTrial = 1:length(contextTrialIds{iContext})
-                trialId = conTrialIds(iConTrial);
+            tiContext = tiPerContext{iContext};
+            for iConTrial = 1:length(tiContext)
+                ticurr = tiContext(iConTrial); % the current trial info
+                
+                trialId = ticurr.id; %(iConTrial);
                 % Load the data
                 fn = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder, ...
                     sprintf('%s_%d_%s', fnPrefix, trialId, obj.config.placemaps.filenameSuffix));
                 tmp = load(fn);
 
                 % Plots contexts as single rows
-                digs = ti(trialId).digs{1};
+                digs = ticurr.digs{1};
                 
                 % Only show the digs if it is relevant
                 showDigs = true;
@@ -66,9 +70,9 @@ function mltp_plot_singleunit_placemap_data(obj, session)
                 % To show or not to show, that is the question --
                 % Shakespere
                 if showDigs
-                    title(sprintf('T%d S%d C%dT%d\nDigs (%s)', trialId, ti(trialId).sequenceNum, uniqueContextIds(iContext), iConTrial, digs));
+                    title(sprintf('T%d S%d C%dT%d\nDigs (%s)', trialId, ticurr.sequenceNum, uniqueContextIds(iContext), iConTrial, digs));
                 else
-                    title(sprintf('T%d S%d C%dT%d', trialId, ti(trialId).sequenceNum, uniqueContextIds(iContext), iConTrial));
+                    title(sprintf('T%d S%d C%dT%d', trialId, ticurr.sequenceNum, uniqueContextIds(iContext), iConTrial));
                 end
 
                 % Plot the placemap

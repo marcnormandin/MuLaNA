@@ -64,17 +64,17 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
             end
 
 
-            trial_num = ti(trialId).sequenceNum;
-            trial_use = ti(trialId).use;
-            trial_first_dig = ti(trialId).digs;
+            trial_num = ti(iTrial).sequenceNum;
+            trial_use = ti(iTrial).use;
+            trial_first_dig = ti(iTrial).digs;
             % FixMe!
-            trial_context_index = ti(trialId).context;
-            trial_context_id = ti(trialId).context;
+            trial_context_index = ti(iTrial).context;
+            trial_context_id = ti(iTrial).context;
             
             % Record this trial with respect to the context
             contexts = [ti.context]; % all the contexts (which will be processes)
             ids = [ti.id];
-            trial_context_num = find(ids(contexts == ti(trialId).context) == ti(trialId).id);
+            trial_context_num = find(ids(contexts == ti(iTrial).context) == ti(iTrial).id);
             if isempty(trial_context_num)
                 error('Logic error!');
             end
