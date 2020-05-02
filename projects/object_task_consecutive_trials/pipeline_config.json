@@ -1,0 +1,36 @@
+{
+    "placemaps": {
+        "outputFolder": "placemaps",
+        "outputFolderShrunk": "placemaps_shrunk",
+        "filenameSuffix": "mltetrodeplacemaps.mat",
+        "smoothingKernelGaussianSize_cm": 15,
+        "smoothingKernelGaussianSigma_cm": 3,
+        "cm_per_bin": 1,
+        "smoothingProtocol": "SmoothBeforeDivision",
+        "criteria_dwell_time_seconds_per_bin_minimum": 0.05,
+        "criteria_spikes_per_bin_minimum": 0,
+        "criteria_spikes_per_map_minimum": 15,
+        "criteria_speed_cm_per_second_minimum": 2,
+        "criteria_speed_cm_per_second_maximum": "inf"
+    },
+
+	"nvt_file_trial_separation_threshold_s": 10.0,
+	"nvt_filename": "VT1.nvt",
+	"verbose": 1,
+
+    "velocity_lowpass_wpass": 0.05,
+
+	"session_orientation_plot": {
+		"draw_feature": 1,
+		"subplot_num_cols": 4,
+		"subplot_num_rows": 4,
+		"subplot_show_title": 1,
+		"arenaroi_vertex_markerfacecolours": "rgbm",
+		"arenaroi_vertex_markeredgecolours": "kkkk",
+		"trial_pos_colours": "rbrbrbrbrbrbrbrbrbrb"
+	},
+
+	"use_d1_xlsx": 0,
+	"trial_nvt_position_plots_folder": "trial_position_plots_raw",
+	"trial_fnvt_position_plots_folder": "trial_position_plots_fixed"
+}
