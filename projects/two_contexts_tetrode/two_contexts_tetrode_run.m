@@ -8,7 +8,6 @@ tstart = tic;
 % Don't change these
 projectCfgFilename = fullfile(pwd, 'project_config.json');
 pipeCfgFilename = fullfile(pwd, 'pipeline_config.json');
-errorFilename = fullfile(pwd, 'error.txt');
 
 % Read in the project configuration file
 if ~isfile( projectCfgFilename )
@@ -36,6 +35,7 @@ homework(3).subjectName = 'JJ9_CA1';
 homework(3).experiment = 'chengs_task_2c';
 homework(3).feature = 'feature_rich';
 
+%experimentAnalysisParentFolder = '/work/muzziolab/marc/two_contexts_tetrode/analysis/feature_rich';
 
 % Feature Poor
 homework(4).subjectName = 'K1_CA1';
@@ -70,21 +70,30 @@ while true
     end
 end % while
 
-% remove any previous error file
-if isfile(errorFilename)
-    delete(errorFilename)
-end
 
-
+% Let's be good and do our homework
 for iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
     
-    experimentAnalysisParentFolder = sprintf('%s/%s', projectConfig.analysisFolder, homework(iHomework).feature);
-
+    fprintf('Processing %d of %d: %s\n', iHomework, length(homework), subjectName);
+    
     recordingsParentFolder = fullfile(projectConfig.dataFolder, subjectName, 'recordings', experiment);
-    analysisParentFolder = fullfile(experimentAnalysisParentFolder, subjectName);
+    analysisParentFolder = fullfile(projectConfig.analysisFolder, homework(iHomework).feature, subjectName);
+    
+    % If the pipeline has an error running a dataset, then save the error
+    % to this file so the user can find out what went wrong.
+    errorFilename = fullfile(pwd, sprintf('%s_error.txt', subjectName));
+    
+    % Remove any previous error file since we are starting anew
+    if isfile(errorFilename)
+        delete(errorFilename)
+    end
 
+    if ~exist(projectConfig.analysisFolder, 'dir')
+        mkdir(projectConfig.analysisFolder);
+    end
+    
     if cleanAnalysisFolder 
         if exist(analysisParentFolder, 'dir')
             rmdir(analysisParentFolder, 's');
@@ -92,132 +101,99 @@ for iHomework = 1:length(homework)
         end
     end
     
-try
-    pipe = MLTetrodePipeline( pipeCfgFilename, recordingsParentFolder, analysisParentFolder);
+    try
+        pipe = MLTetrodePipeline( pipeCfgFilename, recordingsParentFolder, analysisParentFolder);
 
-    pipe.executePerSessionTask('nvt_split_into_trial_nvt');
-    
-    % Ask the user to create the ROIs only when needed (ideally only once)
-    for iSession = 1:pipe.experiment.numSessions
-        session = pipe.experiment.session{iSession};
-        
-        sr = session.sessionRecord;
-        ti = sr.getTrialsToProcess();
-        trialIds = [ti.id];
-        
-        % Check if we have all of the ROI needs for the analysis
-        missingRoi = false;
-        for iTrial = 1:sr.getNumTrialsToProcess()
-            % Check if we are missing the required ROI
-            if ~isfile(fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialIds(iTrial))))
-                missingRoi = true;
-                break;
+        pipe.executePerSessionTask('nvt_split_into_trial_nvt');
+
+        % Ask the user to create the ROIs only when needed (ideally only once)
+        % We to have the ROI before the other parts of the pipeline can run.
+        for iSession = 1:pipe.experiment.numSessions
+            session = pipe.experiment.session{iSession};
+
+            sr = session.sessionRecord;
+            ti = sr.getTrialsToProcess();
+            trialIds = [ti.id];
+
+            % Check if we have all of the ROI needs for the analysis
+            missingRoi = false;
+            for iTrial = 1:sr.getNumTrialsToProcess()
+                % Check if we are missing the required ROI
+                if ~isfile(fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialIds(iTrial))))
+                    missingRoi = true;
+                    break;
+                end
+            end
+
+            if missingRoi
+                pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
             end
         end
+
+        pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
+        pipe.executePerSessionTask('trial_fnvt_to_trial_can_movement');
+        pipe.executePerSessionTask('tfiles_to_singleunits');
+        pipe.executePerSessionTask('compute_singleunit_placemap_data');
+        pipe.executePerSessionTask('compute_singleunit_placemap_data_shrunk');
+
+        % ANALYSIS COMPUTATIONS
+        pipe.executePerSessionTask('make_pfstats_excel')
         
-        if missingRoi
-            pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
+        pipe.executePerSessionTask('compute_bfo_90_ac');
+        pipe.executePerSessionTask('compute_bfo_90_wc');
+        pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
+    %     pipe.executePerSessionTask('compute_best_fit_orientations_0_180_per_cell');
+
+        pipe.executePerSessionTask('make_trial_position_plots_raw');
+        pipe.executePerSessionTask('make_trial_position_plots_fixed');
+        pipe.executePerSessionTask('make_session_orientation_plot_unaligned');
+        pipe.executePerSessionTask('make_session_orientation_plot_aligned');
+
+        pipe.executePerSessionTask('plot_movement');
+        pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
+        pipe.executePerSessionTask('plot_singleunit_placemap_data');
+
+
+        % ANALYSIS PLOTS
+        pipe.executeExperimentTask('plot_bfo_90_ac');
+        pipe.executeExperimentTask('plot_bfo_90_wc');
+        pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
+
+    %     pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
+    
+    % 
+    %     pipe.executePerSessionTask('plot_across_within_0_180_similarity');
+    % 
+
+    %     
+        pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
+        
+        pipe.executeExperimentTask('plot_rate_difference_matrices');
+    catch ME
+        % record the error
+        fid = fopen(errorFilename, 'w+');
+        if fid == -1
+            error('Unable to create the error file! Doubly-bad!!\n');
         end
-    end
 
-    % Remove outliers and smooth the points. Requires the ROI.
-    pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
-    
-    % Transform coordinates to standard orientation for a rectangle
-    pipe.executePerSessionTask('trial_fnvt_to_trial_can_rect');
-    
-    % Same for square
-    pipe.executePerSessionTask('trial_fnvt_to_trial_can_square');
-    
-    % Transform the t-files and separate into trials
-    pipe.executePerSessionTask('tfiles_to_singleunits_canon_rect');
-    pipe.executePerSessionTask('tfiles_to_singleunits_canon_square');
-
-    % Compute the placemaps, but don't plot them yet.
-    pipe.executePerSessionTask('compute_singleunit_placemap_data_rect');
-    pipe.executePerSessionTask('compute_singleunit_placemap_data_square');
-    
-    % Compute placefield statistics
-    pipe.executePerSessionTask('make_pfstats_excel')
-
-    % Compute the pixel-pixel cross-correlations
-    % These require square canonical shape
-    pipe.executePerSessionTask('compute_best_fit_orientations_within_contexts');
-    pipe.executePerSessionTask('compute_best_fit_orientations_all_contexts');
-    pipe.executePerSessionTask('compute_best_fit_orientations_per_cell');
-    
-    % These require being a rectangle
-    pipe.executePerSessionTask('compute_best_fit_orientations_0_180_per_cell');
-    
-    % Plot the raw position data
-    pipe.executePerSessionTask('make_trial_position_plots_raw');
-    
-    % Plot the fixed/smoothed position data
-    pipe.executePerSessionTask('make_trial_position_plots_fixed');
-    
-    % Plot a single figure showing the fixed position in video frame
-    % coordinates.
-    pipe.executePerSessionTask('make_session_orientation_plot_unaligned');
-    
-    % Plot a single figure show the fixed positions in canonical
-    % coordiantes
-    pipe.executePerSessionTask('make_session_orientation_plot_aligned');
-
-    % Make the plot of the speed for each trial.
-    pipe.executePerSessionTask('plot_canon_rect_velspe');
-    
-    % Plot the placemaps for the rectangle 
-    pipe.executePerSessionTask('plot_singleunit_placemap_data_rect');
-    
-    % Plot the placemaps for the square
-    pipe.executePerSessionTask('plot_singleunit_placemap_data_square');
-    
-    % Plot the 0/180 best fit plots per cell/single unit
-    pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
-    
-    % Plot the 0,90,180,270 best fit orienations per cell/single unit
-    % Requires square canaonical shape
-    pipe.executePerSessionTask('plot_best_fit_orientations_per_cell');
-    
-    % Plot the 0 vs 180 best aligned similarity plots (cumulative)
-    pipe.executePerSessionTask('plot_across_within_0_180_similarity');
-    
-    % Plot the spike times for each tfile as 32bit and 64bit, to show
-    % which is correct. Correct is when all the spikes are contained
-    % in the green rectangle.
-    pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
-
-    % Plot the 0,90,180,270 for all contexts
-    pipe.executeExperimentTask('plot_best_fit_orientations_all_contexts');
-    
-    % Plot the 0,90,180,270 results only comparing trials from the same
-    % context.
-    pipe.executeExperimentTask('plot_best_fit_orientations_within_contexts');
-    
-    % Plot the averaged results across sessions (for one animal).
-    pipe.executeExperimentTask('plot_best_fit_orientations_averaged_across_sessions');
-    
-    % Plot the rate difference matrices for each single unit
-    % and the average over all single units.
-    pipe.executeExperimentTask('plot_rate_difference_matrices');
-
-catch ME
-    % record the error
-    fid = fopen(errorFilename, 'w+');
-    if fid == -1
-        error('Unable to create the error file! Doubly-bad!!\n');
+        fprintf(fid, 'Error running %s: %s\n', subjectName, getReport(ME));
+        fclose(fid);
     end
     
-    fprintf(fid, 'Error running %s: %s\n', subjectName, getReport(ME));
-    fclose(fid);
-end
+    if isfile(errorFilename)
+        fprintf('An error occurred in the course of this program running.\n');
+        fprintf('View the error file (%s) for clues as to what errors occurred.\n', errorFilename);
+        
+        % Get the user's attention
+        f = msgbox(sprintf('An error occurred. See the file %s for clues as to why.', errorFilename), 'Error','error');
+    end
+
     % Put a copy of the settings that we used in the analysis folder
     % so that we will always know what was used.
     copyfile(pipeCfgFilename, analysisParentFolder);
 end % for subject
 
 % Now run the code that requires the previous analysis to exist
-% These are specific to the Muzzio Lab project.
 ml_two_contexts_plot_best_fit_alignment(projectConfig);
 ml_two_contexts_plot_rates_across_and_within(projectConfig);
 ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'all');
@@ -226,12 +202,4 @@ ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'within');
 
 % Report the computation time
 telapsed_mins = toc(tstart)/60;
-fprintf('Compute time was %0.3f minutes.\n', telapsed_mins);
-
-if ~isfile(errorFilename)
-    fprintf('Program ended normally! Have a great day!\n');
-else
-    fprintf('An error occurred in the course of this program running.\n');
-    fprintf('View the error file (%s) for clues as to what errors occurred.\n', errorFilename);
-end
-
+fprintf('Computation time was %0.3f minutes.\n', telapsed_mins);

@@ -37,34 +37,34 @@ function mltp_make_pfstats_excel(obj, session)
     placemapFilenameSuffix = obj.config.placemaps.filenameSuffix;
     
     % Make a result structure for each common tfiles
-    results = [];
+    pfStats = [];
     for iTFile = 1:numTFiles
         tFilePrefix = tFilesToUse{iTFile};
         fprintf('Processing %s\n', tFilePrefix);
         
         placemaps = {};
    
+        pfStats(iTFile).tFilePrefix = tFilePrefix;
+
         placemapDataFolder = fullfile(session.analysisFolder, placemapSubFolder);
         for iTrial = 1:numTrials
             trialId = ti(iTrial).id;
             tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
             placemaps{iTrial} = tmp.mltetrodeplacemap;
-        end
-        
-        results(iTFile).tFilePrefix = tFilePrefix;
 
-        for iTrial = 1:numTrials
-           results(iTFile).meanFiringRate(iTrial) = placemaps{iTrial}.meanFiringRateSmoothed;
-           results(iTFile).peakFiringRate(iTrial) = placemaps{iTrial}.peakFiringRateSmoothed;
-           results(iTFile).informationRate(iTrial) = placemaps{iTrial}.informationRateSmoothed;
-           results(iTFile).informationPerSpike(iTrial) = placemaps{iTrial}.informationPerSpikeSmoothed;
-           results(iTFile).totalDwellTime(iTrial) = placemaps{iTrial}.totalDwellTime; % not smoothed, otherwise it doesnt make sense
-           results(iTFile).totalSpikesBeforeCriteria(iTrial) = placemaps{iTrial}.totalSpikesBeforeCriteria;
-           results(iTFile).totalSpikesAfterCriteria(iTrial) = placemaps{iTrial}.totalSpikesAfterCriteria;
+           pfStats(iTFile).meanFiringRate(iTrial) = placemaps{iTrial}.meanFiringRateSmoothed;
+           pfStats(iTFile).peakFiringRate(iTrial) = placemaps{iTrial}.peakFiringRateSmoothed;
+           pfStats(iTFile).informationRate(iTrial) = placemaps{iTrial}.informationRateSmoothed;
+           pfStats(iTFile).informationPerSpike(iTrial) = placemaps{iTrial}.informationPerSpikeSmoothed;
+           pfStats(iTFile).totalDwellTime(iTrial) = placemaps{iTrial}.totalDwellTime; % not smoothed, otherwise it doesnt make sense
+           pfStats(iTFile).totalSpikesBeforeCriteria(iTrial) = placemaps{iTrial}.totalSpikesBeforeCriteria;
+           pfStats(iTFile).totalSpikesAfterCriteria(iTrial) = placemaps{iTrial}.totalSpikesAfterCriteria;
+           pfStats(iTFile).context_id(iTrial) = tmp.trial_context_id;
+           pfStats(iTFile).context_use(iTrial) = tmp.trial_use;
         end
     end
     
-    % Write the results to an excel file
+    % Write the pfStats to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
     for iSheet = 1:length(sheets)
         sheet = sheets{iSheet};
@@ -74,7 +74,7 @@ function mltp_make_pfstats_excel(obj, session)
             S{1,iTFile+1} = tFilePrefix;
             for iTrial = 1:numTrials
                 S{iTrial+1,1} = ti(iTrial).sequenceNum; % name the trial
-                d = results(iTFile).(sheet);
+                d = pfStats(iTFile).(sheet);
                 S{iTrial+1,iTFile+1} = d(iTrial);
             end
          end
@@ -84,5 +84,5 @@ function mltp_make_pfstats_excel(obj, session)
         writetable(Tnew, pfStatsFilename, 'Sheet', sprintf('%s', sheet), 'WriteVariableNames', false);
     end
     
-    save(pfStatsMatFilename, 'results', 'session');
+    save(pfStatsMatFilename, 'pfStats', 'session', 'numTFiles', 'numTrials');
 end % function

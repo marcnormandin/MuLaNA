@@ -85,16 +85,17 @@ function [daymean, daystd] = get_mice_day_stats(filenames, subfolders, statField
         pfStats = tmp.pfStats;
         
         
-        numCells = size(pfStats,1);
-        numTrials = size(pfStats,2);
+        numCells = tmp.numTFiles; %size(pfStats,1);
+        numTrials = tmp.numTrials; %size(pfStats,2);
+        
         context_id = zeros(numCells, numTrials); %tmp.pfStats.context_id
         context_use = zeros(numCells, numTrials); %tmp.pfStats.context_use;\
         stat = zeros(numCells, numTrials);
         for iCell = 1:numCells
             for iTrial = 1:numTrials
-                context_id(iCell, iTrial) = pfStats(iCell, iTrial).context_id;
-                context_use(iCell, iTrial) = pfStats(iCell, iTrial).context_use;
-                stat(iCell, iTrial) = pfStats(iCell, iTrial).(statField);
+                context_id(iCell, iTrial) = pfStats(iCell).context_id(iTrial);
+                context_use(iCell, iTrial) = pfStats(iCell).context_use(iTrial);
+                stat(iCell, iTrial) = pfStats(iCell).(statField)(iTrial);
             end
         end
         

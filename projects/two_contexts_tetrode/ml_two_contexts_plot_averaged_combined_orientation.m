@@ -53,6 +53,7 @@ for iMouse = 1:length(tinimice)
    if strcmp(tinimice{iMouse}, 'K1_CA1') || strcmp(tinimice{iMouse}, 'AK42_CA1') || strcmp(tinimice{iMouse}, 'AK74_CA1') || strcmp(tinimice{iMouse}, 'JJ9_CA1') 
        x = bfo(1:3,:);
    elseif strcmp(tinimice{iMouse}, 'MG1_CA1')
+       % analyzed 7,8,9,10,11
        % days 8,9,10 since day 7 was first day after the problem
        x = bfo(2:4,:);
    else

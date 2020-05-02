@@ -1,23 +1,11 @@
 {
-	"placemaps_rect": {
-		"bounds_x": [0, 20],
-		"bounds_y": [0, 30],
-		"nbins_x": 20,
-		"nbins_y": 30,
-        "smoothingKernelGaussianSize": 15,
-        "smoothingKernelGaussianSigma": 3
-	},
-
-	"placemaps_square": {
-		"bounds_x": [0, 20],
-		"bounds_y": [0, 20],
-		"nbins_x": 20,
-		"nbins_y": 20,
-        "smoothingKernelGaussianSize": 15,
-        "smoothingKernelGaussianSigma": 3
-	},
-
     "placemaps": {
+        "outputFolder": "placemaps",
+        "outputFolderShrunk": "placemaps_shrunk",
+        "filenameSuffix": "mltetrodeplacemaps.mat",
+        "smoothingKernelGaussianSize_cm": 15,
+        "smoothingKernelGaussianSigma_cm": 3,
+        "cm_per_bin": 1,
         "smoothingProtocol": "SmoothBeforeDivision",
         "criteria_dwell_time_seconds_per_bin_minimum": 0.05,
         "criteria_spikes_per_bin_minimum": 0,
@@ -42,15 +30,7 @@
 		"trial_pos_colours": "rbrbrbrbrbrbrbrbrbrb"
 	},
 
-    "information_rate_shuffled_plots_per_cell": {
-        "output_folder": "information_rate"
-    },
-
 	"use_d1_xlsx": 0,
 	"trial_nvt_position_plots_folder": "trial_position_plots_raw",
-	"trial_fnvt_position_plots_folder": "trial_position_plots_fixed",
-
-	"canon_rect_placemaps_folder": "placemaps_rectangle",
-	"canon_square_placemaps_folder": "placemaps_square"
+	"trial_fnvt_position_plots_folder": "trial_position_plots_fixed"
 }
-
