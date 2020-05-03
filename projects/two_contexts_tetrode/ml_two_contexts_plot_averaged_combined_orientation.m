@@ -3,10 +3,8 @@ function ml_two_contexts_plot_averaged_combined_orientation(pc, contexts)
 % contexts must be "all" or "within"
 
 % This code make the orientation plot averaged across days
-% It has to be so specific and clunky because some mice
-% have more than 3 days, and we have to specify unique ones for each mouse.
 
-% Load the project settings
+% Load the project settings if not already loaded
 if isempty(pc)
     pcFilename = fullfile(pwd, 'project_config.json');
     if ~isfile(pcFilename)
@@ -16,14 +14,14 @@ if isempty(pc)
 end
 
 % Feature rich analysis folder
-frFolder = fullfile(pc.analysisFolder, 'feature_rich');
+frFolder = pc.analysisFeatureRichFolder;
+frMice = mulana_util_get_subfolders(frFolder);
 
 % Feature poor analysis folder
-fpFolder = fullfile(pc.analysisFolder, 'feature_poor');
+fpFolder = pc.analysisFeaturePoorFolder;
+fpMice = mulana_util_get_subfolders(fpFolder);
 
-% We can determine whether the mouse is feature_rich or feature_poor
-% by looking in the analysis directories
-tinimice = {'K1_CA1', 'AK42_CA1', 'AK74_CA1', 'JJ9_CA1', 'MG1_CA1'};
+tinimice = [fpMice, frMice];
 
 % We will average over 3 days
 numDays = 3;
@@ -50,15 +48,7 @@ for iMouse = 1:length(tinimice)
        error('contexts parameter must be all or within');
    end
    
-   if strcmp(tinimice{iMouse}, 'K1_CA1') || strcmp(tinimice{iMouse}, 'AK42_CA1') || strcmp(tinimice{iMouse}, 'AK74_CA1') || strcmp(tinimice{iMouse}, 'JJ9_CA1') 
-       x = bfo(1:3,:);
-   elseif strcmp(tinimice{iMouse}, 'MG1_CA1')
-       % analyzed 7,8,9,10,11
-       % days 8,9,10 since day 7 was first day after the problem
-       x = bfo(2:4,:);
-   else
-       error('Invalid mouse')
-   end
+   x = bfo(1:3,:);
    disp(x)
    
    avgOrientation(:,:,iMouse) = x;
@@ -120,3 +110,5 @@ print('-painters', '-depsc', fullfile(outputFolder,sprintf('%s.eps', fnPrefix)))
 close(h);
 
 end % function
+
+

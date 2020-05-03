@@ -1,35 +1,36 @@
 function ml_two_contexts_plot_best_fit_alignment(projectConfig)
-    plot_feature_rich_all_contexts(projectConfig);
-    plot_feature_poor_all_contexts(projectConfig);
-    plot_feature_rich_within_contexts(projectConfig);
-    plot_feature_poor_within_contexts(projectConfig);
+    plot_day_averaged(projectConfig, projectConfig.analysisFeaturePoorFolder, 'poor', 'all');
+    plot_day_averaged(projectConfig, projectConfig.analysisFeaturePoorFolder, 'poor', 'within');
+    plot_day_averaged(projectConfig, projectConfig.analysisFeatureRichFolder, 'rich', 'all');
+    plot_day_averaged(projectConfig, projectConfig.analysisFeatureRichFolder, 'rich', 'within');
 end % function
 
-function plot_feature_rich_all_contexts(projectConfig)
-    ss = 'best_fit_orientations_all_contexts';
-    
-    files = {...
-        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK42_CA1', 'best_fit_orientations_all_contexts.mat'), ...
-        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK74_CA1', 'best_fit_orientations_all_contexts.mat'), ...
-        fullfile(projectConfig.analysisFolder, 'feature_rich', 'JJ9_CA1', 'best_fit_orientations_all_contexts.mat')};
-    
-    [day1mean, day1std] = get_mice_day_stats(files, [1,1,1], ss);
-    [day2mean, day2std] = get_mice_day_stats(files, [2,2,2], ss);
-    [day3mean, day3std] = get_mice_day_stats(files, [3,3,3], ss);
-    
+function plot_day_averaged(projectConfig, analysisFeatureFolder, featureType, contextType)
+    ss = sprintf('best_fit_orientations_%s_contexts', contextType);
+    files = dir(fullfile(analysisFeatureFolder));
+    matFiles = {};
+    for i = 1:length(files)
+        if ~any([strcmp(files(i).name, '.'), strcmp(files(i).name, '..')])
+            matFiles{end+1} = fullfile(analysisFeatureFolder, files(i).name, ss);
+        end
+    end
 
+    [day1mean, day1std] = get_mice_day_stats(matFiles, [1,1,1], ss);
+    [day2mean, day2std] = get_mice_day_stats(matFiles, [2,2,2], ss);
+    [day3mean, day3std] = get_mice_day_stats(matFiles, [3,3,3], ss);
+    
     xmean = [day1mean; day2mean; day3mean]';
     xstd = [day1std; day2std; day3std]';
 
     
     h = make_plot(xmean, xstd);
     
-    title(sprintf('Best Fit Orientations (Feature Rich All Contexts)'), 'interpreter', 'none')
+    title(sprintf('Best Fit Orientations (Feature %s %s Contexts)', featureType, contextType), 'interpreter', 'none')
 
     % Save the figure
     outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
     F = getframe(h);
-    fnPrefix = 'best_fit_orientations_feature_rich_all_contexts';
+    fnPrefix = sprintf('best_fit_orientations_feature_%s_%s_contexts', featureType, contextType);
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
     savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
     saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');
@@ -38,102 +39,6 @@ function plot_feature_rich_all_contexts(projectConfig)
 
 end % function
 
-function plot_feature_poor_all_contexts(projectConfig)
-    ss = 'best_fit_orientations_all_contexts';
-    
-    files = {...
-        fullfile(projectConfig.analysisFolder, 'feature_poor', 'K1_CA1', 'best_fit_orientations_all_contexts.mat'), ...
-        fullfile(projectConfig.analysisFolder, 'feature_poor', 'MG1_CA1', 'best_fit_orientations_all_contexts.mat')};
-    
-    [day1mean, day1std] = get_mice_day_stats(files, [1,3], ss);
-    [day2mean, day2std] = get_mice_day_stats(files, [2,4], ss);
-    [day3mean, day3std] = get_mice_day_stats(files, [3,5], ss);
-    
-
-    xmean = [day1mean; day2mean; day3mean]';
-    xstd = [day1std; day2std; day3std]';
-
-    
-    h = make_plot(xmean, xstd);
-    
-    title(sprintf('Best Fit Orientations (Feature Poor All Contexts)'), 'interpreter', 'none')
-
-    % Save the figure
-    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
-    F = getframe(h);
-    fnPrefix = 'best_fit_orientations_feature_poor_all_contexts';
-    imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
-    savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
-    saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');
-    print('-painters', '-depsc', fullfile(outputFolder,sprintf('%s.eps', fnPrefix)))
-    close(h);
-
-end % function
-
-function plot_feature_rich_within_contexts(projectConfig)
-    ss = 'best_fit_orientations_within_contexts';
-    
-    files = {...
-        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK42_CA1', 'best_fit_orientations_within_contexts.mat'), ...
-        fullfile(projectConfig.analysisFolder, 'feature_rich', 'AK74_CA1', 'best_fit_orientations_within_contexts.mat'), ...
-        fullfile(projectConfig.analysisFolder, 'feature_rich', 'JJ9_CA1', 'best_fit_orientations_within_contexts.mat')};
-    
-    [day1mean, day1std] = get_mice_day_stats(files, [1,1,1], ss);
-    [day2mean, day2std] = get_mice_day_stats(files, [2,2,2], ss);
-    [day3mean, day3std] = get_mice_day_stats(files, [3,3,3], ss);
-    
-
-    xmean = [day1mean; day2mean; day3mean]';
-    xstd = [day1std; day2std; day3std]';
-
-    
-    h = make_plot(xmean, xstd);
-    
-    title(sprintf('Best Fit Orientations (Feature Rich Within Contexts)'), 'interpreter', 'none')
-
-    % Save the figure
-    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
-    F = getframe(h);
-    fnPrefix = 'best_fit_orientations_feature_rich_within_contexts';
-    imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
-    savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
-    saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');
-    print('-painters', '-depsc', fullfile(outputFolder,sprintf('%s.eps', fnPrefix)))
-    close(h);
-
-end % function
-
-function plot_feature_poor_within_contexts(projectConfig)
-    ss = 'best_fit_orientations_within_contexts';
-    
-    files = {...
-        fullfile(projectConfig.analysisFolder, 'feature_poor', 'K1_CA1', 'best_fit_orientations_within_contexts.mat'), ...
-        fullfile(projectConfig.analysisFolder, 'feature_poor', 'MG1_CA1', 'best_fit_orientations_within_contexts.mat')};
-    
-    [day1mean, day1std] = get_mice_day_stats(files, [1,3], ss);
-    [day2mean, day2std] = get_mice_day_stats(files, [2,4], ss);
-    [day3mean, day3std] = get_mice_day_stats(files, [3,5], ss);
-    
-
-    xmean = [day1mean; day2mean; day3mean]';
-    xstd = [day1std; day2std; day3std]';
-
-    
-    h = make_plot(xmean, xstd);
-    
-    title(sprintf('Best Fit Orientations (Feature Poor Within Contexts)'), 'interpreter', 'none')
-
-    % Save the figure
-    outputFolder = projectConfig.analysisFolder; %fullfile(pwd, 'analysis');
-    F = getframe(h);
-    fnPrefix = 'best_fit_orientations_feature_poor_within_contexts';
-    imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
-    savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
-    saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');
-    print('-painters', '-depsc', fullfile(outputFolder,sprintf('%s.eps', fnPrefix)))
-    close(h);
-
-end % function
 
 function [daymean, daystd] = get_mice_day_stats(filenames, indices, ss)
     numMice = length(filenames);

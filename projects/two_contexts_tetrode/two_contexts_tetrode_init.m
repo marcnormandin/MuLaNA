@@ -14,10 +14,27 @@ project.instanceFolder = instanceFolder;
 project.projectCreated = datestr(now);
 project.dataFolder = uigetdir(fullfile(instanceFolder, 'data'), 'Select the parent data directory');
 project.analysisFolder = uigetdir(fullfile(instanceFolder, 'analysis'), 'Select the parent analysis directory');
+project.dataFeaturePoorFolder = fullfile(project.dataFolder, 'feature_poor');
+project.dataFeatureRichFolder = fullfile(project.dataFolder, 'feature_rich');
+project.analysisFeaturePoorFolder = fullfile(project.analysisFolder, 'feature_poor');
+project.analysisFeatureRichFolder = fullfile(project.analysisFolder, 'feature_rich');
+
 
 if ~exist(project.dataFolder, 'dir')
     fprintf('Creating data folder (%s) ... ', project.dataFolder);
     mkdir(project.dataFolder);
+    fprintf('done.\n');
+end
+
+if ~exist(project.dataFeaturePoorFolder, 'dir')
+    fprintf('Creating data folder (%s) ... ', project.dataFeaturePoorFolder);
+    mkdir(project.dataFeaturePoorFolder);
+    fprintf('done.\n');
+end
+
+if ~exist(project.dataFeatureRichFolder, 'dir')
+    fprintf('Creating data folder (%s) ... ', project.dataFeatureRichFolder);
+    mkdir(project.dataFeatureRichFolder);
     fprintf('done.\n');
 end
 
@@ -26,6 +43,20 @@ if ~exist(project.analysisFolder, 'dir')
     mkdir(project.analysisFolder);
     fprintf('done.\n');
 end
+
+if ~exist(project.analysisFeaturePoorFolder, 'dir')
+    fprintf('Creating analsis folder (%s) ... ', project.analysisFeaturePoorFolder);
+    mkdir(project.analysisFeaturePoorFolder);
+    fprintf('done.\n');
+end
+
+if ~exist(project.analysisFeatureRichFolder, 'dir')
+    fprintf('Creating analsis folder (%s) ... ', project.analysisFeatureRichFolder);
+    mkdir(project.analysisFeatureRichFolder);
+    fprintf('done.\n');
+end
+
+
 
 jsonFilename = fullfile(instanceFolder, 'project_config.json');
 jsonTxt = jsonencode(project);

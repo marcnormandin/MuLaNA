@@ -9,49 +9,102 @@ tstart = tic;
 projectCfgFilename = fullfile(pwd, 'project_config.json');
 pipeCfgFilename = fullfile(pwd, 'pipeline_config.json');
 
-% Read in the project configuration file
-if ~isfile( projectCfgFilename )
-    error('The project configuration file (%s) does not exist.', projectCfgFilename);
+% Load the project configuration
+projectConfig = mulana_json_read( projectCfgFilename );
+disp(projectConfig)
+
+% Search for mice
+[featurePoor, descFP_bad] = mulana_experiment_descriptions_search( projectConfig.dataFeaturePoorFolder );
+[featureRich, descFR_bad] = mulana_experiment_descriptions_search( projectConfig.dataFeatureRichFolder );
+
+% Report any problems
+for i = 1:length(descFP_bad)
+    fprintf('Problems encountered reading feature poor: %s\n', descFP_bad.folder);
 end
-try 
-    projectConfig = jsondecode( fileread(projectCfgFilename) );
-catch ME
-    error('Error encountered while reading project configuration from (%s): %s', projectCfgFilename, ME.identifier)
+for i = 1:length(descFR_bad)
+    fprintf('Problems encountered reading feature rich: %s\n', descFR_bad.folder);
 end
 
+% Add the mice data so user can be selective
+data = [];
+for iExp = 1:length(featurePoor)
+    k = length(data)+1;
+    edjson = featurePoor(iExp).json;
+    data(k).edFolder = featurePoor(iExp).folder;
+    data(k).edFilename = featurePoor(iExp).fullFilename;
+    data(k).subjectName = edjson.animal;
+    data(k).experiment = edjson.experiment;
+    data(k).region = edjson.imaging_region;
+    data(k).arena = edjson.arena;
+    data(k).recordingsParentFolder = featurePoor(iExp).folder;
+    data(k).analysisParentFolder = fullfile(projectConfig.analysisFeaturePoorFolder, data(k).subjectName);
+    data(k).featureType = 'poor';
+end % iExp
+for iExp = 1:length(featureRich)
+    k = length(data)+1;
+    edjson = featureRich(iExp).json;
+    data(k).edFolder = featureRich(iExp).folder;
+    data(k).edFilename = featureRich(iExp).fullFilename;
+    data(k).subjectName = edjson.animal;
+    data(k).experiment = edjson.experiment;
+    data(k).region = edjson.imaging_region;
+    data(k).arena = edjson.arena;
+    data(k).recordingsParentFolder = featureRich(iExp).folder;
+    data(k).analysisParentFolder = fullfile(projectConfig.analysisFeatureRichFolder, data(k).subjectName);
+    data(k).featureType = 'rich';
+end % iExp
+
+homeworkIds = [];
+
+% Present user with a menu of options
+if isempty(data)
+    fprintf('There are no datasets to process! Done!\n');
+else
+    while true
+        if ~isempty(homeworkIds)
+            fprintf('We will process:\n');
+            for i = 1:length(homeworkIds)
+                did = homeworkIds(i);
+                fprintf('\t%s\n', data(did).subjectName);
+                %homework(i).experiment = 'object_task_consecutive_trials';
+            end % i
+        end
+        
+        fprintf('The following datasets are available:\n');
+        fprintf('%0.2d:\t Add all (Get a coffee!!)\n', 0);
+        for iData = 1:length(data)
+            if ismember(iData, homeworkIds)
+                continue;
+            else
+                fprintf('%0.2d:\t Add %s (feature %s)\n', iData, data(iData).subjectName, data(iData).featureType);
+            end
+        end
+        fprintf('%0.2d:\t (stop adding)\n', length(data)+1);
+        
+        choice = input('? ');
+        if choice == 0
+            homeworkIds = 1:length(data);
+            break;
+        elseif choice == length(data)+1
+            break;
+        else
+            homeworkIds(end+1) = choice;
+            homeworkIds = unique(homeworkIds);
+        end
+    end
+end
 
 homework = [];
-
-% Feature Rich
-homework(1).subjectName = 'AK42_CA1';
-homework(1).experiment = 'chengs_task_2c';
-homework(1).feature = 'feature_rich';
-
-homework(2).subjectName = 'AK74_CA1';
-homework(2).experiment = 'chengs_task_2c';
-homework(2).feature = 'feature_rich';
-
-homework(3).subjectName = 'JJ9_CA1';
-homework(3).experiment = 'chengs_task_2c';
-homework(3).feature = 'feature_rich';
-
-%experimentAnalysisParentFolder = '/work/muzziolab/marc/two_contexts_tetrode/analysis/feature_rich';
-
-% Feature Poor
-homework(4).subjectName = 'K1_CA1';
-homework(4).experiment = 'chengs_task_2c';
-homework(4).feature = 'feature_poor';
-
-homework(5).subjectName = 'MG1_CA1';
-homework(5).experiment = 'chengs_task_2c';
-homework(5).feature = 'feature_poor';
-
-% HG1Y_CA1 is not yet usable because we only have day 4 (currently).
-% 2020-04-15
-% homework(6).subjectName = 'HG1Y_CA1';
-% homework(6).experiment = 'chengs_task_2c';
-% homework(6).feature = 'feature_poor';
-
+% Collect the homework to do based on what the user selected
+for i = 1:length(homeworkIds)
+    did = homeworkIds(i);
+    homework(i).subjectName = data(did).subjectName;
+    homework(i).experiment = data(did).experiment;
+    homework(i).edFolder = data(did).edFolder;
+    homework(i).edFilename = data(did).edFilename;
+    homework(i).analysisParentFolder = data(did).analysisParentFolder;
+    homework(i).recordingsParentFolder = data(did).recordingsParentFolder;
+end % i
 
 % Ask the user if they want to clean the analysis folder for the subjects
 % that will be analyzed. It is better to do this if t-files change.
@@ -70,16 +123,19 @@ while true
     end
 end % while
 
-
+%
 % Let's be good and do our homework
 for iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
+    edFilename = homework(iHomework).edFilename;
+    edFolder = homework(iHomework).edFolder;
     
     fprintf('Processing %d of %d: %s\n', iHomework, length(homework), subjectName);
     
-    recordingsParentFolder = fullfile(projectConfig.dataFolder, subjectName, 'recordings', experiment);
-    analysisParentFolder = fullfile(projectConfig.analysisFolder, homework(iHomework).feature, subjectName);
+    recordingsParentFolder = homework(iHomework).edFolder;
+    analysisParentFolder = homework(iHomework).analysisParentFolder;
+    
     
     % If the pipeline has an error running a dataset, then save the error
     % to this file so the user can find out what went wrong.
@@ -90,10 +146,6 @@ for iHomework = 1:length(homework)
         delete(errorFilename)
     end
 
-    if ~exist(projectConfig.analysisFolder, 'dir')
-        mkdir(projectConfig.analysisFolder);
-    end
-    
     if cleanAnalysisFolder 
         if exist(analysisParentFolder, 'dir')
             rmdir(analysisParentFolder, 's');
@@ -167,8 +219,8 @@ for iHomework = 1:length(homework)
 
     %     
         pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
-        
-        pipe.executeExperimentTask('plot_rate_difference_matrices');
+    %     
+    %     pipe.executeExperimentTask('plot_rate_difference_matrices');
     catch ME
         % record the error
         fid = fopen(errorFilename, 'w+');
@@ -193,12 +245,28 @@ for iHomework = 1:length(homework)
     copyfile(pipeCfgFilename, analysisParentFolder);
 end % for subject
 
-% Now run the code that requires the previous analysis to exist
-ml_two_contexts_plot_best_fit_alignment(projectConfig);
-ml_two_contexts_plot_rates_across_and_within(projectConfig);
-ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'all');
-ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'within');
+makeMiceAveragedPlots = true;
+while true
+    fprintf('It is better to say yes\n');
+    makeMiceAveragedPlots = input('Do you want to make mice averaged plots [y/n]? ', 's');
+    if strcmpi(makeMiceAveragedPlots, 'y')
+        makeMiceAveragedPlots = true;
+        break;
+    elseif strcmpi(makeMiceAveragedPlots, 'n')
+        makeMiceAveragedPlots = false;
+        break;
+    else
+        fprintf('(y)es or (n)o only.\n');
+    end
+end % while
 
+if makeMiceAveragedPlots
+% Now run the code that requires the previous analysis to exist
+    ml_two_contexts_plot_best_fit_alignment(projectConfig);
+%ml_two_contexts_plot_rates_across_and_within(projectConfig);
+    ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'all');
+    ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'within');
+end
 
 % Report the computation time
 telapsed_mins = toc(tstart)/60;
