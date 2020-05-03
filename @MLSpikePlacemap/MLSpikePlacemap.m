@@ -234,7 +234,7 @@ classdef MLSpikePlacemap < handle
                 obj.meanFiringRateMapSmoothed = ml_placefield_meanfiringratemap( obj.spikeCountMapSmoothed, obj.dwellTimeMapSmoothed );
             elseif strcmpi(obj.p.Results.smoothingProtocol, 'SmoothAfterDivision')
             % Method 2
-                obj.meanFiringRateMapSmoothed = imfilter( ml_placefield_meanfiringratemap( obj.spikeCountMap, obj.dwellTimeMap ), obj.smoothingKernel);
+                obj.meanFiringRateMapSmoothed = imfilter( obj.meanFiringRateMap, obj.smoothingKernel);
             else
                 error('Invalid value for placemaps.smoothingProtocol (%s). Must be SmoothBeforeDivision or SmoothAfterDivision.', obj.p.Results.smoothingProtocol);
             end
@@ -257,11 +257,25 @@ classdef MLSpikePlacemap < handle
             
             tmp2 = obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum);
             
-            obj.meanFiringRateSmoothed = mean(tmp1, 'all');
+            obj.meanFiringRateSmoothed = mean(tmp1, 'all'); % the previous code takes the mean not including bins with zero counts
             obj.peakFiringRateSmoothed = max(tmp2, [], 'all');
             
+            
             [obj.informationRateSmoothed, obj.informationPerSpikeSmoothed] = ml_placefield_informationcontent( obj.meanFiringRateSmoothed, obj.meanFiringRateMapSmoothed, obj.positionProbMapSmoothed );
-
+            if isnan(obj.informationRateSmoothed) || isinf(obj.informationRateSmoothed)
+                obj.informationRateSmoothed = 0;
+            end
+            if isnan(obj.informationPerSpikeSmoothed) || isinf(obj.informationPerSpikeSmoothed)
+                obj.informationPerSpikeSmoothed = 0;
+            end
+            
+            [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
+            if isnan(obj.informationRate) || isinf(obj.informationRate)
+                obj.informationRate = 0;
+            end
+            if isnan(obj.informationPerSpike) || isinf(obj.informationPerSpike)
+                obj.informationPerSpike = 0;
+            end
 
             
     
