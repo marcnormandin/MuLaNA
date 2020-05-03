@@ -221,7 +221,7 @@ classdef MLSpikePlacemap < handle
 
             % The dwell time map after applying the criteria
             obj.dwellTimeMap = obj.dwellTimeMapTrue;
-            %obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
+            obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
             
             obj.dwellTimeMapSmoothed = imfilter( obj.dwellTimeMap, obj.smoothingKernel);
             
@@ -242,22 +242,26 @@ classdef MLSpikePlacemap < handle
             % Calculate some values from the maps (use the unsmoothed maps)
             obj.positionProbMap = ml_placefield_positionprobmap( obj.dwellTimeMap );
             [obj.meanFiringRate, obj.peakFiringRate] = ml_placefield_firingrate( obj.meanFiringRateMap, obj.positionProbMap );
+            
             [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
-
+            if isnan(obj.informationRate) || isinf(obj.informationRate)
+                obj.informationRate = 0;
+            end
+            if isnan(obj.informationPerSpike) || isinf(obj.informationPerSpike)
+                obj.informationPerSpike = 0;
+            end
+            
             % Calculate the values using the smoothed maps
             obj.positionProbMapSmoothed = ml_placefield_positionprobmap( obj.dwellTimeMapSmoothed );
-%             [obj.meanFiringRateSmoothed, obj.peakFiringRateSmoothed] = ml_placefield_firingrate( obj.meanFiringRateMapSmoothed, obj.positionProbMapSmoothed );
-            
-%
-            % 
-            %obj.peakFiringRateSmoothed = max( obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > 
+
+            % The previous code computes the mean only over bins that were
+            % visited.
             tmp1 = obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum);
-            tmp1 = tmp1(:);
             tmp1(tmp1 == 0) = [];
-            
+            obj.meanFiringRateSmoothed = mean(tmp1, 'all'); % the previous code takes the mean not including bins with zero counts
+
             tmp2 = obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum);
             
-            obj.meanFiringRateSmoothed = mean(tmp1, 'all'); % the previous code takes the mean not including bins with zero counts
             obj.peakFiringRateSmoothed = max(tmp2, [], 'all');
             
             
@@ -269,13 +273,8 @@ classdef MLSpikePlacemap < handle
                 obj.informationPerSpikeSmoothed = 0;
             end
             
-            [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
-            if isnan(obj.informationRate) || isinf(obj.informationRate)
-                obj.informationRate = 0;
-            end
-            if isnan(obj.informationPerSpike) || isinf(obj.informationPerSpike)
-                obj.informationPerSpike = 0;
-            end
+            %[obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
+
 
             
     
