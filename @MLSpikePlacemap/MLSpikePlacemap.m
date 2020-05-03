@@ -261,7 +261,6 @@ classdef MLSpikePlacemap < handle
             obj.meanFiringRateSmoothed = mean(tmp1, 'all'); % the previous code takes the mean not including bins with zero counts
 
             tmp2 = obj.meanFiringRateMapSmoothed .* (obj.dwellTimeMapSmoothed > obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum);
-            
             obj.peakFiringRateSmoothed = max(tmp2, [], 'all');
             
             
@@ -279,7 +278,7 @@ classdef MLSpikePlacemap < handle
             
     
             obj.totalSpikesAfterCriteria = sum(obj.spikeCountMap, 'all');
-            obj.totalDwellTime = sum(obj.dwellTimeMap, 'all');
+            obj.totalDwellTime = sum(obj.dwellTimeMapTrue, 'all');
             
             if obj.meanFiringRate > 0.1 && obj.meanFiringRate < 5.0 && obj.informationRate > 0.5
                 obj.isPlaceCell = true;
