@@ -1,6 +1,6 @@
 function MuLaNA()
 
-fprintf('Welcome to MuLaNA!'\n);
+fprintf('Welcome to MuLaNA! \n');
 
 end % function
 
