@@ -100,6 +100,7 @@ else
     end
 end
 
+homework = [];
 % Collect the homework to do based on what the user selected
 for i = 1:length(homeworkIds)
     did = homeworkIds(i);
@@ -112,7 +113,7 @@ end % i
 % Ask the user if they want to clean the analysis folder for the subjects
 % that will be analyzed. It is better to do this if t-files change.
 cleanAnalysisFolder = true;
-while true
+while true && ~isempty(homework)
     fprintf('It is better to say yes\n');
     cleanAnalysisFolder = input('Do you want to delete each subjects previous analysis folder [y/n]? ', 's');
     if strcmpi(cleanAnalysisFolder, 'y')
@@ -125,7 +126,6 @@ while true
         fprintf('(y)es or (n)o only.\n');
     end
 end % while
-
 
 % Let's be good and do our homework
 for iHomework = 1:length(homework)
