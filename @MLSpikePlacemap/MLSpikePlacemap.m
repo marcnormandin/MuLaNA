@@ -243,13 +243,7 @@ classdef MLSpikePlacemap < handle
             obj.positionProbMap = ml_placefield_positionprobmap( obj.dwellTimeMap );
             [obj.meanFiringRate, obj.peakFiringRate] = ml_placefield_firingrate( obj.meanFiringRateMap, obj.positionProbMap );
             
-            [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
-            if isnan(obj.informationRate) || isinf(obj.informationRate)
-                obj.informationRate = 0;
-            end
-            if isnan(obj.informationPerSpike) || isinf(obj.informationPerSpike)
-                obj.informationPerSpike = 0;
-            end
+            [obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent_v2( obj.meanFiringRateMap, obj.positionProbMap );
             
             % Calculate the values using the smoothed maps
             obj.positionProbMapSmoothed = ml_placefield_positionprobmap( obj.dwellTimeMapSmoothed );
@@ -264,13 +258,8 @@ classdef MLSpikePlacemap < handle
             obj.peakFiringRateSmoothed = max(tmp2, [], 'all');
             
             
-            [obj.informationRateSmoothed, obj.informationPerSpikeSmoothed] = ml_placefield_informationcontent( obj.meanFiringRateSmoothed, obj.meanFiringRateMapSmoothed, obj.positionProbMapSmoothed );
-            if isnan(obj.informationRateSmoothed) || isinf(obj.informationRateSmoothed)
-                obj.informationRateSmoothed = 0;
-            end
-            if isnan(obj.informationPerSpikeSmoothed) || isinf(obj.informationPerSpikeSmoothed)
-                obj.informationPerSpikeSmoothed = 0;
-            end
+            [obj.informationRateSmoothed, obj.informationPerSpikeSmoothed] = ml_placefield_informationcontent_v2( obj.meanFiringRateMapSmoothed, obj.positionProbMapSmoothed );
+
             
             %[obj.informationRate, obj.informationPerSpike] = ml_placefield_informationcontent( obj.meanFiringRate, obj.meanFiringRateMap, obj.positionProbMap );
 

@@ -137,7 +137,10 @@ for iHomework = 1:length(homework)
     fprintf('Processing %d of %d: %s\n', iHomework, length(homework), subjectName);
     
     recordingsParentFolder = edFolder;
-    analysisParentFolder = fullfile(ANALYSIS_FOLDER, subjectName); % dont use experiment since it should be object task
+    %analysisParentFolder = fullfile(ANALYSIS_FOLDER, subjectName); % dont use experiment since it should be object task
+    
+    % replicate same structure as that of the recordings
+    analysisParentFolder = replace(recordingsParentFolder, DATA_FOLDER, ANALYSIS_FOLDER);
     
     % If the pipeline has an error running a dataset, then save the error
     % to this file so the user can find out what went wrong.
@@ -193,9 +196,9 @@ for iHomework = 1:length(homework)
         % ANALYSIS COMPUTATIONS
         pipe.executePerSessionTask('make_pfstats_excel')
         
-        pipe.executePerSessionTask('compute_bfo_90_ac');
-        pipe.executePerSessionTask('compute_bfo_90_wc');
-        pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
+        %pipe.executePerSessionTask('compute_bfo_90_ac');
+        %pipe.executePerSessionTask('compute_bfo_90_wc');
+        %pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
     %     pipe.executePerSessionTask('compute_best_fit_orientations_0_180_per_cell');
 
         pipe.executePerSessionTask('make_trial_position_plots_raw');
@@ -209,9 +212,9 @@ for iHomework = 1:length(homework)
 
 
         % ANALYSIS PLOTS
-        pipe.executeExperimentTask('plot_bfo_90_ac');
-        pipe.executeExperimentTask('plot_bfo_90_wc');
-        pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
+        %pipe.executeExperimentTask('plot_bfo_90_ac');
+        %pipe.executeExperimentTask('plot_bfo_90_wc');
+        %pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
 
     %     pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
     
@@ -220,7 +223,7 @@ for iHomework = 1:length(homework)
     % 
 
     %     
-        pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
+        %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
     %     
     %     pipe.executeExperimentTask('plot_rate_difference_matrices');
     

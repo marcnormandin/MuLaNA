@@ -17,6 +17,10 @@ classdef MLSessionRecord < handle
             
         end % function
         
+        function saveFile(obj)
+            ml_util_json_save(obj.json, obj.jsonFilename);
+        end % function
+        
         function [name] = getName(obj)
             name = obj.json.session_info.name;
         end
@@ -40,6 +44,21 @@ classdef MLSessionRecord < handle
                 trialInfo(iTrial) = obj.getTrialInfo_single(iTrial);
             end
         end
+        
+        % Set a trial id not to use "drop it"
+        function dropTrialId(obj, trialId)
+           if trialId < 0 || trialId > obj.getNumTrials()
+               error('Trial id (%d) is invalid. Cannot drop requested trial.', trialId);
+           end
+           
+           obj.json.trial_info.use(trialId) = 0;
+           
+           % Renumber the sequence array
+           ids = find(obj.json.trial_info.use == 1);
+           for i = 1:length(ids)
+               obj.json.trial_info.sequence_num(ids(i)) = i;
+           end
+        end % function
         
         % The number of trials we want to process (marked use = 1).
         function [numTrials] = getNumTrialsToProcess(obj)

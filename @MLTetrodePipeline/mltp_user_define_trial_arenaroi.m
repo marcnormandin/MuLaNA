@@ -6,7 +6,7 @@ function mltp_user_define_trial_arenaroi(obj, session)
     sr = session.sessionRecord;
     ti = sr.getTrialsToProcess();
     for iTrial = 1:sr.getNumTrialsToProcess()
-        trialId = ti(iTrial);
+        trialId = ti(iTrial).id;
         
         % Changed from fnvt to nvt to allow for the fnvt creation to use
         % the ROI bounds to exclude outliers.
