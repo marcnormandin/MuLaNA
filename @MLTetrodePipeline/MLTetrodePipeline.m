@@ -94,8 +94,9 @@ classdef MLTetrodePipeline < MLPipeline
             
             obj.availablePerSessionTasks('plot_nlx_mclust_plot_spikes_for_checking_bits') = @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits;
             
-            obj.availablePerExperimentTasks('plot_rate_difference_matrices') = @obj.mltp_plot_rate_difference_matrices;
-
+            obj.availablePerSessionTasks('plot_rate_difference_matrices') = @obj.mltp_plot_rate_difference_matrices;
+            obj.availablePerExperimentTasks('plot_rate_difference_matrix_average_days') = @obj.mltp_plot_rate_difference_matrix_average_days;
+            
             
         end % function
         
@@ -142,7 +143,9 @@ classdef MLTetrodePipeline < MLPipeline
 
 
         mltp_make_pfstats_excel(obj, session);
-        mltp_plot_rate_difference_matrices(obj);
+        mltp_plot_rate_difference_matrices(obj, session);
+        mltp_plot_rate_difference_matrix_average_days(obj);
+        
         
         mltp_nlx_mclust_plot_spikes_for_checking_bits(obj, session);
         

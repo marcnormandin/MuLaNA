@@ -221,6 +221,10 @@ for iHomework = 1:length(homework)
         pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
     %     
     %     pipe.executeExperimentTask('plot_rate_difference_matrices');
+    
+    pipe.executePerSessionTask('plot_rate_difference_matrices');
+    pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
+
     catch ME
         % record the error
         fid = fopen(errorFilename, 'w+');

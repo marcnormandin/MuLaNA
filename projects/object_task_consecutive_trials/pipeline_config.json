@@ -14,6 +14,11 @@
         "criteria_speed_cm_per_second_maximum": "inf"
     },
 
+    "rate_difference_matrices": {
+        "outputFolder": "rate_difference_matrices",
+        "outputMatFilename": "rate_difference_matrices.mat"
+    },
+
 	"nvt_file_trial_separation_threshold_s": 10.0,
 	"nvt_filename": "VT1.nvt",
 	"verbose": 1,
