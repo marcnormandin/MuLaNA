@@ -224,6 +224,7 @@ for iHomework = 1:length(homework)
     
     pipe.executePerSessionTask('plot_rate_difference_matrices');
     pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
+    pipe.executePerSessionTask('plot_behaviour_averaged_placemaps');
 
     catch ME
         % record the error

@@ -19,6 +19,10 @@
         "outputMatFilename": "rate_difference_matrices.mat"
     },
 
+    "behaviour_averaged_placemaps": {
+        "outputFolder": "behaviour_averaged_placemaps"
+    },
+
 	"nvt_file_trial_separation_threshold_s": 10.0,
 	"nvt_filename": "VT1.nvt",
 	"verbose": 1,
