@@ -27,6 +27,11 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
             labels = data.labels;
         else
             % Check that combining makes sense
+            if length(seqNum) ~= length(data.seqNum)
+                fprintf('Cannot average because the matrices have different dimensions (trials)\n');
+                return;
+            end
+            
             if ~all(seqNum == data.seqNum)
                 fprintf('Cannot average because the sequence nums are different.');
                 return

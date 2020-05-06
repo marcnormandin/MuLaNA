@@ -2,7 +2,7 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
 
     sr = session.sessionRecord;
     ti = sr.getTrialsToProcess();
-    digTypes = ['C', 'G', 'F', 'W'];
+    digTypes = ['C', 'G', 'F', 'W']; % don't match '?'
     numDigTypes = length(digTypes);
     numCells = session.num_tfiles;
     %numTrials = sr.getNumTrialsToProcess();
@@ -13,6 +13,7 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
     end
 
     for iCell = 1:numCells
+        hasMaps = false;
         h = figure();
         tfileName = session.tfiles_filename_prefixes{iCell};
         for iDigType = 1:numDigTypes
@@ -41,6 +42,7 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
                 else
                     pmAveraged = pmAveraged + pm.meanFiringRateMapSmoothed;
                 end
+                hasMaps = true;
             end % iMatches
             pmAveraged = pmAveraged ./ length(timatch);
 
@@ -53,7 +55,7 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
         end % iDig
         
         % Only save a figure if it actually has data
-        if isempty(pmAveraged)
+        if ~hasMaps
             close(h);
             continue;
         end
