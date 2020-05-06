@@ -28,7 +28,8 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
         else
             % Check that combining makes sense
             if ~all(seqNum == data.seqNum)
-                error('Cannot average because the sequence nums are different.');
+                fprintf('Cannot average because the sequence nums are different.');
+                return
             end
             averageMatrix = averageMatrix + data.rate_difference_matrix_average;
         end
