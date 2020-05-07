@@ -98,7 +98,8 @@ classdef MLTetrodePipeline < MLPipeline
             obj.availablePerExperimentTasks('plot_rate_difference_matrix_average_days') = @obj.mltp_plot_rate_difference_matrix_average_days;
             
             obj.availablePerSessionTasks('plot_behaviour_averaged_placemaps') = @obj.mltp_plot_behaviour_averaged_placemaps;
-            
+            obj.availablePerSessionTasks('plot_behaviour_averaged_placemaps_contexts') = @obj.mltp_plot_behaviour_averaged_placemaps_contexts;
+
         end % function
         
         [experiment] = mltp_create_session_folders( obj, recordingsParentFolder, analysisParentFolder, experimentDescriptionFilename );
@@ -151,6 +152,7 @@ classdef MLTetrodePipeline < MLPipeline
         mltp_nlx_mclust_plot_spikes_for_checking_bits(obj, session);
         
         mltp_plot_behaviour_averaged_placemaps(obj, session);
+        mltp_plot_behaviour_averaged_placemaps_contexts(obj, session);
         
         % new
         mltp_plot_movement(obj, session);
