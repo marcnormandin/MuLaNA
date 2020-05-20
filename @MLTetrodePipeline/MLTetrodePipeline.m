@@ -44,7 +44,13 @@ classdef MLTetrodePipeline < MLPipeline
             if mod(obj.config.placemaps.smoothingKernelGaussianSize_cm,2) ~= 1
                 error('The config value placemaps.smoothingKernelGaussianSize_cm must be odd, but it is %d.', obj.config.placemaps.smoothingKernelGaussianSize_cm);
             end
-            obj.smoothingKernel = fspecial('gaussian', obj.config.placemaps.smoothingKernelGaussianSize_cm / obj.config.placemaps.cm_per_bin, obj.config.placemaps.smoothingKernelGaussianSigma_cm / obj.config.placemaps.cm_per_bin);
+            % Make sure that the size is odd so that gaussian peak is at
+            % the central bin
+            hsize = ceil(obj.config.placemaps.smoothingKernelGaussianSize_cm / obj.config.placemaps.cm_per_bin);
+            if mod(hsize,2) ~= 1
+                hsize = hsize + 1;
+            end
+            obj.smoothingKernel = fspecial('gaussian', hsize, obj.config.placemaps.smoothingKernelGaussianSigma_cm / obj.config.placemaps.cm_per_bin);
             obj.smoothingKernel = obj.smoothingKernel ./ max(obj.smoothingKernel(:)); % Isabel wants this like the other
             
             % Take care of the possible infinite value for the speed

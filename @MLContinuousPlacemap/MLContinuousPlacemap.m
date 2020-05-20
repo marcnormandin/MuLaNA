@@ -64,6 +64,13 @@ classdef MLContinuousPlacemap < handle
     
     methods
         function obj = MLContinuousPlacemap(x, y, ts_ms, trace_value, trace_ts_ms, varargin)
+            % Reshape
+            x = reshape(x, 1, length(x));
+            y = reshape(y, 1, length(y));
+            ts_ms = reshape(ts_ms, 1, length(ts_ms));
+            trace_value = reshape(trace_value, 1, length(trace_value));
+            trace_ts_ms = reshape(trace_ts_ms, 1, length(trace_ts_ms));
+            
             p = inputParser;
             p.CaseSensitive = false;
             
@@ -88,7 +95,7 @@ classdef MLContinuousPlacemap < handle
                 };
             
             % Parameters
-            addParameter(p,'smoothingProtocol','SmoothAfterDivision',...
+            addParameter(p,'smoothingProtocol','SmoothBeforeDivision',...
                  @(x) any(validatestring(x,availableSmoothingProtocols)));
             addParameter(p, 'speed_cm_per_second', []);
             addParameter(p, 'boundsx', [min(x), max(x)], checkBounds);
@@ -99,6 +106,8 @@ classdef MLContinuousPlacemap < handle
             addParameter(p, 'criteriaDwellTimeSecondsPerBinMinimum', 0, checkPositiveOrZero);
             addParameter(p, 'criteria_speed_cm_per_second_minimum', 0, checkPositiveOrZero);
             addParameter(p, 'criteria_speed_cm_per_second_maximum', inf, checkPositiveOrZero);
+            addParameter(p, 'criteria_trace_threshold_minimum', 0, checkPositiveOrZero);
+
 
             % Store the required inputs
             obj.x = x;
@@ -148,9 +157,9 @@ classdef MLContinuousPlacemap < handle
             % TEMP HACK
             % Computes speed if not given any
             if isempty(obj.speed_cm_per_second)
-                dx = [0; diff(obj.x)];
-                dy = [0; diff(obj.y)];
-                dt = [0; diff(obj.ts_ms)]./1000.0;
+                dx = [0, diff(obj.x)];
+                dy = [0, diff(obj.y)];
+                dt = [0, diff(obj.ts_ms)]./1000.0;
                 dtm = median(dt);
                 obj.speed_cm_per_second = sqrt( dx.^2 + dy.^2 ) ./ dtm;
                 obj.speed_cm_per_second = movmean(obj.speed_cm_per_second,ceil(2./dtm));
@@ -178,11 +187,13 @@ classdef MLContinuousPlacemap < handle
             end
             
             % Now find periods where the trace is increasing
-            dTrace = [0; diff(obj.trace_value)];
+            dTrace = [0, diff(obj.trace_value)];
             increasingI = find(dTrace > 0);
             
             % Passed: increasing + above speed threshold
             obj.passedTracei = intersect(increasingI, obj.passedSpeedTracei);
+            passedTraceMinimumi = find(obj.trace_value >= obj.p.Results.criteria_trace_threshold_minimum);
+            obj.passedTracei = intersect(obj.passedTracei, passedTraceMinimumi);
             
             obj.passed_trace_x = obj.trace_x(obj.passedTracei);
             obj.passed_trace_y = obj.trace_y(obj.passedTracei);

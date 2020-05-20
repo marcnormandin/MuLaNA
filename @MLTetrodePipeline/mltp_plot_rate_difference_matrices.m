@@ -1,6 +1,12 @@
 function mltp_plot_rate_difference_matrices(obj, session)
     sessionName = session.name;
 
+    % Controls what values will be used
+    % available fields:
+    % meanFiringRate, peakFiringRate, informationRate, informationPerSpike
+    pfStatsField = 'peakFiringRate';
+    figureField = 'PFR';
+    
     % Load the pfStats file that contains all of the information we
     % need.
     tfolder = session.analysisFolder; %fullfile(pwd, 'analysis','chengs_task_2c', sessionName);
@@ -26,7 +32,7 @@ function mltp_plot_rate_difference_matrices(obj, session)
     % firing rate for each cell.
     MFRT = zeros(numCells, numTrials);
     for iCell = 1:numCells
-        MFRT(iCell, :) = pfStats(iCell).meanFiringRate;
+        MFRT(iCell, :) = pfStats(iCell).(pfStatsField); %meanFiringRate;
     end
     % The mean firing rate is NAN if there were no spikes so set it to zero
     MFRT(isnan(MFRT)) = 0;
@@ -71,7 +77,7 @@ function mltp_plot_rate_difference_matrices(obj, session)
     end
     
     % Plotting
-    hpercell = figure('name', sprintf('%s: %s', obj.experiment.subjectName, sessionName), 'Position', get(0,'Screensize'));
+    hpercell = figure('name', sprintf('%s: %s (%s)', obj.experiment.subjectName, sessionName, figureField), 'Position', get(0,'Screensize'));
     p = 3; q=ceil(numCells/3); k=1; % maximum of 25 cells on a plot
     for iCell = 1:numCells
         %
