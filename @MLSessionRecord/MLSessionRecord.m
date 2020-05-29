@@ -37,7 +37,7 @@ classdef MLSessionRecord < handle
         % This returns information for every trial regardless
         % of context or use (not filtered).
         function [trialInfo] = getTrials(obj)
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', []);
+            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
 
             numTrials = obj.getNumTrials();
             for iTrial = 1:numTrials
@@ -113,7 +113,7 @@ classdef MLSessionRecord < handle
             
             
             % Struct array to hold all matches for the requested context
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', []);
+            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
             
             numTrials = obj.getNumTrials();
             for iTrial = 1:numTrials
@@ -132,7 +132,7 @@ classdef MLSessionRecord < handle
         % This returns information for every trial regardless
         % of context or use (not filtered).
         function [trialInfo] = getTrialInfoAll(obj)
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', []);
+            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
 
             numTrials = obj.getNumTrials();
             for iTrial = 1:numTrials
@@ -168,7 +168,7 @@ classdef MLSessionRecord < handle
             end
             useDropped = p.Results.useDropped;
             
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', []);
+            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
 
             % Get all of the data, and then filter it for what user wants
             trialInfoAll = obj.getTrialInfoAll();
@@ -290,7 +290,7 @@ classdef MLSessionRecord < handle
         function validateJSON(obj)
             % Make sure that the json has the required fields
             reqFields = {{'session_info', {'name', 'date'}}, ...
-                {'trial_info', {'sequence_num', 'contexts', 'use', 'digs'}}};
+                {'trial_info', {'sequence_num', 'contexts', 'use', 'digs', 'folders'}}};
             for iRequired = 1:length(reqFields)
                row = reqFields{iRequired};
                topField = row{1};
@@ -321,7 +321,7 @@ classdef MLSessionRecord < handle
             
             
             % Validate the arrays. Should all be the same length.
-            sameLengthFields = {'sequence_num', 'contexts', 'use', 'digs'};
+            sameLengthFields = {'sequence_num', 'contexts', 'use', 'digs', 'folders'};
             N = length(obj.json.trial_info.(sameLengthFields{1}));
             for iField = 2:length(sameLengthFields)
                 n = length(obj.json.trial_info.(sameLengthFields{iField}));
@@ -363,17 +363,18 @@ classdef MLSessionRecord < handle
             trialInfo.sequenceNum = obj.json.trial_info.sequence_num(iTrial);
             trialInfo.digs = obj.json.trial_info.digs(iTrial);
             trialInfo.id = iTrial;
+            trialInfo.folders = obj.json.trial_info.folders{iTrial};
         end
     end % private methods
     
     methods ( Static )
-        function createDefaultFile(numTrials, numAlternatingContexts, sessionName, sessionDate, outputFilename)
+        function createDefaultFile(numTrials, numAlternatingContexts, sessionName, sessionDate, outputFilename, folders)
             %fprintf('Creating default record.json for %s\n', outputFilename);
 
             record.session_info.name = sessionName;
             record.session_info.date = sessionDate;
             
-            record.trial_info = struct('contexts', [], 'use', [], 'sequence_num', [], 'digs', []);
+            record.trial_info = struct('contexts', [], 'use', [], 'sequence_num', [], 'digs', [], 'folders', []);
 
             tmp = repmat(1:numAlternatingContexts, 1, ceil(numTrials/numAlternatingContexts));
             record.trial_info.contexts = tmp(1:numTrials);
@@ -383,6 +384,18 @@ classdef MLSessionRecord < handle
             record.trial_info.digs = cell(1,numTrials);
             for iTmp = 1:numTrials
                 record.trial_info.digs{iTmp} = "?";
+            end
+            
+            if isempty(folders)
+                record.trial_info.folders = [];
+            else
+                if length(folders) ~= numTrials
+                    error('The number of folders does not equal the number of trials.');
+                end
+                record.trial_info.folders = cell(numTrials, 1);
+                for iTmp = 1:numTrials
+                    record.trial_info.folders{iTmp} = folders{iTmp};
+                end
             end
 
             txt = jsonencode(record);

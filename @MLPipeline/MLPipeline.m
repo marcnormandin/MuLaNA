@@ -13,6 +13,7 @@ classdef MLPipeline < handle
     end
     
     methods
+        
         function printAvailableTasks(obj)
             fprintf('Per trial tasks:\n');
             if obj.availablePerTrialTasks.length == 0

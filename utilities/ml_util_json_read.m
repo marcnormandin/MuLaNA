@@ -8,7 +8,7 @@ function [json] = ml_util_json_read(filename)
     try 
         json = jsondecode( fileread(filename) );
     catch ME
-        fprintf('Error encountered while reading json from (%s): %s', filename, ME.identifier)
+        error('Error encountered while reading json from (%s): %s', filename, ME.identifier)
     end
             
 end % function
