@@ -13,6 +13,8 @@ classdef MLArena < handle
         % 2xN reference points in the canoncial frame
         referencePointsCanon;
         
+        % Homography Transformation Matrix
+        HomographyTransformMatrix
     end % properties
     
     methods
@@ -49,10 +51,12 @@ classdef MLArena < handle
         
         % Transform from video to canonical coordinates
         function [xCan, yCan] = tranformVidToCanonPoints(obj, xVid, yVid)
-            [xCan, yCan, ~] = ml_core_geometry_homographic_transform_points(...
+            [xCan, yCan, trans] = ml_core_geometry_homographic_transform_points(...
                 obj.referencePointsVideo(1,:), obj.referencePointsVideo(2,:), ...
                 obj.referencePointsCanon(1,:), obj.referencePointsCanon(2,:), ...
                 xVid, yVid);
+            % Store the matrix
+            obj.HomographyTransformMatrix = trans;
         end % function
         
         % Get the minimum rectangular bounds that the caononical reference

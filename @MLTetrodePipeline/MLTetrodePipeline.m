@@ -36,7 +36,7 @@ classdef MLTetrodePipeline < MLPipeline
 
             
             % Create the experiment structure
-            obj.experiment = obj.mltp_create_session_folders( obj.recordingsParentFolder, obj.analysisParentFolder, obj.experimentDescriptionFilename, [] );
+            obj.experiment = obj.mltp_create_session_folders( obj.recordingsParentFolder, obj.analysisParentFolder, obj.experimentDescriptionFilename);
             
             
             % Construct the kernel. Make sure that it is valid.

@@ -321,7 +321,7 @@ classdef MLSessionRecord < handle
             
             
             % Validate the arrays. Should all be the same length.
-            sameLengthFields = {'sequence_num', 'contexts', 'use', 'digs', 'folders'};
+            sameLengthFields = {'sequence_num', 'contexts', 'use', 'digs'};
             N = length(obj.json.trial_info.(sameLengthFields{1}));
             for iField = 2:length(sameLengthFields)
                 n = length(obj.json.trial_info.(sameLengthFields{iField}));
