@@ -17,7 +17,7 @@ function [track] = ml_cai_dlc_to_mlbehaviourtrack(trialDLCFolder, timestamp_ms)
 % Only the miniscope seems to be stable without furthering training
 % on particular sessions.
 
-numBehavCamFiles = length(dir(fullfile(trialDLCFolder, 'behavCam*DLC_resnet50_CMG089_CA1_EPOCH_2_EARS*.h5')));
+numBehavCamFiles = length(dir(fullfile(trialDLCFolder, 'behavCam*.h5')));
 if numBehavCamFiles == 0
     error('Unable to read any behavCam#DLC...h5 files from %s', trialDLCFolder);
 end
@@ -28,7 +28,7 @@ p = [];
 for iBehavCamNum = 1:numBehavCamFiles
     % We don't know what the specific name of the file will be, but know
     % what it will start with
-    fnPrefix = sprintf('behavCam%dDLC_resnet50_CMG089_CA1_EPOCH_2_EARS*.h5', iBehavCamNum);
+    fnPrefix = sprintf('behavCam%d.h5', iBehavCamNum);
     fnn = dir(fullfile(trialDLCFolder, fnPrefix));
     
     if isempty(fnn)

@@ -31,6 +31,8 @@ classdef MLMiniscopePipeline < MLPipeline2
             obj.registerTrialTask('behavcam_referenceframe_create', @obj.behavcam_referenceframe_create);
             obj.registerTrialTask('behavcam_roi_create', @obj.behavcam_roi_create);
             
+            obj.registerTrialTask('convert_dlc_to_mlbehaviourtrack_per_trial', @obj.convert_dlc_to_mlbehaviourtrack_per_trial);
+            
             obj.registerTrialTask('scopecam_alignvideo', @obj.scopecam_alignvideo);
             obj.registerTrialTask('scopecam_cnmfe_run', @obj.scopecam_cnmfe_run);
             obj.registerTrialTask('cnfme_spatial_footprints_save_to_cellreg', @obj.cnfme_spatial_footprints_save_to_cellreg);
@@ -50,10 +52,14 @@ classdef MLMiniscopePipeline < MLPipeline2
         behavcam_referenceframe_create( obj, session, trial );
         behavcam_roi_create( obj, session, trial );
         
+        convert_dlc_to_mlbehaviourtrack_per_trial( obj, session, trial );
+        
         scopecam_alignvideo( obj, session, trial );
         scopecam_cnmfe_run( obj, session, trial );
         cnfme_spatial_footprints_save_to_cellreg(obj, session, trial);
         cnmfe_to_neuron( obj, session, trial );
+        
+        
     end % methods
 end % classdef
 

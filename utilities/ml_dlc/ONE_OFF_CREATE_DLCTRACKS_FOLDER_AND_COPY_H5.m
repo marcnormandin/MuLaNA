@@ -8,19 +8,21 @@
 %     pwd, '../../analysis/chengs_task_2c' );
 
 
-mainDir = 'M:/Minimice/CMG154_RSC/recordings/chengs_task_2c';
-cfg = jsondecode(fileread(fullfile(pwd, 'pipeline_config.json')));
-pipe = MLCalciumImagingPipeline( cfg, mainDir, strrep(mainDir, 'recordings', 'analysis') );
+mainDir = 'M:/Minimice/CMG154_CA1/recordings/chengs_task_2c';
+%cfg = jsondecode(fileread(fullfile(pwd, 'pipeline_config.json')));
+%pipe = MLMiniscopePipeline( cfg, mainDir, strrep(mainDir, 'recordings', 'analysis') );
+experimentRecordingsParentFolder = mainDir;
+experimentAnalysisParentFolder = strrep(experimentRecordingsParentFolder, 'recordings', 'analysis');
+experiment = MLExperimentBuilder.buildFromJson( experimentRecordingsParentFolder, experimentAnalysisParentFolder );
 
-experimentRecordingsParentFolder = pipe.experimentParentFolder;
 experimentTracksParentFolder = strrep(experimentRecordingsParentFolder, "recordings", "dlc_tracks");
 
 % Make a copy of the directory tree, but under the tracks parent
-for iSession = 1:pipe.experiment.numSessions
-    session = pipe.experiment.session{iSession};
-    for iTrial = 1:session.numTrials
-        trial = session.trial{iTrial};
-        tdataFolder = trial.rawFolder;
+for iSession = 1:experiment.getNumSessions()
+    session = experiment.getSession(iSession);
+    for iTrial = 1:session.getNumTrials()
+        trial = session.getTrial(iTrial);
+        tdataFolder = trial.getTrialDirectory();
         
         ttrackFolder = strrep(tdataFolder, "recordings", "dlc_tracks");
         if ~isfolder(ttrackFolder)
@@ -37,6 +39,12 @@ for iSession = 1:pipe.experiment.numSessions
             % general
             fn2 = strrep(fn, 'DLC_resnet50_CMG089_CA1_EPOCH_2_EARSJan25shuffle1_1030000.h5', '_DLC.h5');
             copyfile(fullfile(trialDLCFolder, fn), fullfile(ttrackFolder, fn2));
+            
+            % remove the original dlc file
+            delete(fullfile(trialDLCFolder, fn));
         end
+        
+        % Remove any and all DLC 'pickle' files
+        delete(fullfile(trialDLCFolder, '*.pickle'))
     end
 end

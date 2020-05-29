@@ -18,7 +18,7 @@ function [track] = ml_cai_dlc_to_mlbehaviourtrack_with_heading(trialDLCFolder, t
 % on particular sessions.
 
 pos = [];
-numBehavCamFiles = length(dir(fullfile(trialDLCFolder, 'behavCam*.avi')));
+numBehavCamFiles = length(dir(fullfile(trialDLCFolder, 'behavCam*.h5')));
 if numBehavCamFiles == 0
     error('Unable to read any behavCam#DLC...h5 files from %s', trialDLCFolder);
 end
@@ -33,7 +33,7 @@ rp = [];
 for iBehavCamNum = 1:numBehavCamFiles
     % We don't know what the specific name of the file will be, but know
     % what it will start with
-    fnPrefix = sprintf('behavCam%dDLC*.h5', iBehavCamNum);
+    fnPrefix = sprintf('behavCam%d.h5', iBehavCamNum);
     fnn = dir(fullfile(trialDLCFolder, fnPrefix));
     
     if isempty(fnn)
