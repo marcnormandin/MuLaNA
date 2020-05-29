@@ -237,9 +237,9 @@ classdef MLPipeline2 < handle
         function configSetupSmoothingKernel(obj)
             % Construct the kernel. Make sure that it is valid.
             % The kernel sizes must be odd so that they are symmetric
-            if mod(obj.Config.placemaps.smoothingKernelGaussianSize_cm,2) ~= 1
-                error('The config value placemaps.smoothingKernelGaussianSize_cm must be odd, but it is %d.', obj.Config.placemaps.smoothingKernelGaussianSize_cm);
-            end
+            %if mod(obj.Config.placemaps.smoothingKernelGaussianSize_cm,2) ~= 1
+            %    error('The config value placemaps.smoothingKernelGaussianSize_cm must be odd, but it is %d.', obj.Config.placemaps.smoothingKernelGaussianSize_cm);
+            %end
             % Make sure that the size is odd so that gaussian peak is at
             % the central bin
             hsize = ceil(obj.Config.placemaps.smoothingKernelGaussianSize_cm / obj.Config.placemaps.cm_per_bin);
