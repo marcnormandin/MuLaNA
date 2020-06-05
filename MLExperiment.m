@@ -7,6 +7,7 @@ classdef MLExperiment < MLExperimentInterface
         ImagingRegion
         ExperimentName
         ArenaGeometry
+        NumContexts
         Sessions
         
         SessionsParentDirectory
@@ -15,13 +16,14 @@ classdef MLExperiment < MLExperimentInterface
     
     methods
         function obj = MLExperiment( ...
-                animalName, imagingRegion, experimentName, arenaGeometry, sessions, ...
+                animalName, imagingRegion, experimentName, arenaGeometry, numContexts, sessions, ...
                 sessionsParentDirectory, analysisParentDirectory)
             
             obj.AnimalName = animalName;
             obj.ImagingRegion = imagingRegion;
             obj.ExperimentName = experimentName;
             obj.ArenaGeometry = arenaGeometry;
+            obj.NumContexts = numContexts;
             obj.Sessions = sessions;
             obj.SessionsParentDirectory = sessionsParentDirectory;
             obj.AnalysisParentDirectory = analysisParentDirectory;
@@ -45,6 +47,10 @@ classdef MLExperiment < MLExperimentInterface
         
         function [a] = getArenaGeometry(obj)
             a = obj.ArenaGeometry;
+        end
+        
+        function [n] = getNumContexts(obj)
+            n = obj.NumContexts;
         end
         
         function [n] = getNumSessions(obj)

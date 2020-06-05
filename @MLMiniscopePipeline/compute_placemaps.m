@@ -1,4 +1,4 @@
-function plot_and_save_placemaps(obj, session, trial)
+function compute_placemaps(obj, session, trial)
 
     trialResultsFolder = trial.getAnalysisDirectory();
     outputFolder = fullfile(trial.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
@@ -85,50 +85,10 @@ function plot_and_save_placemaps(obj, session, trial)
             'criteria_speed_cm_per_second_maximum', obj.Config.placemaps.criteria_speed_cm_per_second_maximum, ...
             'criteria_trace_threshold_minimum', obj.Config.placemaps_miniscope.criteria_trace_threshold_minimum);
 
-        neuron = MLCaiNeuron( fullfile(trialResultsFolder, 'neuron.hdf5'), nid, trace_ts_ms./1000.0 );
-        h = figure('position', get(0, 'Screensize'));
-        subplot(2,4,4)
-        pm.plot()
-        title('Event Map')
-        for iOther = 1:numOther
-            hold on
-            plot(other_x_cm(iOther), other_y_cm(iOther), 'mo')
-            viscircles([other_x_cm(iOther), other_y_cm(iOther)], 2);
-        end
-        colorbar
-        subplot(2,4,1)
-        pm.plot_path_with_spikes()
-        title('Path')
-        subplot(2,4,2)
-        pm.plot_dwellTimeMapSmoothed()
-        colorbar
-        title('Dwell Time')
-        subplot(2,4,3)
-        pm.plot_traceMapSmoothed()
-        colorbar
-        title('Trace Map')
-        subplot(2,4,5)
-        neuron.plotSpatialFootprint('view', 'full');
-        axis equal tight
-        title('Spatial Footprint (full)')
-        colorbar
-        subplot(2,4,6)
-        neuron.plotSpatialFootprint('view', 'zoomed');
-        colorbar
-        axis equal tight
-        title('Spatial Footprint (zoomed')
-        subplot(2,4,7:8)
-        neuron.plotTimeseries();
-        xlabel('Time, t [s]')
-        grid on
-        axis tight
-        title(sprintf('Filtered Trace for nid = %d', nid));
         
-        filenamePrefix = sprintf('fig_%d', nid);
-        fn1 = fullfile(outputFolder, sprintf('%s.png', filenamePrefix));
         fprintf('Saving figure as: %s\n', fn1);
         
-        save(fullfile(outputFolder, sprintf('pm_%d', nid)), 'pm', 'nid', '-v7.3');
+        save(fullfile(outputFolder, sprintf('%s%d%s', obj.Config.placemaps.filenamePrefix, nid, obj.Config.placemaps.filenameSuffix)), 'pm', 'nid', '-v7.3');
         
         saveas(h, fn1, 'png');
         savefig(h, fullfile(outputFolder, sprintf('%s.fig', filenamePrefix)));

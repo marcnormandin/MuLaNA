@@ -38,7 +38,9 @@ classdef MLMiniscopePipeline < MLPipeline2
             obj.registerTrialTask('cnfme_spatial_footprints_save_to_cellreg', @obj.cnfme_spatial_footprints_save_to_cellreg);
             obj.registerTrialTask('cnmfe_to_neuron', @obj.cnmfe_to_neuron);
             
-            obj.registerTrialTask('plot_and_save_placemaps', @obj.plot_and_save_placemaps);
+            obj.registerTrialTask('compute_placemaps', @obj.compute_placemaps);
+            obj.registerTrialTask('compute_placemaps_shrunk', @obj.compute_placemaps_shrunk);
+            obj.registerTrialTask('plot_placemaps', @obj.plot_placemaps);
         end % function
         
     end % methods private
@@ -62,8 +64,10 @@ classdef MLMiniscopePipeline < MLPipeline2
         cnfme_spatial_footprints_save_to_cellreg(obj, session, trial);
         cnmfe_to_neuron( obj, session, trial );
         
-        plot_and_save_placemaps(obj, session, trial);
-        
+        compute_placemaps(obj, session, trial);
+        compute_placemaps_shrunk(obj, session, trial);
+        plot_placemaps(obj, session, trial);
+
     end % methods
 end % classdef
 

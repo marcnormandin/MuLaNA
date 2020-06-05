@@ -28,7 +28,7 @@ classdef MLExperimentBuilder < handle
         function [experiment] = buildFromJsonNeuralyxTetrodes(expJson, sessionsParentDirectory, analysisParentDirectory)
             numSessions = length(expJson.session_folders);
             sessions = MLSession.empty;
-            
+            numContexts = expJson.num_contexts;
             for iSession = 1:numSessions
                 sessionDirectory = fullfile(sessionsParentDirectory, expJson.session_folders{iSession});
                 sessionAnalysisDirectory = fullfile(analysisParentDirectory, expJson.session_folders{iSession});
@@ -65,7 +65,7 @@ classdef MLExperimentBuilder < handle
             end
             
             experiment = MLExperiment( ...
-                expJson.animal, expJson.imaging_region, expJson.experiment, expJson.arena, sessions, sessionsParentDirectory, analysisParentDirectory );
+                expJson.animal, expJson.imaging_region, expJson.experiment, expJson.arena, numContexts, sessions, sessionsParentDirectory, analysisParentDirectory );
         end % buildFromJson
         
         function createDefaultSessionRecordNeuralynxTetrodes(expJson, sessionDirectory, sessionName)
@@ -95,7 +95,8 @@ classdef MLExperimentBuilder < handle
         %% MINISCOPE
         function [experiment] = buildFromJsonUclaMiniscope(expJson, sessionsParentDirectory, analysisParentDirectory)
             numSessions = length(expJson.session_folders);
-            sessions = MLSession.empty;
+            sessions = MLMiniscopeSession.empty;
+            numContexts = expJson.num_contexts;
             
             for iSession = 1:numSessions
                 sessionName = expJson.session_folders{iSession};
@@ -130,11 +131,11 @@ classdef MLExperimentBuilder < handle
                         trialDirectory, trialAnalysisDirectory, ...
                         dateString, timeString);
                 end
-                sessions(iSession) = MLSession(sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
+                sessions(iSession) = MLMiniscopeSession(sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
             end
             
             experiment = MLExperiment( ...
-                expJson.animal, expJson.imaging_region, expJson.experiment, expJson.arena, sessions, sessionsParentDirectory, analysisParentDirectory );
+                expJson.animal, expJson.imaging_region, expJson.experiment, expJson.arena, numContexts, sessions, sessionsParentDirectory, analysisParentDirectory );
         end % buildFromJson
         
 
