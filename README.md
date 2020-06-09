@@ -35,20 +35,25 @@ where **projectName** is one of the available projects. The initialization scrip
 ### Requirements of the user
 Each experiment requires a file named 'experiment_description.json'. This file contains information about the experiment that is not part of the tetrode dataset. Below are examples.
 
-## Example of a rectangular arena, two alternating contexts, used for chengs_task_2c. The tfiles are specified as '-1', which tells the system to load them as the appropriate bits.
+## Example of a rectangular arena, two alternating contexts, used for chengs_task_2c. The tfiles are specified as '-1', which tells the system to load them as the appropriate bits. The value for nvt_file_trial_separation_threshold_s specifies the minimum separation between trials in seconds.
 ```
 {
-	"animal": "JJ9_CA1",
+	"animal": "AK42_CA1",
 	"imaging_region": "CA1",
 	"experiment": "chengs_task_two_context",
+	"apparatus_type": "neuralynx_tetrodes",
+	"has_digs": 1,
+	"num_contexts": 2,
 	"arena": {
 		"shape": "rectangle",
 		"x_length_cm": 20.0,
 		"y_length_cm": 30.0
 	},
 	"num_contexts": 2,
-	"session_folders": ["d1", "d2", "d3"],
-	"mclust_tfile_bits": -1
+	"session_folders": ["d7", "d8", "d9"],
+	"mclust_tfile_bits": -1,
+	"nvt_file_trial_separation_threshold_s": 10.0,
+	"nvt_filename": "VT1.nvt"
 }
 ```
 
@@ -56,18 +61,41 @@ Each experiment requires a file named 'experiment_description.json'. This file c
 ```
 {
 	"animal": "MG1_CA1",
-	"imaging_region": "hippocampus",
-	"experiment": "object_task_consecutive_trials",
+	"imaging_region": "CA1",
+	"experiment": "chengs_task_two_context",
+	"apparatus_type": "neuralynx_tetrodes",
+	"has_digs": 1,
+	"num_contexts": 2,
 	"arena": {
 		"shape": "square",
 		"length_cm": 35.0
 	},
-	"num_contexts": 1,
-	"session_folders": ["hab","test"],
-	"mclust_tfile_bits": 64
+	"num_contexts": 2,
+	"session_folders": ["hab", "test"],
+	"mclust_tfile_bits": 64,
+	"nvt_file_trial_separation_threshold_s": 10.0,
+	"nvt_filename": "VT1.nvt"
 }
 ```
 
+## Example of UCLA Miniscope experiment. The main difference is apparatus_type value, which should be ucla_miniscope.
+```
+{
+	"animal":"CMG154_CA1",
+	"experiment":"chengs_task_2c",
+	"imaging_region":"CA1",	
+	"apparatus_type": "ucla_miniscope",
+	"has_digs": 1,
+	"num_contexts":2,
+	"session_folders":["s1","s2","s3", "s4"],
+	"arena":{
+		"shape":"rectangle",
+		"x_length_cm":20,
+		"y_length_cm":30
+		}
+	}
+}
+```
 ## Authors
 
 * **Marc Normandin** - *Developer, Muzzio Lab* - [Marc Normandin](https://github.com/marcnormandin)
