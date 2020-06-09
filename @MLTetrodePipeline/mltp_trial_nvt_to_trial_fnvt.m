@@ -1,14 +1,17 @@
 function mltp_trial_nvt_to_trial_fnvt(obj, session)
-            if obj.verbose
+            if obj.isVerbose()
                 fprintf('Fixing the trial data.\n');
             end
 
-            sr = session.sessionRecord;
-            ti = sr.getTrialsToProcess();
-            for iTrial = 1:sr.getNumTrialsToProcess()
-                trialId = ti(iTrial).id;
+            for iTrial = 1:session.getNumTrials()
+                triall = session.getTrial(iTrial);
                 
-                trialNvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_nvt.mat', trialId));
+                % Check
+%                 if iTrial ~= trial.getSequenceId()
+%                     error('Logic error. iTrial == %d, but trial.sequenceId() == %d', iTrial, trial.getSequenceId());
+%                 end
+                
+                trialNvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_nvt.mat', triall.getTrialId()));
                 fprintf('Loading %s ... ', trialNvtFilename);
                 data = load(trialNvtFilename);
                 t = data.trial;
@@ -16,7 +19,7 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
 
                 % Load the ROI so that we can exclude points (set them to
                 % zero if outside the ROI).
-                troiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialId));
+                troiFilename = fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', triall.getTrialId()));
                 if ~isfile(troiFilename)
                     error('Required file (%s) does not exist.', troiFilename);
                 end
@@ -55,7 +58,7 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
                 trial.points = t.points;
                 trial.header = t.header;
 
-                trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
+                trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', triall.getTrialId()));
                 fprintf('Saving %s ... ', trialFnvtFilename);
                 save(trialFnvtFilename, 'trial')
                 fprintf('done!\n');

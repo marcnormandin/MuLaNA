@@ -9,6 +9,10 @@ classdef MLSessionInterface < handle
         getNumTrials(obj)
         getNumTrialsToUse(obj)
         getTrial(obj, iTrial )
+        getTrialToUse(obj, iTrial)
+        
+        %getNumSingleUnits(obj);
+        %getSingleUnit(obj, iUnit);
         
         getSessionDirectory(obj)
         getAnalysisDirectory(obj)

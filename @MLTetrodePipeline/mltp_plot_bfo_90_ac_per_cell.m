@@ -1,9 +1,9 @@
 function mltp_plot_bfo_90_ac_per_cell(obj, session)
     % We have to use the shrunk data if the shape is a rectangle
     if strcmpi(obj.getArena().shape, 'rectangle')
-        dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolderShrunk);
+        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
     else
-        dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder);
+        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
     end
     
     % Load the data
@@ -16,8 +16,6 @@ function mltp_plot_bfo_90_ac_per_cell(obj, session)
 
     numCells = length(data);
     
-    sr = session.sessionRecord;
-
     h = figure('Position', get(0,'Screensize'));
     
     % FixMe! Pick the number of subplots based on the number that will
@@ -45,14 +43,14 @@ function mltp_plot_bfo_90_ac_per_cell(obj, session)
 
     end % iCell
     % Save the figure
-        %outputFolder = fullfile(session.analysisFolder);
+        %outputFolder = fullfile(session.getAnalysisDirectory());
         %outputFolder = fullfile(pwd,'for_Isabel');
-        outputFolder = fullfile(session.analysisFolder, 'best_fit_orientations_per_cell');
+        outputFolder = fullfile(session.getAnalysisDirectory(), 'best_fit_orientations_per_cell');
         if ~exist(outputFolder, 'dir')
             mkdir(outputFolder)
         end
         F = getframe(h);
-        fnPrefix = sprintf('%s_%s_bfo_90_ac_per_cell', obj.experiment.subjectName, sr.getName());
+        fnPrefix = sprintf('%s_%s_bfo_90_ac_per_cell', obj.Experiment.getAnimalName(), session.getName());
         imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
         savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
         saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');

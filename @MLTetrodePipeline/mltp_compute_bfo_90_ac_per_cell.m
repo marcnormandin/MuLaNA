@@ -1,26 +1,38 @@
 function mltp_compute_bfo_90_ac_per_cell(obj, session)
     % Allow the function to run so that other functions do not break,
     % but give a warning.
-    sr = session.sessionRecord;
-    if sr.getNumTrialsToProcess() < 2
+    if session.getNumTrialsToUse() < 2
         warning('This function requires the session to have more than 1 trial.');
     end
     
     % We have to use the shrunk data if the shape is a rectangle
     if strcmpi(obj.getArena().shape, 'rectangle')
-        outputFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolderShrunk);
+        outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
     else
-        outputFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder);
+        outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
     end
 
-    numCells = length(session.tfiles_filename_prefixes);
+    tfiles_filename_prefixes = session.getTFilesFilenamePrefixes();
+    numCells = length(tfiles_filename_prefixes);
 
     best_fit_orientations_per_cell = struct;
     for iCell = 1:numCells
-        fl = dir(fullfile(outputFolder, sprintf('%s_*_%s', session.tfiles_filename_prefixes{iCell}, obj.config.placemaps.filenameSuffix)));
-        fnames = {fl.name};
+        fl = dir(fullfile(outputFolder, sprintf('%s_*_%s', tfiles_filename_prefixes{iCell}, obj.Config.placemaps.filenameSuffix)));
+        fnames1 = {fl.name};
+        
+        % Now get a list of the the trials that we want to use so that we
+        % dont assume that every placemap is used
+        trialIdsToUse = session.getTrialIndicesToUse();
+        fnames = {};
+        for iName = 1:length(fnames1)
+            tmp = split(fnames1{iName}, '_'); % eg. TT2_02_1_mltetrodeplacemaps.mat
+            tid = str2double(tmp{2});
+            if ismember(tid, trialIdsToUse)
+                fnames{end+1} = fnames1{iName};
+            end
+        end
 
-        best_fit_orientations_per_cell(iCell).tfile_filename_prefix = session.tfiles_filename_prefixes{iCell};
+        best_fit_orientations_per_cell(iCell).tfile_filename_prefix = tfiles_filename_prefixes{iCell};
 
         best_fit_orientations_per_cell(iCell).angle_index = [];
         best_fit_orientations_per_cell(iCell).angle_value = [];
@@ -45,7 +57,7 @@ function mltp_compute_bfo_90_ac_per_cell(obj, session)
                 W2 = ones(size(T2));
                 W2(isnan(T2)) = 0;
 
-                fprintf('Computing per-cell pixel-pixel cross-correlation for cell %s between trial %d and trial %d\n', session.tfiles_filename_prefixes{iCell}, iMap1, iMap2);
+                fprintf('Computing per-cell pixel-pixel cross-correlation for cell %s between trial %d and trial %d\n', tfiles_filename_prefixes{iCell}, iMap1, iMap2);
 
                 [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_square(T1, T2, 'W1',W1,'W2',W2);
 
@@ -63,7 +75,7 @@ function mltp_compute_bfo_90_ac_per_cell(obj, session)
         end
     end
 
-    %folder = fullfile(session.analysisFolder, obj.config.trial_nvt_position_plots_folder);
+    %folder = fullfile(session.getAnalysisDirectory(), obj.Config.trial_nvt_position_plots_folder);
     if ~exist(outputFolder, 'dir')
         mkdir(outputFolder)
     end

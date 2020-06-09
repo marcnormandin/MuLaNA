@@ -1,5 +1,5 @@
 function mltp_user_define_trial_arenaroi(obj, session)
-    if obj.verbose
+    if obj.isVerbose()
         fprintf('Defining the ROI for the trials.\n');
     end
 
@@ -24,11 +24,11 @@ function mltp_user_define_trial_arenaroi(obj, session)
         % it like raw data (and it takes a lot of user time
         % to create).
         roiFilename = fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialId));
-        if obj.verbose
+        if obj.isVerbose()
             fprintf('Saving ROI to %s ... ', roiFilename);
         end
         save(roiFilename, 'arenaroi')
-        if obj.verbose
+        if obj.isVerbose()
             fprintf('done!\n');
         end
     end

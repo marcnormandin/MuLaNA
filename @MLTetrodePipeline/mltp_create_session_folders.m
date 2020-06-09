@@ -1,5 +1,5 @@
 function [experiment] = mltp_create_session_folders( obj, recordingsParentFolder, analysisParentFolder, experimentDescriptionFilename )
-            VERBOSE = obj.verbose;
+            VERBOSE = obj.isVerbose();
             if VERBOSE
                  fprintf('Creating the analysis folder structure (if it does not exist).\n');
             end

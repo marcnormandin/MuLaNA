@@ -27,7 +27,7 @@ classdef MLExperimentBuilder < handle
         %% TETRODES
         function [experiment] = buildFromJsonNeuralyxTetrodes(expJson, sessionsParentDirectory, analysisParentDirectory)
             numSessions = length(expJson.session_folders);
-            sessions = MLSession.empty;
+            sessions = MLTetrodeSession.empty;
             numContexts = expJson.num_contexts;
             for iSession = 1:numSessions
                 sessionDirectory = fullfile(sessionsParentDirectory, expJson.session_folders{iSession});
@@ -61,11 +61,12 @@ classdef MLExperimentBuilder < handle
                         trialDirectory, trialAnalysisDirectory, ...
                         dateString, timeString);
                 end
-                sessions(iSession) = MLSession(sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
+                sessions(iSession) = MLTetrodeSession(sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
             end
             
-            experiment = MLExperiment( ...
-                expJson.animal, expJson.imaging_region, expJson.experiment, expJson.arena, numContexts, sessions, sessionsParentDirectory, analysisParentDirectory );
+            experiment = MLTetrodeExperiment( ...
+                expJson.animal, expJson.imaging_region, expJson.experiment, expJson.arena, numContexts, sessions, sessionsParentDirectory, analysisParentDirectory, ...
+                expJson.mclust_tfile_bits, expJson.nvt_file_trial_separation_threshold_s, expJson.nvt_filename);
         end % buildFromJson
         
         function createDefaultSessionRecordNeuralynxTetrodes(expJson, sessionDirectory, sessionName)

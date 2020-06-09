@@ -321,7 +321,7 @@ classdef MLSessionRecord < handle
             
             
             % Validate the arrays. Should all be the same length.
-            sameLengthFields = {'sequence_num', 'contexts', 'use', 'digs'};
+            sameLengthFields = {'sequence_num', 'contexts', 'use', 'digs', 'folders'};
             N = length(obj.json.trial_info.(sameLengthFields{1}));
             for iField = 2:length(sameLengthFields)
                 n = length(obj.json.trial_info.(sameLengthFields{iField}));
@@ -386,9 +386,9 @@ classdef MLSessionRecord < handle
                 record.trial_info.digs{iTmp} = "?";
             end
             
-            if isempty(folders)
-                record.trial_info.folders = [];
-            else
+%             if isempty(folders)
+%                 record.trial_info.folders = [];
+%             else
                 if length(folders) ~= numTrials
                     error('The number of folders does not equal the number of trials.');
                 end
@@ -396,7 +396,7 @@ classdef MLSessionRecord < handle
                 for iTmp = 1:numTrials
                     record.trial_info.folders{iTmp} = folders{iTmp};
                 end
-            end
+%             end
 
             txt = jsonencode(record);
             fid = fopen(outputFilename,'w');

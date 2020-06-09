@@ -54,7 +54,7 @@ classdef MLTrial < MLTrialInterface
         end
         
         function [dig] = getDig(obj) % return only the first dig
-            dig = obj.Digs(1);
+            dig = obj.Digs{1};
         end
         
         function [b] = hasDigs(obj)

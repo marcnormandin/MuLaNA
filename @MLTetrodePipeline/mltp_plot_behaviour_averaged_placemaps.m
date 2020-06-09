@@ -1,37 +1,40 @@
 function mltp_plot_behaviour_averaged_placemaps(obj, session)
 
-    sr = session.sessionRecord;
-    ti = sr.getTrialsToProcess();
+    tfiles_filename_prefixes = session.getTFilesFilenamePrefixes();
+
     digTypes = ['C', 'G', 'F', 'W']; % don't match '?'
     numDigTypes = length(digTypes);
-    numCells = session.num_tfiles;
-    %numTrials = sr.getNumTrialsToProcess();
-    digs = [ti.digs];
-    firstDigs = cell(1,length(digs));
-    for i = 1:length(digs)
-        firstDigs{i} = digs{i}(1);
+    numCells = session.getNumTFiles();
+
+    firstDigs = {};
+    for iTrialToUse = 1:session.getNumTrialsToUse()
+        trial = session.getTrialToUse(iTrialToUse);
+        firstDigs{end+1} = trial.getDig();
     end
 
     for iCell = 1:numCells
         hasMaps = false;
         h = figure();
-        tfileName = session.tfiles_filename_prefixes{iCell};
+        tfileName = tfiles_filename_prefixes{iCell};
+        
         for iDigType = 1:numDigTypes
             dt = digTypes(iDigType);
             ids = strcmpi(firstDigs, dt);
             if ~any(ids)
                 continue;
             end
+            ti = 1:session.getNumTrialsToUse();
             timatch = ti(ids);
 
             pmAveraged = {};
 
-            % Average the matching placemaps
+            % Average the matching placemaps for the current dig type
             for iMatch = 1:length(timatch)
-                tid = timatch(iMatch).id;
+                trial = session.getTrialToUse(timatch(iMatch));
+                tid = trial.getTrialId();
                 prefix = sprintf('%s_%d', tfileName, tid);
-                fn = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder, ...
-                    sprintf('%s_%s', prefix, obj.config.placemaps.filenameSuffix));
+                fn = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder, ...
+                    sprintf('%s_%s', prefix, obj.Config.placemaps.filenameSuffix));
                 if ~isfile(fn)
                     error('The placemap (%s) does not exist.\n', fn);
                 end
@@ -61,12 +64,12 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
         end
         
         % Save the figures
-        outputFolder = fullfile(session.analysisFolder, obj.config.behaviour_averaged_placemaps.outputFolder);
+        outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.behaviour_averaged_placemaps.outputFolder);
         if ~exist(outputFolder, 'dir')
             mkdir(outputFolder)
         end
         F = getframe(h);
-        fnPrefix = sprintf('%s_behaviour_averaged_placemap', tfileName, session.name);
+        fnPrefix = sprintf('%s_behaviour_averaged_placemap', tfileName, session.getName());
         imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')
         savefig(h, fullfile(outputFolder, sprintf('%s.fig', fnPrefix)));
         saveas(h, fullfile(outputFolder, sprintf('%s.svg', fnPrefix)), 'svg');

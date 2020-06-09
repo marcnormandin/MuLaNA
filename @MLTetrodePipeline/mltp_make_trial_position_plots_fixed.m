@@ -1,20 +1,19 @@
 function mltp_make_trial_position_plots_fixed(obj, session)
-        if obj.verbose
+        if obj.isVerbose()
             fprintf('Making position plots using the fixed data\n');
         end
 
         % Make the folder if it does not exist
-        folder = fullfile(session.analysisFolder, obj.config.trial_fnvt_position_plots_folder);
+        folder = fullfile(session.getAnalysisDirectory(), obj.Config.trial_fnvt_position_plots_folder);
         if ~exist(folder, 'dir')
             mkdir(folder)
         end
 
-        sr = session.sessionRecord;
-        ti = sr.getTrialsToProcess();
-        for iTrial = 1:sr.getNumTrialsToProcess()
-            trialId = ti(iTrial).id;
+        for iTrial = 1:session.getNumTrials()
+            trial = session.getTrial(iTrial);
+            trialId = trial.getTrialId();
                 
-            trialFnvtFilename = fullfile(session.analysisFolder, sprintf('trial_%d_fnvt.mat', trialId));
+            trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trialId));
             fprintf('Loading %s ... ', trialFnvtFilename);
             data = load(trialFnvtFilename);
             fprintf('done!\n');
@@ -25,6 +24,8 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             plot(t.extractedX, t.extractedY, 'b.')
             set(gca, 'ydir', 'reverse')
             axis equal off
+            title(sprintf('Trial: %d, Sequence: %d, Context: %d\n Dig: %s', trial.getTrialId(), trial.getSequenceId(), trial.getContextId(), trial.getDig()))
+
 
             % Save the data here
             trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', trialId, 'pos_scatter'));
@@ -49,6 +50,7 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             xlabel('Trial time, t (s)')
             ylabel('X Position (px)')
             grid on
+            title(sprintf('Trial: %d, Sequence: %d, Context: %d\n Dig: %s', trial.getTrialId(), trial.getSequenceId(), trial.getContextId(), trial.getDig()))
 
             ax(2) = subplot(3,1,2);
             plot(ts, t.extractedY, 'b.-')

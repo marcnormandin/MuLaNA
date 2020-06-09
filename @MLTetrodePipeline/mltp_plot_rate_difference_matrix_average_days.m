@@ -2,17 +2,17 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
     averageMatrix = {};
     seqNum = [];
     labels = {};
-    numSessions = obj.experiment.numSessions;
+    numSessions = obj.Experiment.getNumSessions();
     for iSession = 1:numSessions
-        session = obj.experiment.session{iSession};
-        sessionName = session.name;
+        session = obj.Experiment.getSession(iSession);
+        sessionName = session.getName();
 
         % Load the pfStats file that contains all of the information we
         % need.
-        tfolder = session.analysisFolder; %fullfile(pwd, 'analysis','chengs_task_2c', sessionName);
+        tfolder = session.getAnalysisDirectory(); %fullfile(pwd, 'analysis','chengs_task_2c', sessionName);
         dataFilename = fullfile(tfolder, ...
-            obj.config.rate_difference_matrices.outputFolder, ...
-            obj.config.rate_difference_matrices.outputMatFilename);
+            obj.Config.rate_difference_matrices.outputFolder, ...
+            obj.Config.rate_difference_matrices.outputMatFilename);
         if ~isfile(dataFilename)
             fprintf('Skipping session (%s) because (%s) found.\n', sessionName, dataFilename);
             return;
@@ -41,14 +41,14 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
     end % iSession
     averageMatrix = averageMatrix ./ numSessions;
     
-    havg = figure('name', sprintf('%s', obj.experiment.subjectName));
+    havg = figure('name', sprintf('%s', obj.Experiment.getAnimalName()));
         imagesc(averageMatrix)
         colormap jet
         xticks(1:numTrials)
         xticklabels(labels);
         yticks(1:numTrials)
         yticklabels(labels);
-        title(sprintf('%s\nAVERAGE ACROSS (%d) DAYS', obj.experiment.subjectName, numSessions), 'interpreter', 'none')
+        title(sprintf('%s\nAVERAGE ACROSS (%d) DAYS', obj.Experiment.getAnimalName(), numSessions), 'interpreter', 'none')
         hold on;
         rectangle('Position',[0.5,0.5,6,6],...
                   'Curvature',[0,0],...
@@ -59,7 +59,7 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
         hcb = colorbar;
         title(hcb, 'Rate Difference');
 
-        outputFolder = obj.analysisParentFolder;
+        outputFolder = obj.Experiment.getAnalysisParentDirectory();
         
         F = getframe(havg);
         imwrite(F.cdata, fullfile(outputFolder, sprintf('rate_difference_matrix_avg_across_days.png')), 'png')

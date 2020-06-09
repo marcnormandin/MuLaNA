@@ -33,6 +33,11 @@ classdef MLPipeline2 < handle
             obj.AnalysisParentFolder = analysisParentFolder;
             
             obj.Experiment = MLExperimentBuilder.buildFromJson(recordingsParentFolder, analysisParentFolder);
+            
+            if ~exist(analysisParentFolder, 'dir')
+                mkdir(analysisParentFolder);
+                fprintf('Created analysis parent folder: %s\n', analysisParentFolder);
+            end
 
             obj.configSetup();
         end
