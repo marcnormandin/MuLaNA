@@ -68,6 +68,6 @@ end
 % The values need to be integers for NLX NVT files.
 % Floor the value so we don't go higher (unlikely) then what the video
 % file supports.
-fixed = floor(fixed);
+% fixed = floor(fixed);
 
 end

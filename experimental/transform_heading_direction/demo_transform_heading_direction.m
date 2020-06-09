@@ -44,15 +44,15 @@ y_cm = canonPts(2,:);
 % Compute angle of the feature (from right to left) in video coordinates
 angle_px = atan2( referencePointsVideo(2,2) - referencePointsVideo(2,1), referencePointsVideo(1,2) - referencePointsVideo(1,1) );
 angle_px( angle_px < pi ) = angle_px( angle_px < pi ) + 2*pi;
-angle_px = angle_px * 360 / (2*pi)
+angle_px = angle_px * 360 / (2*pi);
 
 % Compute angle of the feature (from right to left) in standard coordinates
 angle_cm = atan2( referencePointsCanon(2,2) - referencePointsCanon(2,1), referencePointsCanon(1,2) - referencePointsCanon(1,1) );
 angle_cm( angle_cm < pi ) = angle_cm( angle_cm < pi ) + 2*pi;
-angle_cm = angle_cm * 360 / (2*pi)
+angle_cm = angle_cm * 360 / (2*pi);
 
 % Now compute what the difference is
-angleDifference = angle_cm - angle_px
+angleDifference = angle_cm - angle_px;
 
 % Add the difference to the angle in video coordinates to get the angle in
 % standard coordinates
