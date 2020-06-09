@@ -2,7 +2,6 @@ function two_contexts_tetrode_init(referenceFolder)
 
 projectType = 'two_contexts_tetrode';
 
-fprintf('Select project instance folder \n');
 instanceFolder = uigetdir(pwd, 'Select project instance folder');
 if ~exist(instanceFolder, 'dir')
     fprintf('Creating instance folder (%s) ... ', instanceFolder);
@@ -13,9 +12,7 @@ end
 project.type = projectType;
 project.instanceFolder = instanceFolder;
 project.projectCreated = datestr(now);
-fprintf('Select the parent data directory \n');
 project.dataFolder = uigetdir(fullfile(instanceFolder, 'data'), 'Select the parent data directory');
-fprintf('Select the parent analysis directory \n');
 project.analysisFolder = uigetdir(fullfile(instanceFolder, 'analysis'), 'Select the parent analysis directory');
 project.dataFeaturePoorFolder = fullfile(project.dataFolder, 'feature_poor');
 project.dataFeatureRichFolder = fullfile(project.dataFolder, 'feature_rich');
