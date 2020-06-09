@@ -1,17 +1,17 @@
 function mltp_plot_bfo_90_averaged_across_sessions(obj)
 
     % Only applicable if experiment has more than one session
-    if obj.experiment.numSessions < 2
+    if obj.Experiment.getNumSessions() < 2
         warning('plot_best_fit_orientations_averaged_across_sessions requires more than one session of data. Skipping.')
         return
     end
     
-    tmp = load(fullfile(obj.analysisParentFolder, 'best_fit_orientations_all_contexts.mat'));
+    tmp = load(fullfile(obj.Experiment.getAnalysisParentDirectory(), 'best_fit_orientations_all_contexts.mat'));
     x1 = tmp.best_fit_orientations_all_contexts;
     x1mean = mean(x1,1);
     x1std = std(x1,1);
 
-    tmp = load(fullfile(obj.analysisParentFolder, 'best_fit_orientations_within_contexts.mat'));
+    tmp = load(fullfile(obj.Experiment.getAnalysisParentDirectory(), 'best_fit_orientations_within_contexts.mat'));
     x2 = tmp.best_fit_orientations_within_contexts;
     x2mean = mean(x2,1);
     x2std = std(x2,1);
@@ -46,10 +46,10 @@ function mltp_plot_bfo_90_averaged_across_sessions(obj)
     set(gca,'XTickLabel',{['0' char(176)], ['90' char(176)], ['180' char(176)], ['270' char(176)]})
     %xlabel('Orientation [deg]')
     ylabel('Proportion Best Fit', 'fontweight', 'bold')
-    title(sprintf('Best Fit Orientations: %s', obj.experiment.subjectName), 'interpreter', 'none')
+    title(sprintf('Best Fit Orientations: %s', obj.Experiment.getAnimalName()), 'interpreter', 'none')
 
     % Save the figure
-    outputFolder = obj.analysisParentFolder;
+    outputFolder = obj.Experiment.getAnalysisParentDirectory();
     F = getframe(h);
     fnPrefix = 'best_fit_orientations_averaged_across_sessions';
     imwrite(F.cdata, fullfile(outputFolder, sprintf('%s.png', fnPrefix)), 'png')

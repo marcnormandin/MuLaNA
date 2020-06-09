@@ -1,115 +1,73 @@
-classdef MLTetrodePipeline < MLPipeline
+classdef MLTetrodePipeline < MLPipeline2
     properties
-        pipelineConfigFilename = '';
-        experimentDescriptionFilename = '';
         
-        recordingsParentFolder = '';
-        analysisParentFolder = '';
-        config = '';
-        
-        % Kernel used to smooth the placemaps
-        smoothingKernel = [];
-        smoothingKernelSquare = [];
     end % properties
     
     methods
-        function obj = MLTetrodePipeline(pipelineConfigFilename, recordingsParentFolder,  analysisParentFolder)
-            obj.pipelineConfigFilename = pipelineConfigFilename;
-            obj.recordingsParentFolder = recordingsParentFolder;
-            obj.analysisParentFolder = analysisParentFolder;
+        function obj = MLTetrodePipeline(config, recordingsParentFolder,  analysisParentFolder)
+            obj@MLPipeline2(config, recordingsParentFolder,  analysisParentFolder);
+            obj.initialize();
             
-            % Read in the pipeline configuration file
-            if ~isfile( pipelineConfigFilename )
-                error('The pipeline configuration file (%s) does not exist.', pipelineConfigFilename);
-            end
-            try 
-                obj.config = jsondecode( fileread(pipelineConfigFilename) );
-            catch ME
-                error('Error encountered while reading pipeline configuration from (%s): %s', pipelineConfigFilename, ME.identifier)
-            end
+            obj.registerAvailableTasks();
             
-            % Read in the experiment file
-            obj.experimentDescriptionFilename = fullfile(obj.recordingsParentFolder, 'experiment_description.json');
-            if ~isfile( obj.experimentDescriptionFilename )
-                error('Error! The file (%s) does not exist! How do you expect me to work?!', obj.experimentDescriptionFilename);
-            end
-
+        end
             
-            % Create the experiment structure
-            obj.experiment = obj.mltp_create_session_folders( obj.recordingsParentFolder, obj.analysisParentFolder, obj.experimentDescriptionFilename);
-            
-            
-            % Construct the kernel. Make sure that it is valid.
-            % The kernel sizes must be odd so that they are symmetric
-            if mod(obj.config.placemaps.smoothingKernelGaussianSize_cm,2) ~= 1
-                error('The config value placemaps.smoothingKernelGaussianSize_cm must be odd, but it is %d.', obj.config.placemaps.smoothingKernelGaussianSize_cm);
-            end
-            % Make sure that the size is odd so that gaussian peak is at
-            % the central bin
-            hsize = ceil(obj.config.placemaps.smoothingKernelGaussianSize_cm / obj.config.placemaps.cm_per_bin);
-            if mod(hsize,2) ~= 1
-                hsize = hsize + 1;
-            end
-            obj.smoothingKernel = fspecial('gaussian', hsize, obj.config.placemaps.smoothingKernelGaussianSigma_cm / obj.config.placemaps.cm_per_bin);
-            obj.smoothingKernel = obj.smoothingKernel ./ max(obj.smoothingKernel(:)); % Isabel wants this like the other
-            
-            % Take care of the possible infinite value for the speed
-            obj.config.placemaps.criteria_speed_cm_per_second_maximum = eval(obj.config.placemaps.criteria_speed_cm_per_second_maximum);
-            if obj.config.placemaps.criteria_speed_cm_per_second_maximum < 0
-                error('The config value placemaps.criteria_speed_cm_per_second_maximum must be >= 0, but is %f.', obj.config.placemaps.criteria_speed_cm_per_second_maximum);
-            end
-            if obj.config.placemaps.criteria_speed_cm_per_second_maximum < obj.config.placemaps.criteria_speed_cm_per_second_minimum
-                error('The config value placemaps.criteria_speed_cm_per_second_maximum (%f) must be greater than the minimum (%f).', ...
-                    obj.config.placemaps.criteria_speed_cm_per_second_maximum, obj.config.placemaps.criteria_speed_cm_per_second_minimum);
-            end
-            
-
-            
-            % These should go through a registration function to allow for
-            % checking of duplicates
-            obj.availablePerSessionTasks('nvt_split_into_trial_nvt') = @obj.mltp_nvt_split_into_trial_nvt;
-            obj.availablePerSessionTasks('trial_nvt_to_trial_fnvt') = @obj.mltp_trial_nvt_to_trial_fnvt;
-            obj.availablePerSessionTasks('user_define_trial_arenaroi') = @obj.mltp_user_define_trial_arenaroi;
-            obj.availablePerSessionTasks('make_trial_position_plots_raw') = @obj.mltp_make_trial_position_plots_raw;
-            obj.availablePerSessionTasks('make_trial_position_plots_fixed') = @obj.mltp_make_trial_position_plots_fixed;
-            obj.availablePerSessionTasks('make_session_orientation_plot_unaligned') = @obj.mltp_make_session_orientation_plot_unaligned;
-            obj.availablePerSessionTasks('make_session_orientation_plot_aligned') = @obj.mltp_make_session_orientation_plot_aligned;
-            
-            obj.availablePerSessionTasks('trial_fnvt_to_trial_can_movement') = @obj.mltp_trial_fnvt_to_trial_can_movement;
-
-            obj.availablePerSessionTasks('tfiles_to_singleunits') = @obj.mltp_tfiles_to_singleunits;
-            obj.availablePerSessionTasks('compute_singleunit_placemap_data') = @obj.mltp_compute_singleunit_placemap_data;
-            obj.availablePerSessionTasks('compute_singleunit_placemap_data_shrunk') = @obj.mltp_compute_singleunit_placemap_data_shrunk;
-            obj.availablePerSessionTasks('plot_singleunit_placemap_data') = @obj.mltp_plot_singleunit_placemap_data;
-            
-  
-            % Best fit orientations for 0, 90, 180, 270
-            obj.availablePerSessionTasks('compute_bfo_90_ac') = @obj.mltp_compute_bfo_90_ac;
-            obj.availablePerSessionTasks('compute_bfo_90_wc') = @obj.mltp_compute_bfo_90_wc;
-            obj.availablePerSessionTasks('compute_bfo_90_ac_per_cell') = @obj.mltp_compute_bfo_90_ac_per_cell;
-            obj.availablePerExperimentTasks('plot_bfo_90_wc') = @obj.mltp_plot_bfo_90_wc;
-            obj.availablePerExperimentTasks('plot_bfo_90_ac') = @obj.mltp_plot_bfo_90_ac;
-            obj.availablePerSessionTasks('plot_bfo_90_ac_per_cell') = @obj.mltp_plot_bfo_90_ac_per_cell;
-            obj.availablePerExperimentTasks('plot_bfo_90_averaged_across_sessions') = @obj.mltp_plot_bfo_90_averaged_across_sessions;   
-            
-            obj.availablePerSessionTasks('compute_best_fit_orientations_0_180_per_cell') = @obj.mltp_compute_best_fit_orientations_0_180_per_cell;
-            obj.availablePerSessionTasks('plot_across_within_0_180_similarity') = @obj.mltp_plot_across_within_0_180_similarity;
-            obj.availablePerSessionTasks('make_pfstats_excel') = @obj.mltp_make_pfstats_excel;
-            
-            obj.availablePerSessionTasks('plot_movement') = @obj.mltp_plot_movement;
-            
-            obj.availablePerSessionTasks('plot_nlx_mclust_plot_spikes_for_checking_bits') = @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits;
-            
-            obj.availablePerSessionTasks('plot_rate_difference_matrices') = @obj.mltp_plot_rate_difference_matrices;
-            obj.availablePerExperimentTasks('plot_rate_difference_matrix_average_days') = @obj.mltp_plot_rate_difference_matrix_average_days;
-            
-            obj.availablePerSessionTasks('plot_behaviour_averaged_placemaps') = @obj.mltp_plot_behaviour_averaged_placemaps;
-            obj.availablePerSessionTasks('plot_behaviour_averaged_placemaps_contexts') = @obj.mltp_plot_behaviour_averaged_placemaps_contexts;
-
+    end
+    
+    methods (Access = private)
+        function initialize(obj)
+            % nothing to do
         end % function
         
-        [experiment] = mltp_create_session_folders( obj, recordingsParentFolder, analysisParentFolder, experimentDescriptionFilename );
+        function registerAvailableTasks(obj)
+            % These should go through a registration function to allow for
+            % checking of duplicates
+            obj.registerSessionTask('nvt_split_into_trial_nvt', @obj.mltp_nvt_split_into_trial_nvt);
+            obj.registerSessionTask('trial_nvt_to_trial_fnvt', @obj.mltp_trial_nvt_to_trial_fnvt);
+            obj.registerSessionTask('user_define_trial_arenaroi', @obj.mltp_user_define_trial_arenaroi);
+            obj.registerSessionTask('make_trial_position_plots_raw', @obj.mltp_make_trial_position_plots_raw);
+            obj.registerSessionTask('make_trial_position_plots_fixed', @obj.mltp_make_trial_position_plots_fixed);
+            obj.registerSessionTask('make_session_orientation_plot_unaligned', @obj.mltp_make_session_orientation_plot_unaligned);
+            obj.registerSessionTask('make_session_orientation_plot_aligned', @obj.mltp_make_session_orientation_plot_aligned);
+            
+            obj.registerSessionTask('trial_fnvt_to_trial_can_movement', @obj.mltp_trial_fnvt_to_trial_can_movement);
+
+            obj.registerSessionTask('tfiles_to_singleunits', @obj.mltp_tfiles_to_singleunits);
+            obj.registerSessionTask('compute_singleunit_placemap_data', @obj.mltp_compute_singleunit_placemap_data);
+            obj.registerSessionTask('compute_singleunit_placemap_data_shrunk', @obj.mltp_compute_singleunit_placemap_data_shrunk);
+            obj.registerSessionTask('plot_singleunit_placemap_data', @obj.mltp_plot_singleunit_placemap_data);
+            
+            obj.registerSessionTask('plot_placemaps', @obj.mltp_plot_placemaps);
+  
+            % Best fit orientations for 0, 90, 180, 270
+            obj.registerSessionTask('compute_bfo_90_ac', @obj.mltp_compute_bfo_90_ac);
+            obj.registerSessionTask('compute_bfo_90_wc', @obj.mltp_compute_bfo_90_wc);
+            obj.registerSessionTask('compute_bfo_90_ac_per_cell', @obj.mltp_compute_bfo_90_ac_per_cell);
+            obj.registerExperimentTask('plot_bfo_90_wc', @obj.mltp_plot_bfo_90_wc);
+            obj.registerExperimentTask('plot_bfo_90_ac', @obj.mltp_plot_bfo_90_ac);
+            obj.registerSessionTask('plot_bfo_90_ac_per_cell', @obj.mltp_plot_bfo_90_ac_per_cell);
+            obj.registerExperimentTask('plot_bfo_90_averaged_across_sessions', @obj.mltp_plot_bfo_90_averaged_across_sessions);   
+            
+            obj.registerSessionTask('compute_best_fit_orientations_0_180_per_cell', @obj.mltp_compute_best_fit_orientations_0_180_per_cell);
+            obj.registerSessionTask('plot_across_within_0_180_similarity', @obj.mltp_plot_across_within_0_180_similarity);
+            obj.registerSessionTask('make_pfstats_excel', @obj.mltp_make_pfstats_excel);
+            
+            obj.registerSessionTask('plot_movement', @obj.mltp_plot_movement);
+            
+            obj.registerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits', @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits);
+            
+            obj.registerSessionTask('plot_rate_difference_matrices', @obj.mltp_plot_rate_difference_matrices);
+            obj.registerExperimentTask('plot_rate_difference_matrix_average_days', @obj.mltp_plot_rate_difference_matrix_average_days);
+            
+            obj.registerSessionTask('plot_behaviour_averaged_placemaps', @obj.mltp_plot_behaviour_averaged_placemaps);
+            obj.registerSessionTask('plot_behaviour_averaged_placemaps_contexts', @obj.mltp_plot_behaviour_averaged_placemaps_contexts);
+            
+        end % function
         
+    end % methods private
+        
+
+    methods
         mltp_nvt_split_into_trial_nvt(obj, session);
         mltp_trial_nvt_to_trial_fnvt(obj, session);
         mltp_trial_fnvt_to_trial_can_movement(obj, session);
@@ -118,7 +76,8 @@ classdef MLTetrodePipeline < MLPipeline
         mltp_compute_singleunit_placemap_data(obj, session);
         mltp_compute_singleunit_placemap_data_shrunk(obj, session);
         mltp_plot_singleunit_placemap_data(obj, session);
-
+        mltp_plot_placemaps(obj, session);
+        
         mltp_make_trial_position_plots_raw(obj, session);
         mltp_make_trial_position_plots_fixed(obj, session);
         mltp_user_define_trial_arenaroi(obj, session);
@@ -164,7 +123,7 @@ classdef MLTetrodePipeline < MLPipeline
         mltp_plot_movement(obj, session);
          
         function [arena] = getArena(obj)
-            arena = obj.experiment.info.arena;
+            arena = obj.Experiment.getArenaGeometry();
         end % function
         
     end % methods

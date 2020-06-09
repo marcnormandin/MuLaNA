@@ -1,15 +1,14 @@
 function mltp_plot_movement(obj, session)
-    outputFolder = fullfile( session.analysisFolder, 'trial_movement' );
+    outputFolder = fullfile( session.getAnalysisDirectory(), 'trial_movement' );
     if ~exist( outputFolder, 'dir')
         mkdir(outputFolder)
     end
     
-    sr = session.sessionRecord;
-    ti = sr.getTrialsToProcess();
-    for iTrial = 1:sr.getNumTrialsToProcess()
-        trialId = ti(iTrial).id;
+    for iTrial = 1:session.getNumTrials()
+        trial = session.getTrial(iTrial);
+        trialId = trial.getTrialId();
                 
-        fn = fullfile( session.analysisFolder, sprintf('trial_%d_movement.mat', trialId) );
+        fn = fullfile( session.getAnalysisDirectory(), sprintf('trial_%d_movement.mat', trialId) );
         if ~isfile(fn)
             error('The required file (%s) does not exist:', fn);
         end
@@ -27,7 +26,7 @@ function mltp_plot_movement(obj, session)
         plot(t, movement.vx_smoothed, 'r-', 'linewidth', 2)
         grid on
         ylabel('v_x(t) [cm/s]')
-        title(sprintf('%s %s Trial %d', obj.experiment.subjectName, session.name, trialId), 'interpreter', 'none');
+        title(sprintf('%s %s\n T: %d, S: %d, C: %d', obj.Experiment.getAnimalName(), session.getName(), trialId, trial.getSequenceId(), trial.getContextId()), 'interpreter', 'none');
 
         ax(2) = subplot(p,q,3);
         plot(t, movement.vy,'b.');
@@ -40,10 +39,10 @@ function mltp_plot_movement(obj, session)
         plot(t, movement.speed_cm_per_s, 'b.');
         hold on
         plot(t, movement.speed_smoothed_cm_per_s,'r-', 'linewidth', 2)
-        yline(obj.config.placemaps.criteria_speed_cm_per_second_minimum,'k', 'linewidth', 2)
-        if isfinite(obj.config.placemaps.criteria_speed_cm_per_second_maximum)
-            yline(obj.config.placemaps.criteria_speed_cm_per_second_maximum,'k', 'linewidth', 2)
-            yline(-obj.config.placemaps.criteria_speed_cm_per_second_maximum,'k', 'linewidth', 2)
+        yline(obj.Config.placemaps.criteria_speed_cm_per_second_minimum,'k', 'linewidth', 2)
+        if isfinite(obj.Config.placemaps.criteria_speed_cm_per_second_maximum)
+            yline(obj.Config.placemaps.criteria_speed_cm_per_second_maximum,'k', 'linewidth', 2)
+            yline(-obj.Config.placemaps.criteria_speed_cm_per_second_maximum,'k', 'linewidth', 2)
         end
         grid on
         ylabel('s(t) [cm/s]')

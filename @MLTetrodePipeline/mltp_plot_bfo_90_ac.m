@@ -1,15 +1,15 @@
 function mltp_plot_bfo_90_ac(obj)
     numAngles = 4;
-    best_fit_orientations_all_contexts = zeros(obj.experiment.numSessions, numAngles);
-    plotlegend = cell(obj.experiment.numSessions, 1);
-    for iSession = 1:obj.experiment.numSessions
-        session = obj.experiment.session{iSession};
+    best_fit_orientations_all_contexts = zeros(obj.Experiment.getNumSessions(), numAngles);
+    plotlegend = cell(obj.Experiment.getNumSessions(), 1);
+    for iSession = 1:obj.Experiment.getNumSessions()
+        session = obj.Experiment.getSession(iSession);
         
         % We have to use the shrunk data if the shape is a rectangle
         if strcmpi(obj.getArena().shape, 'rectangle')
-            dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolderShrunk);
+            dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
         else
-            dataFolder = fullfile(session.analysisFolder, obj.config.placemaps.outputFolder);
+            dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
         end
         tmp = load(fullfile(dataFolder,'bfo_90_ac.mat'));        
         
@@ -22,18 +22,18 @@ function mltp_plot_bfo_90_ac(obj)
         else
             best_fit_orientations_all_contexts(iSession,:) = 0*ones(1,4);
         end
-        plotlegend{iSession} = session.record.session_info.name;
+        plotlegend{iSession} = session.getName();
     end
     % All of the sessions
-    h = figure('Name', sprintf('Best Fit Orientations (all contexts) ( %s )', obj.experiment.subjectName), 'Position', get(0,'Screensize'));
+    h = figure('Name', sprintf('Best Fit Orientations (all contexts) ( %s )', obj.Experiment.getAnimalName()), 'Position', get(0,'Screensize'));
     bar([0, 90, 180, 270], best_fit_orientations_all_contexts');
     hold on 
     grid on
-    title(sprintf('Best Fit Orientations (all contexts) ( %s )', obj.experiment.subjectName), 'Interpreter', 'none')
+    title(sprintf('Best Fit Orientations (all contexts) ( %s )', obj.Experiment.getAnimalName()), 'Interpreter', 'none')
     ylabel('Proportion Best Fit')
     xticklabels({['0' char(176)], ['90' char(176)], ['180' char(176)], ['270' char(176)]});
     legend(plotlegend)
-    outputFolder = obj.analysisParentFolder;
+    outputFolder = obj.Experiment.getAnalysisParentDirectory();
     F = getframe(h);
     imwrite(F.cdata, fullfile(outputFolder, 'bfo_90_ac.png'), 'png')
     savefig(h, fullfile(outputFolder, 'bfo_90_ac.fig'));

@@ -20,6 +20,10 @@ classdef MLSession < MLSessionInterface
             obj.Trials = trials;
             obj.SessionDirectory = sessionDirectory;
             obj.AnalysisDirectory = analysisDirectory;
+            
+            if ~exist(obj.AnalysisDirectory, 'dir')
+                mkdir(obj.AnalysisDirectory);
+            end
         end % function
     end % methods
     
@@ -36,8 +40,8 @@ classdef MLSession < MLSessionInterface
            N = length(obj.Trials);
            indices = [];
            for n = 1:N
-               t = obj.getTrials(n);
-               if t.isEnabled(obj)
+               t = obj.getTrial(n);
+               if t.isEnabled()
                    indices(end+1) = n;
                end
            end
@@ -57,6 +61,16 @@ classdef MLSession < MLSessionInterface
             end
             
             t = obj.Trials(iTrial);
+        end
+        
+        function [t] = getTrialToUse( obj, iTrial )
+            if iTrial < 1 || iTrial > obj.getNumTrialsToUse()
+                error('Invalid trial id (%d). Only sessions 1 to %d are available.', iTrial, obj.getNumTrialsToUse());
+            end
+            
+            ti = obj.getTrialIndicesToUse();
+            
+            t = obj.Trials(ti(iTrial));
         end
         
         function [s] = getSessionDirectory(obj)

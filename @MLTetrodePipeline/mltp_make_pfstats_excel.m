@@ -1,40 +1,23 @@
 function mltp_make_pfstats_excel(obj, session)
-    pfStatsFilename = fullfile(session.analysisFolder, 'pfStats.xlsx');
-    pfStatsMatFilename = fullfile(session.analysisFolder, 'pfStats.mat');
+    pfStatsFilename = fullfile(session.getAnalysisDirectory(), 'pfStats.xlsx');
+    pfStatsMatFilename = fullfile(session.getAnalysisDirectory(), 'pfStats.mat');
 
     if isfile(pfStatsFilename)
         delete(pfStatsFilename)
     end
+    
+    if isfile(pfStatsMatFilename)
+        delete(pfStatsMatFilename)
+    end
 
-    % Sort them (hackish)
-    % Remove the TT
-    tmp2 = [];
-    for i = 1:length(session.tfiles_filename_prefixes)
-        tmp1 = session.tfiles_filename_prefixes{i};
-        s = tmp1(3:end); % strip the TT
-        s = split(s,'_');
-        % Now convert to a number
-        num = str2double(s{1}) * 10 + str2double(s{2});
-        tmp2(end+1) = num;
-    end
-    % now sort them numerically
-    [sortedValue, prevIndex] = sort(tmp2);
-    tFilesToUse = {};
-    for i = 1:length(tmp2)
-        tFilesToUse{i} = session.tfiles_filename_prefixes{prevIndex(i)};
-    end
+    tFilesToUse = session.getTFilesFilenamePrefixes();
     
     numTFiles = length(tFilesToUse);
     
-    sr = session.sessionRecord;
-    ti = sr.getTrialsToProcess();
+    fprintf('Found %d tfiles present in %s.\n', length(tFilesToUse), session.getName());
     
-    numTrials = sr.getNumTrialsToProcess();
-    
-    fprintf('Found %d tfiles present in %s.\n', length(tFilesToUse), sr.getName());
-    
-    placemapSubFolder = obj.config.placemaps.outputFolder;
-    placemapFilenameSuffix = obj.config.placemaps.filenameSuffix;
+    placemapSubFolder = obj.Config.placemaps.outputFolder;
+    placemapFilenameSuffix = obj.Config.placemaps.filenameSuffix;
     
     % Make a result structure for each common tfiles
     pfStats = [];
@@ -46,9 +29,11 @@ function mltp_make_pfstats_excel(obj, session)
    
         pfStats(iTFile).tFilePrefix = tFilePrefix;
 
-        placemapDataFolder = fullfile(session.analysisFolder, placemapSubFolder);
-        for iTrial = 1:numTrials
-            trialId = ti(iTrial).id;
+        % We only want stats for the trials that we actually want to use
+        placemapDataFolder = fullfile(session.getAnalysisDirectory(), placemapSubFolder);
+        for iTrial = 1:session.getNumTrialsToUse()
+            trial = session.getTrialToUse(iTrial);
+            trialId = trial.getTrialId();
             tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
             placemaps{iTrial} = tmp.mltetrodeplacemap;
 
@@ -72,8 +57,9 @@ function mltp_make_pfstats_excel(obj, session)
          for iTFile = 1:numTFiles
             tFilePrefix = tFilesToUse{iTFile};
             S{1,iTFile+1} = tFilePrefix;
-            for iTrial = 1:numTrials
-                S{iTrial+1,1} = ti(iTrial).sequenceNum; % name the trial
+            for iTrial = 1:session.getNumTrialsToUse()
+                trial = session.getTrialToUse(iTrial);
+                S{iTrial+1,1} = trial.getSequenceId(); % name the trial
                 d = pfStats(iTFile).(sheet);
                 S{iTrial+1,iTFile+1} = d(iTrial);
             end
@@ -84,5 +70,6 @@ function mltp_make_pfstats_excel(obj, session)
         writetable(Tnew, pfStatsFilename, 'Sheet', sprintf('%s', sheet), 'WriteVariableNames', false);
     end
     
+    numTrials = session.getNumTrialsToUse();
     save(pfStatsMatFilename, 'pfStats', 'session', 'numTFiles', 'numTrials');
 end % function

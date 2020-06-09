@@ -1,5 +1,5 @@
 function mltp_plot_rate_difference_matrices(obj, session)
-    sessionName = session.name;
+    sessionName = session.getName();
 
     % Controls what values will be used
     % available fields:
@@ -9,7 +9,7 @@ function mltp_plot_rate_difference_matrices(obj, session)
     
     % Load the pfStats file that contains all of the information we
     % need.
-    tfolder = session.analysisFolder; %fullfile(pwd, 'analysis','chengs_task_2c', sessionName);
+    tfolder = session.getAnalysisDirectory(); %fullfile(pwd, 'analysis','chengs_task_2c', sessionName);
     pfStatsFilename = fullfile(tfolder, 'pfStats.mat');
     if ~isfile(pfStatsFilename)
         fprintf('Skipping session (%s) because (%s) found.\n', sessionName, pfStatsFilename);
@@ -23,11 +23,13 @@ function mltp_plot_rate_difference_matrices(obj, session)
     % Get the number of trials to process because that is all that the
     % pfStats contains. It doesn't contain any data from trials not
     % processed.
-    sr = session.sessionRecord;
-    ti = sr.getTrialsToProcess(); % for the contexts
-    numTrials = sr.getNumTrialsToProcess();
+    numTrials = session.getNumTrialsToUse();
     numCells = length(pfStats); % or use the session itself
-
+    if numTrials ~= length(pfStats(1).meanFiringRate)
+        error('The number of trials to use (%d) and those stored in pfStats (%d) do not match, but they should!', ...
+            numTrials, size(pfStats,2));
+    end
+    
     % Cells are the rows and columns are the trials. Load the mean
     % firing rate for each cell.
     MFRT = zeros(numCells, numTrials);
@@ -45,6 +47,7 @@ function mltp_plot_rate_difference_matrices(obj, session)
         D = zeros(numTrials, numTrials);
         for iTrial1 = 1:numTrials
             for iTrial2 = 1:numTrials
+                % Calculate the absolute difference
                 D(iTrial1, iTrial2) = abs( MFRT(iCell, iTrial1) - MFRT(iCell, iTrial2) );
             end
         end        
@@ -54,11 +57,27 @@ function mltp_plot_rate_difference_matrices(obj, session)
     DAVG = DAVG ./ numCells; % compute the average over the cells
     
     % Sort based on context. We find indices grouped by context
-    contexts = sort(unique([ti.context]));
+    contexts = []; % We do this to not assume that the context ids are 1,2,3, and allow them to be 1,32,55, etc.
+    for iTrialToUse = 1:session.getNumTrialsToUse()
+        trial = session.getTrialToUse(iTrialToUse);
+        contexts(end+1) = trial.getContextId();
+    end
+    contexts = sort(unique(contexts));
     numContexts = length(contexts);
+    % Check for any possible bug
+    if numContexts ~= obj.Experiment.getNumContexts()
+        error('The number of contexts does not match, but they should!');
+    end
+    
+    % We want an array of trials to use sorted by context
     tids = [];
     for iContext = 1:numContexts
-        tids = [tids, find([ti.context] == contexts(iContext))];
+        for iTrialToUse = 1:session.getNumTrialsToUse()
+            trial = session.getTrialToUse(iTrialToUse);
+            if trial.getContextId() == contexts(iContext)
+                tids(end+1) = iTrialToUse;
+            end
+        end
     end
     % Sort the matrices by context (rows and columns have to be switched)
     for iCell = 1:numCells
@@ -69,7 +88,15 @@ function mltp_plot_rate_difference_matrices(obj, session)
     DAVG = DAVG(tids,:);
     DAVG = DAVG(:, tids);
     
-    seqNum = [ti.sequenceNum];
+    %seqNum = [ti.sequenceNum];
+    % This is for labeling the axes. We use the sequence numbers
+    % become some actual trials may have been redone/not used.
+    seqNum = [];
+    for iTrialToUse = 1:session.getNumTrialsToUse()
+        trial = session.getTrialToUse(iTrialToUse);
+        seqNum(end+1) = trial.getSequenceId();
+    end
+    % Now sort them by the contexts
     seqNum = seqNum(tids); % get the sequences like 1,3,5,...
     labels = cell(1, numTrials);
     for iTrial = 1:numTrials
@@ -77,7 +104,7 @@ function mltp_plot_rate_difference_matrices(obj, session)
     end
     
     % Plotting
-    hpercell = figure('name', sprintf('%s: %s (%s)', obj.experiment.subjectName, sessionName, figureField), 'Position', get(0,'Screensize'));
+    hpercell = figure('name', sprintf('%s: %s (%s)', obj.Experiment.getAnimalName(), sessionName, figureField), 'Position', get(0,'Screensize'));
     p = 3; q=ceil(numCells/3); k=1; % maximum of 25 cells on a plot
     for iCell = 1:numCells
         %
@@ -102,7 +129,7 @@ function mltp_plot_rate_difference_matrices(obj, session)
     end
 
     % Save the plots
-    outputFolder = fullfile(tfolder, obj.config.rate_difference_matrices.outputFolder);
+    outputFolder = fullfile(tfolder, obj.Config.rate_difference_matrices.outputFolder);
     if ~exist(outputFolder,'dir')
         mkdir(outputFolder)
     end
@@ -115,14 +142,14 @@ function mltp_plot_rate_difference_matrices(obj, session)
 
 
 
-    havg = figure('name', sprintf('%s: %s', obj.experiment.subjectName, sessionName));
+    havg = figure('name', sprintf('%s: %s', obj.Experiment.getAnimalName(), sessionName));
     imagesc(DAVG)
     colormap jet
     xticks(1:numTrials)
     xticklabels(labels);
     yticks(1:numTrials)
     yticklabels(labels);
-    title(sprintf('AVERAGE ACROSS CELLS (%s: %s)', obj.experiment.subjectName, sessionName), 'interpreter', 'none')
+    title(sprintf('AVERAGE ACROSS CELLS (%s: %s)', obj.Experiment.getAnimalName(), sessionName), 'interpreter', 'none')
     hold on;
     rectangle('Position',[0.5,0.5,6,6],...
               'Curvature',[0,0],...
@@ -143,6 +170,6 @@ function mltp_plot_rate_difference_matrices(obj, session)
     % Save the data for averaging over days
     rate_difference_matrices_per_cell = DALL;
     rate_difference_matrix_average = DAVG;
-    save(fullfile(outputFolder, obj.config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum');
+    save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum');
     
 end % function

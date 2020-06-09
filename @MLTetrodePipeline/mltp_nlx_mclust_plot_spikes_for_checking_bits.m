@@ -1,16 +1,16 @@
 function mltp_nlx_mclust_plot_spikes_for_checking_bits(obj, session)
     % Get a list of the tfiles
-    tFilenames = dir(fullfile(session.rawFolder, 'TT*.t'));
-    nvtFilename = fullfile(session.rawFolder, obj.config.nvt_filename);
+    tFilenames = dir(fullfile(session.getSessionDirectory(), 'TT*.t'));
+    nvtFilename = fullfile(session.getSessionDirectory(), obj.Config.nvt_filename);
     numTFiles = length(tFilenames);
     
-    outputFolder = fullfile(session.analysisFolder, 'tfile_diagnostics');
+    outputFolder = fullfile(session.getAnalysisDirectory(), 'tfile_diagnostics');
     if ~exist(outputFolder, 'dir')
         mkdir(outputFolder);
     end
     
     for iFile = 1:numTFiles
-        tFilename = fullfile(session.rawFolder, tFilenames(iFile).name);
+        tFilename = fullfile(session.getSessionDirectory(), tFilenames(iFile).name);
         h = ml_nlx_mclust_plot_spikes_for_checking_bits( nvtFilename, tFilename );
         
         tmp = split(tFilenames(iFile).name, '.');
