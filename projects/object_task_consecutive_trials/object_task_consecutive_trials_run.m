@@ -29,6 +29,20 @@ try
 catch ME
     error('Error encountered while reading project configuration from (%s): %s', projectCfgFilename, ME.identifier)
 end
+
+% Read in the pipeline configuration file
+if ~isfile(pipeCfgFilename)
+    error('The pipeline configuration file (%s) does not exist.', pipeCfgFilename);
+end
+try
+    fprintf('Loading the pipeline configuration from: %s\n', pipeCfgFilename);
+    pipeCfg = mulana_json_read( pipeCfgFilename );
+    fprintf('\tcompleted loading.\n');
+catch ME
+    error('Error encountered while reading the pipeline configuration from (%s): %s', pipeCfgFilename, ME.identifier);
+end
+
+
      
 DATA_FOLDER = projectConfig.dataFolder;
 ANALYSIS_FOLDER = projectConfig.analysisFolder;
@@ -159,31 +173,29 @@ for iHomework = 1:length(homework)
     end
     
     try
-        pipe = MLTetrodePipeline( pipeCfgFilename, recordingsParentFolder, analysisParentFolder);
+        pipe = MLTetrodePipeline( pipeCfg, recordingsParentFolder, analysisParentFolder);
 
-        pipe.executePerSessionTask('nvt_split_into_trial_nvt');
+
+pipe.executePerSessionTask('nvt_split_into_trial_nvt');
 
         % Ask the user to create the ROIs only when needed (ideally only once)
         % We to have the ROI before the other parts of the pipeline can run.
-        for iSession = 1:pipe.experiment.numSessions
-            session = pipe.experiment.session{iSession};
-
-            sr = session.sessionRecord;
-            ti = sr.getTrialsToProcess();
-            trialIds = [ti.id];
+        for iSession = 1:pipe.Experiment.getNumSessions()
+            session = pipe.Experiment.getSession(iSession);
 
             % Check if we have all of the ROI needs for the analysis
             missingRoi = false;
-            for iTrial = 1:sr.getNumTrialsToProcess()
+            for iTrial = 1:session.getNumTrials()
+                trial = session.getTrial(iTrial);
                 % Check if we are missing the required ROI
-                if ~isfile(fullfile(session.rawFolder, sprintf('trial_%d_arenaroi.mat', trialIds(iTrial))))
+                if ~isfile(fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trial.getTrialId())))
                     missingRoi = true;
                     break;
                 end
             end
 
             if missingRoi
-                pipe.executePerSessionTaskByIndex('user_define_trial_arenaroi', iSession);
+                pipe.executeSessionTask('user_define_trial_arenaroi', session);
             end
         end
 
@@ -192,44 +204,16 @@ for iHomework = 1:length(homework)
         pipe.executePerSessionTask('tfiles_to_singleunits');
         pipe.executePerSessionTask('compute_singleunit_placemap_data');
         pipe.executePerSessionTask('compute_singleunit_placemap_data_shrunk');
-
-        % ANALYSIS COMPUTATIONS
         pipe.executePerSessionTask('make_pfstats_excel')
-        
-        %pipe.executePerSessionTask('compute_bfo_90_ac');
-        %pipe.executePerSessionTask('compute_bfo_90_wc');
-        %pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
-    %     pipe.executePerSessionTask('compute_best_fit_orientations_0_180_per_cell');
-
         pipe.executePerSessionTask('make_trial_position_plots_raw');
         pipe.executePerSessionTask('make_trial_position_plots_fixed');
         pipe.executePerSessionTask('make_session_orientation_plot_unaligned');
         pipe.executePerSessionTask('make_session_orientation_plot_aligned');
-
         pipe.executePerSessionTask('plot_movement');
         pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
-        pipe.executePerSessionTask('plot_singleunit_placemap_data');
-
-
-        % ANALYSIS PLOTS
-        %pipe.executeExperimentTask('plot_bfo_90_ac');
-        %pipe.executeExperimentTask('plot_bfo_90_wc');
-        %pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
-
-    %     pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
+        pipe.executePerSessionTask('plot_placemaps');
     
-    % 
-    %     pipe.executePerSessionTask('plot_across_within_0_180_similarity');
-    % 
-
-    %     
-        %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
-    %     
-
-    %pipe.executePerSessionTask('plot_rate_difference_matrices');
-    %pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
-    
-        % custom to this analysis
+        % custom to this consecutive object task analysis
         object_task_correlations(pipe);
     
     catch ME

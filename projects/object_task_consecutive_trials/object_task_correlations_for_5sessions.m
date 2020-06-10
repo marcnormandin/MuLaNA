@@ -3,24 +3,23 @@ function object_task_correlations_for_5sessions(pipe)
     % Isabel said there are 5, so I'm leaving it at 5 for now.
     numSessions = 5; 
     
-    if pipe.experiment.numSessions ~= numSessions
+    if pipe.Experiment.getNumSessions() ~= numSessions
         error('The object task consecutive trials experiment requires 5 sessions of data.');
     end
     
-    % Find the tfiles that are present for all sessions
-    s = cell(numSessions,1);
+    s = MLTetrodeSession.empty;
     for iSession = 1:numSessions
-        s{iSession} = pipe.experiment.session{iSession};
-        sr = s{iSession}.sessionRecord;
-        if sr.getNumTrialsToProcess() ~= 1
+        s(iSession) = pipe.Experiment.getSession(iSession);
+        if s(iSession).getNumTrialsToUse() ~= 1
             error('Session (%d, %s) has (%d) trials, but must have only one.', ...
-                iSession, s{iSession}.name);
+                iSession, s(iSession).getName());
         end
     end
 
-    tFilesToUse = s{1}.tfiles_filename_prefixes;
+    % Find the tfiles that are present for all sessions
+    tFilesToUse = s(1).getTFilesFilenamePrefixes();
     for iSession = 2:numSessions
-        tFilesToUse = intersect(tFilesToUse, s{iSession}.tfiles_filename_prefixes);
+        tFilesToUse = intersect(tFilesToUse, s(iSession).getTFilesFilenamePrefixes());
     end
     numTFilesToUse = length(tFilesToUse);
 
@@ -36,21 +35,9 @@ function object_task_correlations_for_5sessions(pipe)
     end
     fprintf('\n');
 
-    
-    % Get the correct placemap data
-%     if strcmpi(pipe.getArena().shape, 'rectangle')
-%         fprintf('Computing placefield stats excel file using rectangle data.\n');
-%         placemapSubFolder = 'placemaps_rectangle';
-%         placemapFilenameSuffix = 'mltetrodeplacemaprect.mat';
-%     elseif strcmpi(pipe.getArena().shape, 'square')
-%         fprintf('Computing placefield stats excel file using square data.\n');
-%         placemapSubFolder = 'placemaps_square';
-%         placemapFilenameSuffix = 'mltetrodeplacemapsquare.mat';
-%     else
-%         error('Placefield stats excel file creation is only valid for rectangle or square, not %s.', obj.getArena().shape);
-%     end
-    placemapSubFolder = pipe.config.placemaps.outputFolder;
-    placemapFilenameSuffix = pipe.config.placemaps.filenameSuffix;
+    % FixMe! This should check if it should use the shrunk placemaps
+    placemapSubFolder = pipe.Config.placemaps.outputFolder;
+    placemapFilenameSuffix = pipe.Config.placemaps.filenameSuffix;
     
     
     % Make a result structure for each common tfile
@@ -62,15 +49,13 @@ function object_task_correlations_for_5sessions(pipe)
         placemaps = cell(numSessions,1);
    
         for iSession = 1:numSessions
-            session = s{iSession};
-            placemapDataFolder = fullfile(session.analysisFolder, placemapSubFolder);
-            ti = session.sessionRecord.getTrialsToProcess();
-            if length(ti) ~= 1
+            session = s(iSession);
+            placemapDataFolder = fullfile(session.getAnalysisDirectory(), placemapSubFolder);
+            if session.getNumTrialsToUse() ~= 1
                 error('Session should have only 1 trial to process!');
             end
-            trialId = ti.id; % could be the second actual trial if trial 1 was marked as not to use
-
-            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
+            trial = session.getTrialToUse(1); % we already checked that there is only 1
+            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trial.getTrialId(), placemapFilenameSuffix)) );
             placemaps{iSession} = tmp.mltetrodeplacemap;
         end
         
@@ -95,7 +80,7 @@ function object_task_correlations_for_5sessions(pipe)
         end
     end
     
-    outputFilename = fullfile(pipe.analysisParentFolder, sprintf('%s_otcs.xlsx', pipe.experiment.subjectName));
+    outputFilename = fullfile(pipe.getAnalysisParentDirectory(), sprintf('%s_otcs.xlsx', pipe.Experiment.getAnimalName()));
     delete(outputFilename)
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
@@ -105,7 +90,7 @@ function object_task_correlations_for_5sessions(pipe)
         %S(1,:) = {'','hab','t1','t2','t3','test'};
         S{1,1} = ' ';
         for iSession = 1:numSessions
-            S{1,iSession+1} = s{iSession}.name;
+            S{1,iSession+1} = s(iSession).getName();
         end
         
         for iT = 1:numTFilesToUse
@@ -129,7 +114,7 @@ function object_task_correlations_for_5sessions(pipe)
         %S(1,:) = {'','hab-t1','t1-t2','t2-t3','t3-test'};
         S{1,1} = '';
         for iSession = 1:numComparisons
-            S{1,iSession+1} = sprintf('%s corr %s', s{iSession}.name, s{iSession+1}.name);
+            S{1,iSession+1} = sprintf('%s corr %s', s(iSession).name, s(iSession+1).getName());
         end
         
         for iT = 1:numTFilesToUse

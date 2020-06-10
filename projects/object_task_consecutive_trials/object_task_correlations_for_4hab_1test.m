@@ -1,20 +1,22 @@
 function object_task_correlations_for_4hab_1test(pipe)
     % Get the t-files that are present for both day 1 and day 2
-    if pipe.experiment.numSessions ~= 2
+    if pipe.Experiment.getNumSessions() ~= 2
         error('The object task consecutive trials experiments requires exactly two sessions (hab and test) of data.');
     end
     
     % Find the tfiles that are present for all sessions
-    s1 = pipe.experiment.session{1};
-    s2 = pipe.experiment.session{2};
-    tFilesToUse = s1.tfiles_filename_prefixes(ismember(s1.tfiles_filename_prefixes, s2.tfiles_filename_prefixes));
+    s1 = pipe.Experiment.getSession(1);
+    s2 = pipe.Experiment.getSession(2);
+    
+    s1tfiles_filename_prefixes = s1.getTFilesFilenamePrefixes();
+    tFilesToUse = s1tfiles_filename_prefixes(ismember(s1.getTFilesFilenamePrefixes(), s2.getTFilesFilenamePrefixes()));
     fprintf('Found %d tfiles present in both hab and test sessions.\n', length(tFilesToUse));
     
     % Find the hab and test sessions
-    if strcmpi(s1.name, 'hab') && strcmpi(s2.name, 'test')
+    if strcmpi(s1.getName(), 'hab') && strcmpi(s2.getName(), 'test')
         shab = s1;
         stest = s2;
-    elseif strcmpi(s1.name, 'test') && strcmpi(s2.name, 'hab')
+    elseif strcmpi(s1.getName(), 'test') && strcmpi(s2.getName(), 'hab')
         shab = s2;
         stest = s1;
     else
@@ -22,30 +24,17 @@ function object_task_correlations_for_4hab_1test(pipe)
     end
     
     % Hab session should have 4 trials (hab, t1, t2, t3)
-    if shab.sessionRecord.getNumTrialsToProcess() ~= 4
-        error('The hab session should have 4 trials, but actually has %d\n', shab.sessionRecord.getNumTrialsToProcess());
+    if shab.getNumTrialsToUse() ~= 4
+        error('The hab session should have 4 trials, but actually has %d\n', shab.getNumTrialsToUse());
     end
     
     % Test session should have only 1 trial (test)
-    if stest.sessionRecord.getNumTrialsToProcess() ~= 1
-        error('The test session should have 1 trial, but actually has %d.\n', stest.sessionRecord.getNumTrialsToProcess());
+    if stest.getNumTrialsToUse() ~= 1
+        error('The test session should have 1 trial, but actually has %d.\n', stest.getNumTrialsToUse());
     end
     
-    % Get the correct placemap data
-%     if strcmpi(pipe.getArena().shape, 'rectangle')
-%         fprintf('Computing placefield stats excel file using rectangle data.\n');
-%         placemapSubFolder = 'placemaps_rectangle';
-%         placemapFilenameSuffix = 'mltetrodeplacemaprect.mat';
-%     elseif strcmpi(pipe.getArena().shape, 'square')
-%         fprintf('Computing placefield stats excel file using square data.\n');
-%         placemapSubFolder = 'placemaps_square';
-%         placemapFilenameSuffix = 'mltetrodeplacemapsquare.mat';
-%     else
-%         error('Placefield stats excel file creation is only valid for rectangle or square, not %s.', obj.getArena().shape);
-%     end
-    
-    placemapSubFolder = pipe.config.placemaps.outputFolder;
-    placemapFilenameSuffix = pipe.config.placemaps.filenameSuffix;
+    placemapSubFolder = pipe.Config.placemaps.outputFolder;
+    placemapFilenameSuffix = pipe.Config.placemaps.filenameSuffix;
     
     
     % Make a result structure for each common tfiles
@@ -57,22 +46,20 @@ function object_task_correlations_for_4hab_1test(pipe)
         placemaps = cell(4+1,1);
    
         % day 1 (hab, t1, t2, t3)
-        placemapDataFolder = fullfile(shab.analysisFolder, placemapSubFolder);
-        shabti = shab.sessionRecord.getTrialsToProcess();
+        placemapDataFolder = fullfile(shab.getAnalysisDirectory(), placemapSubFolder);
         % We've already checked that shab has 4 trials to process
-        for iTrial = 1:4
-            trialId = shabti(iTrial).id;
-            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
+        for iTrial = 1:shab.getNumTrialsToUse()
+            trial = shab.getTrialToUse(iTrial);
+            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trial.getTrialId(), placemapFilenameSuffix)) );
             placemaps{iTrial} = tmp.mltetrodeplacemap;
         end
         
         % day 2 (test)
-        placemapDataFolder = fullfile(stest.analysisFolder, placemapSubFolder);
-        stestsi = stest.sessionRecord.getTrialsToProcess();
+        placemapDataFolder = fullfile(stest.getAnalysisDirectory(), placemapSubFolder);
         % We've already checked that stest has 1 trial to process
-        for iTrial = 1:1
-            trialId = stestsi(iTrial).id;
-            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
+        for iTrial = 1:stest.getNumTrialsToUse()
+            trial = stest.getTrialToUse(iTrial);
+            tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trial.getTrialId(), placemapFilenameSuffix)) );
             placemaps{iTrial+4} = tmp.mltetrodeplacemap;
         end
         
@@ -96,7 +83,7 @@ function object_task_correlations_for_4hab_1test(pipe)
         end
     end
     
-    outputFilename = fullfile(pipe.analysisParentFolder, sprintf('%s_otcs.xlsx', pipe.experiment.subjectName));
+    outputFilename = fullfile(pipe.getAnalysisParentDirectory(), sprintf('%s_otcs.xlsx', pipe.Experiment.getAnimalName()));
     delete(outputFilename)
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
