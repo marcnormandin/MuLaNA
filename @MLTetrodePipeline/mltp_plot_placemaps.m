@@ -63,7 +63,10 @@ function mltp_plot_placemaps(obj, session)
                 
                 subplot(p,q,k2)
                 pm.plot()
-                title(sprintf('T%d S%d C%d', trial.getTrialId(), trial.getSequenceId(), trial.getContextId()))
+                %title(sprintf('T%d S%d C%d', trial.getTrialId(), trial.getSequenceId(), trial.getContextId()))
+                title(sprintf('%0.2f Hz | %0.2f Hz\n%0.2f b | %0.2f bps', ...
+                    pm.meanFiringRateSmoothed, pm.peakFiringRateSmoothed, ...
+                    pm.informationRate, pm.informationPerSpike));
             end % iTrial
 
 
