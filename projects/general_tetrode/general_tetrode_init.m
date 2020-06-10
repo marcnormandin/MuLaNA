@@ -2,6 +2,7 @@ function general_tetrode_init(referenceFolder)
 
 projectType = 'general_tetrode';
 
+fprintf('Select the project instance folder (the project scripts will be saved in it)...\n');
 instanceFolder = uigetdir(pwd, 'Select project instance folder to create');
 if ~exist(instanceFolder, 'dir')
     fprintf('Creating instance folder (%s) ... ', instanceFolder);
@@ -12,7 +13,11 @@ end
 project.type = projectType;
 project.instanceFolder = instanceFolder;
 project.projectCreated = datestr(now);
+
+fprintf('Select the parent data directory (that has a subfolder for each animal) ...\n');
 project.dataFolder = uigetdir(fullfile(instanceFolder, 'data'), 'Select the parent data directory');
+
+fprintf('Select the parent analysis directory (this will create a subfolder for each animals analysis results)...\n');
 project.analysisFolder = uigetdir(fullfile(instanceFolder, 'analysis'), 'Select the parent analysis directory');
 
 if ~exist(project.dataFolder, 'dir')
