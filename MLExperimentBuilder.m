@@ -38,7 +38,7 @@ classdef MLExperimentBuilder < handle
                 srFilename = fullfile(sessionDirectory, MLExperimentBuilder.SessionRecordFilename);
                 if ~isfile(srFilename)
                     sessionName = expJson.session_folders{iSession};
-                    obj.createDefaultSessionRecordNeuralynxTetrodes(expJson, sessionDirectory, sessionName);
+                    MLExperimentBuilder.createDefaultSessionRecordNeuralynxTetrodes(expJson, sessionDirectory, sessionName);
                 end
                 
                 sr = MLSessionRecord( srFilename );
