@@ -76,7 +76,7 @@ else
             if ismember(iData, homeworkIds)
                 continue;
             else
-                fprintf('%0.2d:\t Add %s (feature %s)\n', iData, data(iData).subjectName, data(iData).featureType);
+                fprintf('%0.2d:\t Add %s (feature %s) [%s]\n', iData, data(iData).subjectName, data(iData).featureType, data(iData).recordingsParentFolder);
             end
         end
         fprintf('%0.2d:\t (stop adding)\n', length(data)+1);
