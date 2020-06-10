@@ -14,7 +14,7 @@ project.type = projectType;
 project.instanceFolder = instanceFolder;
 project.projectCreated = datestr(now);
 
-fprintf('Select the parent data directory (that has a subfolder for each animal) ...\n');
+fprintf('Select the parent data directory (that has a feature_rich and feature_poor subfolders containing subfolders of animals) ...\n');
 project.dataFolder = uigetdir(fullfile(instanceFolder, 'data'), 'Select the parent data directory');
 
 fprintf('Select the parent analysis directory (this will create a subfolder for each animals analysis results)...\n');
