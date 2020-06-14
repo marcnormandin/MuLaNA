@@ -71,11 +71,13 @@ function mltp_plot_rate_difference_matrices(obj, session)
     
     % We want an array of trials to use sorted by context
     tids = [];
+    cids = [];
     for iContext = 1:numContexts
         for iTrialToUse = 1:session.getNumTrialsToUse()
             trial = session.getTrialToUse(iTrialToUse);
             if trial.getContextId() == contexts(iContext)
                 tids(end+1) = iTrialToUse;
+                cids(end+1) = trial.getContextId();
             end
         end
     end
@@ -170,6 +172,6 @@ function mltp_plot_rate_difference_matrices(obj, session)
     % Save the data for averaging over days
     rate_difference_matrices_per_cell = DALL;
     rate_difference_matrix_average = DAVG;
-    save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum');
+    save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum', 'tids', 'cids');
     
 end % function

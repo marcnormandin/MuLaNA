@@ -1,10 +1,6 @@
-function mltp_compute_bfo_90_ac(obj, session)
-    % We have to use the shrunk data if the shape is a rectangle
-    if strcmpi(obj.getArena().shape, 'rectangle')
-        outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
-    else
-        outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
-    end
+function mltp_compute_bfo_180_ac(obj, session)
+
+    outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
 
     % Allow the function to run so that other functions do not break,
     % but give a warning.
@@ -66,9 +62,9 @@ function mltp_compute_bfo_90_ac(obj, session)
                 W2 = ones(size(T2));
                 W2(isnan(T2)) = 0;
 
-                fprintf('Computing pixel-pixel cross-correlation for cell %s between trial %d and trial %d\n', tfiles_filename_prefixes{iCell}, iMap1, iMap2);
+                fprintf('Computing pixel-pixel cross-correlation (180 deg) for cell %s between trial %d and trial %d\n', tfiles_filename_prefixes{iCell}, iMap1, iMap2);
 
-                [v(k), vind(k)] = ml_core_max_pixel_rotated_pixel_cross_correlation_90deg(T1, T2, 'W1',W1,'W2',W2);
+                [v(k), vind(k)] = ml_core_max_pixel_rotated_pixel_cross_correlation_180deg(T1, T2, 'W1',W1,'W2',W2);
                 k = k + 1;
             end
         end
@@ -79,7 +75,7 @@ function mltp_compute_bfo_90_ac(obj, session)
         mkdir(outputFolder)
     end
 
-    outputFilename = fullfile(outputFolder, 'bfo_90_ac.mat');
+    outputFilename = fullfile(outputFolder, 'bfo_180_ac.mat');
     fprintf('Saving best fit orientation data (all contexts) to file: %s\n', outputFilename);
     save(outputFilename, 'v', 'vind');  
 end % function

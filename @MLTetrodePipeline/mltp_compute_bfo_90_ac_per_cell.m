@@ -59,7 +59,7 @@ function mltp_compute_bfo_90_ac_per_cell(obj, session)
 
                 fprintf('Computing per-cell pixel-pixel cross-correlation for cell %s between trial %d and trial %d\n', tfiles_filename_prefixes{iCell}, iMap1, iMap2);
 
-                [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_square(T1, T2, 'W1',W1,'W2',W2);
+                [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_90deg(T1, T2, 'W1',W1,'W2',W2);
 
                 best_fit_orientations_per_cell(iCell).angle_index = [best_fit_orientations_per_cell(iCell).angle_index, vind];
                 best_fit_orientations_per_cell(iCell).angle_value = [ best_fit_orientations_per_cell(iCell).angle_value, v];

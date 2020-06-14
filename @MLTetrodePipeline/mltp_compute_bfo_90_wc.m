@@ -106,7 +106,7 @@ function mltp_compute_bfo_90_wc(obj, session)
 
                 fprintf('Computing within-context pixel-pixel cross-correlation for cell %s between trial %d and trial %d\n', tfiles_filename_prefixes{iCell}, iMap1, iMap2);
 
-                [v(k), vind(k)] = ml_core_max_pixel_rotated_pixel_cross_correlation_square(T1, T2, 'W1',W1,'W2',W2);
+                [v(k), vind(k)] = ml_core_max_pixel_rotated_pixel_cross_correlation_90deg(T1, T2, 'W1',W1,'W2',W2);
                 k = k + 1;
             end
         end

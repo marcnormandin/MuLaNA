@@ -252,8 +252,9 @@ classdef MLPipeline2 < handle
                 hsize = hsize + 1;
             end
             obj.SmoothingKernel = fspecial('gaussian', hsize, obj.Config.placemaps.smoothingKernelGaussianSigma_cm / obj.Config.placemaps.cm_per_bin);
-            obj.SmoothingKernel = obj.SmoothingKernel ./ max(obj.SmoothingKernel(:)); % Isabel wants this like the other
-             
+            %obj.SmoothingKernel = obj.SmoothingKernel ./ max(obj.SmoothingKernel(:)); % Isabel wants this like the other
+            obj.SmoothingKernel = obj.SmoothingKernel ./ sum(obj.SmoothingKernel(:), 'all'); % Isabel wants this like the other
+
         end
         
         function configValidateSpeed(obj)

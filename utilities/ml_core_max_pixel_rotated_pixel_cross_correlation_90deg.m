@@ -1,4 +1,4 @@
-function [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_square(T1, T2, varargin)
+function [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_90deg(T1, T2, varargin)
     p = inputParser;
     p.CaseSensitive = false;
 
