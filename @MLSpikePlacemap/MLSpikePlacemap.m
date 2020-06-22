@@ -117,7 +117,8 @@ classdef MLSpikePlacemap < handle
             addParameter(p, 'criteriaSpikesPerMapMinimum', 15, checkPositiveOrZero);
             addParameter(p, 'criteria_speed_cm_per_second_minimum', 0, checkPositiveOrZero);
             addParameter(p, 'criteria_speed_cm_per_second_maximum', inf, checkPositiveOrZero);
-
+            addParameter(p, 'compute_information_rate_pvalue', false, @(x) islogical(x));
+            
             % Store the required inputs
             obj.x = x;
             obj.y = y;
@@ -272,6 +273,10 @@ classdef MLSpikePlacemap < handle
             if obj.meanFiringRate > 0.1 && obj.meanFiringRate < 5.0 && obj.informationRate > 0.5
                 obj.isPlaceCell = true;
             end
+            
+            if obj.p.Results.compute_information_rate_pvalue
+                obj.compute_information_rate_pvalue();
+            end
         end % function
         
         function compute_information_rate_pvalue(obj)
@@ -315,8 +320,10 @@ classdef MLSpikePlacemap < handle
                     'smoothingKernel', pmTrue.p.Results.smoothingKernel, ...
                     'criteriaDwellTimeSecondsPerBinMinimum', pmTrue.p.Results.criteriaDwellTimeSecondsPerBinMinimum, ...
                     'criteriaSpikesPerBinMinimum', pmTrue.p.Results.criteriaSpikesPerBinMinimum, ...
+                    'criteriaSpikesPerMapMinimum', pmTrue.p.Results.criteriaSpikesPerMapMinimum, ...
                     'criteria_speed_cm_per_second_minimum', pmTrue.p.Results.criteria_speed_cm_per_second_minimum, ...
-                    'criteria_speed_cm_per_second_maximum', pmTrue.p.Results.criteria_speed_cm_per_second_maximum);
+                    'criteria_speed_cm_per_second_maximum', pmTrue.p.Results.criteria_speed_cm_per_second_maximum, ...
+                    'compute_information_rate_pvalue', false);
 
                 informationRateSim(iDraw) = pmSim.informationRate;
                 informationPerSpikeSim(iDraw) = pmSim.informationPerSpike;
@@ -359,19 +366,45 @@ classdef MLSpikePlacemap < handle
             colormap jet 
         end
 
-        function plot_information_rate_distribution(obj)
+        function plot_information_rate_distribution(obj, faceColour)
+            if isempty(faceColour)
+                faceColour = 'b';
+            end
+            
             if isempty(obj.informationRateSim)
                 obj.compute_information_rate_pvalue();
             end
             nbins = 50;
-            histogram(obj.informationRateSim, nbins, 'normalization', 'pdf');
-            title(sprintf('p = %0.4f', obj.informationRate_pvalue))
+            histogram(obj.informationRateSim, nbins, 'normalization', 'pdf', ...
+                'faceColor', faceColour);
+            title(sprintf('%0.2f b/s\np = %0.4f', obj.informationRate, obj.informationRate_pvalue))
             hold on
             xline(obj.informationRate, 'r', 'linewidth', 8);
-            xlabel('Information rate, IC (bits/s)');
+            xlabel('b/s');
             grid on
             model_x = linspace(min(obj.informationRateSim), max(obj.informationRateSim), 100);
             model_y = normpdf(model_x, mean(obj.informationRateSim), std(obj.informationRateSim));
+            plot(model_x, model_y, 'k-', 'linewidth', 4);
+        end 
+        
+        function plot_information_per_spike_distribution(obj, faceColour)
+            if isempty(faceColour)
+                faceColour = 'r';
+            end
+            
+            if isempty(obj.informationPerSpikeSim)
+                obj.compute_information_rate_pvalue();
+            end
+            nbins = 50;
+            histogram(obj.informationPerSpikeSim, nbins, 'normalization', 'pdf', ...
+                'faceColor', faceColour);
+            title(sprintf('%0.2f bits\np = %0.4f', obj.informationPerSpike, obj.informationPerSpike_pvalue))
+            hold on
+            xline(obj.informationPerSpike, 'r', 'linewidth', 8);
+            xlabel('bits');
+            grid on
+            model_x = linspace(min(obj.informationPerSpikeSim), max(obj.informationPerSpikeSim), 100);
+            model_y = normpdf(model_x, mean(obj.informationPerSpikeSim), std(obj.informationPerSpikeSim));
             plot(model_x, model_y, 'k-', 'linewidth', 4);
         end 
     end

@@ -40,6 +40,8 @@ classdef MLTetrodePipeline < MLPipeline2
             %obj.registerSessionTask('plot_singleunit_placemap_data', @obj.mltp_plot_singleunit_placemap_data);
             
             obj.registerSessionTask('plot_placemaps', @obj.mltp_plot_placemaps);
+            obj.registerSessionTask('plot_placemap_information_dists', @obj.mltp_plot_placemap_information_dists);
+            
   
             % Best fit orientations for 0, 90, 180, 270
             obj.registerSessionTask('compute_bfo_90_ac', @obj.mltp_compute_bfo_90_ac);

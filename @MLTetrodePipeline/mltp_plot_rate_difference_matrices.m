@@ -1,11 +1,20 @@
 function mltp_plot_rate_difference_matrices(obj, session)
+
+mltp_plot_rate_difference_matrices_helper(obj, session, 'peakFiringRate', 'PFRS', true)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRate', 'MFR', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'informationRate', 'IC', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'informationPerSpike', 'IPS', false)
+
+end
+    
+function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, figureField, saveMat)
     sessionName = session.getName();
 
     % Controls what values will be used
     % available fields:
     % meanFiringRate, peakFiringRate, informationRate, informationPerSpike
-    pfStatsField = 'peakFiringRate';
-    figureField = 'PFR';
+    %pfStatsField = 'peakFiringRate';
+    %figureField = 'PFR';
     
     % Load the pfStats file that contains all of the information we
     % need.
@@ -34,7 +43,11 @@ function mltp_plot_rate_difference_matrices(obj, session)
     % firing rate for each cell.
     MFRT = zeros(numCells, numTrials);
     for iCell = 1:numCells
-        MFRT(iCell, :) = pfStats(iCell).(pfStatsField); %meanFiringRate;
+        rate = pfStats(iCell).(pfStatsField); %some firingRate;
+        %rate(isnan(rate)) = nan;
+        rate(isinf(rate)) = nan;
+        rate(rate == 0) = nan;
+        MFRT(iCell, :) = rate;
     end
     % The mean firing rate is NAN if there were no spikes so set it to zero
     MFRT(isnan(MFRT)) = 0;
@@ -48,7 +61,11 @@ function mltp_plot_rate_difference_matrices(obj, session)
         for iTrial1 = 1:numTrials
             for iTrial2 = 1:numTrials
                 % Calculate the absolute difference
-                D(iTrial1, iTrial2) = abs( MFRT(iCell, iTrial1) - MFRT(iCell, iTrial2) );
+                if ~isnan(MFRT(iCell, iTrial1)) && ~isnan(MFRT(iCell, iTrial2))
+                    D(iTrial1, iTrial2) = abs( MFRT(iCell, iTrial1) - MFRT(iCell, iTrial2) );
+                else
+                    D(iTrial1, iTrial2) = nan;
+                end
             end
         end        
         DALL{iCell} = D;
@@ -108,25 +125,43 @@ function mltp_plot_rate_difference_matrices(obj, session)
     % Plotting
     hpercell = figure('name', sprintf('%s: %s (%s)', obj.Experiment.getAnimalName(), sessionName, figureField), 'Position', get(0,'Screensize'));
     p = 3; q=ceil(numCells/3); k=1; % maximum of 25 cells on a plot
+    cellNames = session.getTFilesFilenamePrefixes();
     for iCell = 1:numCells
+        cellName = cellNames{iCell};
         %
         subplot(p,q,k);
         k = k + 1;
-        imagesc(DALL{iCell})
+        DP = DALL{iCell};
+        [nr,nc] = size(DP);
+        pcolor( [DP, nan(nr,1); nan(1,nc+1)] );
+        shading flat;
+        set(gca, 'ydir', 'reverse');
+            
+        %imagesc(DALL{iCell})
         colormap jet
-        xticks(1:numTrials)
+        xticks(1.5:(numTrials+0.5))
         xticklabels(labels);
-        yticks(1:numTrials)
+        yticks(1.5:(numTrials+0.5))
         yticklabels(labels);
-        title(sprintf('Cell %d', iCell));
+        %title(sprintf('Cell %d', iCell));
+        title(sprintf('%s', cellName), 'interpreter', 'none');
+        
         axis equal square tight
         hold on;
-        rectangle('Position',[0.5,0.5,6,6],...
-                  'Curvature',[0,0],...
-                 'LineWidth',4,'LineStyle','-')
-        rectangle('Position',[6.5,6.5,6,6],...
-                  'Curvature',[0,0],...
-                 'LineWidth',4,'LineStyle','-')
+        
+        % Plot a outlined rectangle around each context with itself
+        for iContext = 1:numContexts
+            nb = sum( cids < contexts(iContext) ) + 1;
+            ne = sum( cids == contexts(iContext) );
+            
+            
+            rectangle('Position',[nb,nb,ne,ne],...
+                      'Curvature',[0,0],...
+                     'LineWidth',4,'LineStyle','-')
+        end
+%         rectangle('Position',[6.5,6.5,6,6],...
+%                   'Curvature',[0,0],...
+%                  'LineWidth',4,'LineStyle','-')
         colorbar
     end
 
@@ -137,41 +172,50 @@ function mltp_plot_rate_difference_matrices(obj, session)
     end
 
     F = getframe(hpercell);
-    imwrite(F.cdata, fullfile(outputFolder, sprintf('rate_difference_matrix_per_cell.png')), 'png')
-    savefig(hpercell, fullfile(outputFolder, sprintf('rate_difference_matrix_per_cell.fig')));
+    imwrite(F.cdata, fullfile(outputFolder, sprintf('%s_difference_matrix_per_cell.png', pfStatsField)), 'png')
+    savefig(hpercell, fullfile(outputFolder, sprintf('%s_difference_matrix_per_cell.fig', pfStatsField)));
     close(hpercell);
 
 
 
 
     havg = figure('name', sprintf('%s: %s', obj.Experiment.getAnimalName(), sessionName));
-    imagesc(DAVG)
+    %imagesc(DAVG)
+    [nr,nc] = size(DAVG);
+    pcolor( [DAVG, nan(nr,1); nan(1,nc+1)] );
+    shading flat;
+    set(gca, 'ydir', 'reverse');
+        
     colormap jet
-    xticks(1:numTrials)
+    xticks(1.5:(numTrials+0.5))
     xticklabels(labels);
-    yticks(1:numTrials)
+    yticks(1.5:(numTrials+0.5))
     yticklabels(labels);
     title(sprintf('AVERAGE ACROSS CELLS (%s: %s)', obj.Experiment.getAnimalName(), sessionName), 'interpreter', 'none')
     hold on;
-    rectangle('Position',[0.5,0.5,6,6],...
-              'Curvature',[0,0],...
-             'LineWidth',4,'LineStyle','-')
-    rectangle('Position',[6.5,6.5,6,6],...
-              'Curvature',[0,0],...
-             'LineWidth',4,'LineStyle','-')
+    for iContext = 1:numContexts
+        nb = sum( cids < contexts(iContext) ) + 1;
+        ne = sum( cids == contexts(iContext) );
+
+
+        rectangle('Position',[nb,nb,ne,ne],...
+                  'Curvature',[0,0],...
+                 'LineWidth',4,'LineStyle','-')
+    end
     hcb = colorbar;
     title(hcb, 'Rate Difference');
 
     F = getframe(havg);
-    imwrite(F.cdata, fullfile(outputFolder, sprintf('averaged_rate_difference_matrix.png')), 'png')
-    savefig(havg, fullfile(outputFolder, sprintf('averaged_rate_difference_matrix.fig')));
+    imwrite(F.cdata, fullfile(outputFolder, sprintf('averaged_%s_difference_matrix.png', pfStatsField)), 'png')
+    savefig(havg, fullfile(outputFolder, sprintf('averaged_%s_difference_matrix.fig', pfStatsField)));
     close(havg);
     
     
     
     % Save the data for averaging over days
-    rate_difference_matrices_per_cell = DALL;
-    rate_difference_matrix_average = DAVG;
-    save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum', 'tids', 'cids');
-    
+    if saveMat
+        rate_difference_matrices_per_cell = DALL;
+        rate_difference_matrix_average = DAVG;
+        save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum', 'tids', 'cids');
+    end
 end % function
