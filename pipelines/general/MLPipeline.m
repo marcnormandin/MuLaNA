@@ -1,4 +1,4 @@
-classdef MLPipeline2 < handle
+classdef MLPipeline < handle
     
     properties (SetAccess = protected, GetAccess = public)
 
@@ -25,7 +25,7 @@ classdef MLPipeline2 < handle
     end
     
     methods
-        function obj = MLPipeline2(config, recordingsParentFolder,  analysisParentFolder)
+        function obj = MLPipeline(config, recordingsParentFolder,  analysisParentFolder)
             obj.Verbose = config.verbose;
             
             obj.Config = config;
@@ -274,15 +274,15 @@ classdef MLPipeline2 < handle
     methods (Access = private)
         
         function taskFound = isValidTrialTask(obj, task)
-            taskFound = MLPipeline2.isValidTask(obj.availableTrialTasks, task);
+            taskFound = MLPipeline.isValidTask(obj.availableTrialTasks, task);
         end
         
         function taskFound = isValidSessionTask(obj, task)
-            taskFound = MLPipeline2.isValidTask(obj.availableSessionTasks, task);
+            taskFound = MLPipeline.isValidTask(obj.availableSessionTasks, task);
         end
         
         function taskFound = isValidExperimentTask(obj, task)
-            taskFound = MLPipeline2.isValidTask(obj.availableExperimentTasks, task);
+            taskFound = MLPipeline.isValidTask(obj.availableExperimentTasks, task);
         end
         
     end

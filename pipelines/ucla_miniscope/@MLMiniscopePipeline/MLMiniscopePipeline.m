@@ -1,4 +1,4 @@
-classdef MLMiniscopePipeline < MLPipeline2
+classdef MLMiniscopePipeline < MLPipeline
     %MLMiniscopePipeline Miniscope pipeline
     %   A pipeline for the analysis of data from the UCLA Miniscope
     
@@ -9,7 +9,7 @@ classdef MLMiniscopePipeline < MLPipeline2
     methods
         function obj = MLMiniscopePipeline(config, recordingsParentFolder,  analysisParentFolder)
             %MLMiniscopePipeline Construct an instance of this class
-            obj@MLPipeline2(config, recordingsParentFolder,  analysisParentFolder)
+            obj@MLPipeline(config, recordingsParentFolder,  analysisParentFolder)
             
             obj.initialize();
             

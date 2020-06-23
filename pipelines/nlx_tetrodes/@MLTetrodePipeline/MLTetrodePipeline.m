@@ -1,11 +1,11 @@
-classdef MLTetrodePipeline < MLPipeline2
+classdef MLTetrodePipeline < MLPipeline
     properties
         
     end % properties
     
     methods
         function obj = MLTetrodePipeline(config, recordingsParentFolder,  analysisParentFolder)
-            obj@MLPipeline2(config, recordingsParentFolder,  analysisParentFolder);
+            obj@MLPipeline(config, recordingsParentFolder,  analysisParentFolder);
             obj.initialize();
             
             obj.registerAvailableTasks();
