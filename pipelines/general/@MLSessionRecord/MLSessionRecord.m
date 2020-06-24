@@ -386,16 +386,20 @@ classdef MLSessionRecord < handle
                 record.trial_info.digs{iTmp} = "?";
             end
             
-%             if isempty(folders)
-%                 record.trial_info.folders = [];
-%             else
-                if length(folders) ~= numTrials
-                    error('The number of folders does not equal the number of trials.');
-                end
-                record.trial_info.folders = cell(numTrials, 1);
+            if isempty(folders)
+                folders = cell(numTrials,1);
                 for iTmp = 1:numTrials
-                    record.trial_info.folders{iTmp} = folders{iTmp};
+                    folders{iTmp} = "";
                 end
+            end
+            
+            if length(folders) ~= numTrials
+                error('The number of folders does not equal the number of trials.');
+            end
+            record.trial_info.folders = cell(numTrials, 1);
+            for iTmp = 1:numTrials
+                record.trial_info.folders{iTmp} = folders{iTmp};
+            end
 %             end
 
             txt = jsonencode(record);

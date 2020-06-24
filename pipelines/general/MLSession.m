@@ -22,7 +22,9 @@ classdef MLSession < MLSessionInterface
             obj.AnalysisDirectory = analysisDirectory;
             
             if ~exist(obj.AnalysisDirectory, 'dir')
+                fprintf('Making directory (%s)...', obj.AnalysisDirectory);
                 mkdir(obj.AnalysisDirectory);
+                fprintf('done.\n');
             end
         end % function
     end % methods
