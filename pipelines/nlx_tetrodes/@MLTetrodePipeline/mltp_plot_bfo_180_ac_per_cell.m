@@ -16,7 +16,7 @@ function mltp_plot_bfo_180_ac_per_cell(obj, session)
     
     % FixMe! Pick the number of subplots based on the number that will
     % actually be plotted
-    p = 5; q = 5; k = 1;
+    p = 7; q = 9; k = 1;
     for iCell = 1:numCells
 
         cellName = data(iCell).tfile_filename_prefix;

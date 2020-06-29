@@ -24,7 +24,8 @@ classdef MLTetrodePipeline < MLPipeline
             % checking of duplicates
             obj.registerSessionTask('nvt_split_into_trial_nvt', @obj.mltp_nvt_split_into_trial_nvt);
             obj.registerSessionTask('trial_nvt_to_trial_fnvt', @obj.mltp_trial_nvt_to_trial_fnvt);
-            obj.registerSessionTask('user_define_trial_arenaroi', @obj.mltp_user_define_trial_arenaroi);
+            obj.registerTrialTask('user_define_trial_arenaroi', @obj.mltp_user_define_trial_arenaroi);
+            obj.registerSessionTask('user_define_session_arenaroi', @obj.mltp_user_define_session_arenaroi);
             obj.registerSessionTask('make_trial_position_plots_raw', @obj.mltp_make_trial_position_plots_raw);
             obj.registerSessionTask('make_trial_position_plots_fixed', @obj.mltp_make_trial_position_plots_fixed);
             obj.registerSessionTask('make_session_orientation_plot_unaligned', @obj.mltp_make_session_orientation_plot_unaligned);

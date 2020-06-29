@@ -103,6 +103,7 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
         x = DALL{iCell};
         x = x(tids,:);
         x = x(:, tids);
+        DALL{iCell} = x; % added
     end
     DAVG = DAVG(tids,:);
     DAVG = DAVG(:, tids);

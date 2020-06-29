@@ -28,6 +28,12 @@ classdef MLSpikePlacemap < handle
         yedges = [];
         x_bounded = [];
         y_bounded = [];
+        
+        passedSpeedi = [];
+        passed_x = [];
+        passed_y = [];
+        passed_ts_ms = [];
+        
         passedSpeedSpikei = []; % These are indices into the position of spikes that passed the spike thresholds
         passed_spike_ts_ms = [];
         passed_spike_x = [];
@@ -178,13 +184,25 @@ classdef MLSpikePlacemap < handle
             obj.passed_spike_x = obj.spike_x(obj.passedSpeedSpikei);
             obj.passed_spike_y = obj.spike_y(obj.passedSpeedSpikei);
             obj.passed_spike_ts_ms = obj.spike_ts_ms(obj.passedSpeedSpikei);
-                        
+            
+            % Now threshold the paths as well
+            if ~isempty(obj.speed_cm_per_second)     
+                passedSpeedi1 = find(obj.speed_cm_per_second >= obj.p.Results.criteria_speed_cm_per_second_minimum);
+                passedSpeedi2 = find(obj.speed_cm_per_second <= obj.p.Results.criteria_speed_cm_per_second_maximum);
+                obj.passedSpeedi = intersect(passedSpeedi1, passedSpeedi2);
+            else
+                obj.passedSpeedi = 1:length(obj.speed_cm_per_second);
+            end
+            obj.passed_x = obj.x(obj.passedSpeedi);
+            obj.passed_y = obj.y(obj.passedSpeedi);
+            obj.passed_ts_ms = obj.ts_ms(obj.passedSpeedi);
+            
             
             %fprintf('%d spikes have been excluded using the speed criteria.\n', length(obj.spike_ts_ms) - length(obj.passed_spike_ts_ms));
             %fprintf('%d spikes have passed the speed criteria.\n', length(obj.passed_spike_ts_ms));
 
             [obj.x_bounded, obj.y_bounded, obj.xi, obj.yi, obj.xedges, obj.yedges] = ...
-                ml_core_compute_binned_positions(obj.x, obj.y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
+                ml_core_compute_binned_positions(obj.passed_x, obj.passed_y, obj.boundsx, obj.boundsy, obj.nbinsx, obj.nbinsy);
 
             % Recompute the spike location since we could have potentially changed
             % the subjects location when the spike occurred. 
@@ -218,14 +236,16 @@ classdef MLSpikePlacemap < handle
             
             % The dwell time map before applying the criteria
             ts_s = (obj.ts_ms - obj.ts_ms(1)) ./ (1.0*10^3);
-            obj.dwellTimeMapTrue = ml_placefield_dwelltimemap(obj.xi, obj.yi, ts_s, obj.nbinsx, obj.nbinsy);
+            median_dt = median(diff(ts_s), 'all');
+            obj.dwellTimeMapTrue = ml_placefield_dwelltimemap_v2(obj.xi, obj.yi, median_dt, obj.nbinsx, obj.nbinsy);
 
             % The dwell time map after applying the criteria
             obj.dwellTimeMap = obj.dwellTimeMapTrue;
-            obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
+            %obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
             
             obj.dwellTimeMapSmoothed = imfilter( obj.dwellTimeMap, obj.smoothingKernel);
-            
+            obj.dwellTimeMapSmoothed( obj.dwellTimeMapSmoothed < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
+
             
             % Use the unsmoothed maps that passed the criteria
             obj.meanFiringRateMap = ml_placefield_meanfiringratemap(obj.spikeCountMap, obj.dwellTimeMap );
@@ -343,9 +363,9 @@ classdef MLSpikePlacemap < handle
 
             hold on
             % These are the spikes that passed the velocity check
-            spikeScatter1 = scatter(obj.spike_x, obj.spike_y, 25, 'ro', 'markerfacecolor', 'r');
-            spikeScatter1.MarkerFaceAlpha = 0.6;
-            spikeScatter1.MarkerEdgeAlpha = 0.6;
+            spikeScatter1 = scatter(obj.passed_spike_x, obj.passed_spike_y, 25, 'ro', 'markerfacecolor', 'r');
+            spikeScatter1.MarkerFaceAlpha = 0.4;
+            spikeScatter1.MarkerEdgeAlpha = 0.8;
 
             set(gca, 'ydir', 'reverse')
             axis equal off
