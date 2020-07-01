@@ -53,7 +53,7 @@ function [perCell, total] = mltp_compute_bfo_general(obj, session, rotDeg, mirro
         fnames = {};
         for iName = 1:length(fnames1)
             tmp = split(fnames1{iName}, '_'); % eg. TT2_02_1_mltetrodeplacemaps.mat
-            tid = str2double(tmp{2});
+            tid = str2double(tmp{3});
             if ismember(tid, trialIdsToUse)
                 fnames{end+1} = fnames1{iName};
             end
