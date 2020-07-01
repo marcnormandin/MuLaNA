@@ -10,6 +10,8 @@ function [perCell, total] = mltp_compute_bfo_general(obj, session, rotDeg, mirro
     end
     
     if rotDeg == 90
+        numAngles = 4;
+        
         % We have to use the shrunk data if the shape is a rectangle
         if strcmpi(obj.getArena().shape, 'rectangle')
             outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
@@ -17,6 +19,7 @@ function [perCell, total] = mltp_compute_bfo_general(obj, session, rotDeg, mirro
             outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
         end
     elseif rotDeg == 180
+        numAngles = 2;
         outputFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
     else
         error('Invalid rotDeg (%f) given. Can only be 90 or 180.', rotDeg);
@@ -29,18 +32,27 @@ function [perCell, total] = mltp_compute_bfo_general(obj, session, rotDeg, mirro
     numCells = length(tfiles_filename_prefixes);
     
     % Will be the length of the number of cells
-    perCell = struct('vind_same', [], 'v_same', [], ...
-        'vind_different', [], 'v_different', [], ...
-        'vind_all', [], 'v_all', []);
+    perCell = struct('vind_same', [], 'v_same', [], 'prob_same', [], 'avg_corr_same', [], ...
+        'vind_different', [], 'v_different', [], 'prob_different', [], 'avg_corr_different', [], ...
+        'vind_all', [], 'v_all', [], 'prob_all', [], 'avg_corr_all', []);
     
     for iCell = 1:numCells
         % Store a new cells results
         perCell(iCell).vind_same = [];
         perCell(iCell).v_same = [];
+        perCell(iCell).prob_same = [];
+        perCell(iCell).avg_corr_same = [];
+        
         perCell(iCell).vind_different = [];
         perCell(iCell).v_different = [];
+        perCell(iCell).prob_different = [];
+        perCell(iCell).avg_corr_different = [];
+        
         perCell(iCell).vind_all = [];
         perCell(iCell).v_all = [];
+        perCell(iCell).prob_all = [];
+        perCell(iCell).avg_corr_all = [];
+        
         perCell(iCell).tfile_filename_prefix = tfiles_filename_prefixes{iCell};
 
         
@@ -135,9 +147,20 @@ function [perCell, total] = mltp_compute_bfo_general(obj, session, rotDeg, mirro
                 perCell(iCell).v_all(end+1) = vn;
                 perCell(iCell).vind_all(end+1) = vindn;
                 
-            end
-        end
-    end
+            end % iMap2
+        end % iMap1
+        
+        % Compute the averages and probability
+        perCell(iCell).prob_same = histcounts( perCell(iCell).vind_same, 1:(numAngles+1), 'normalization', 'probability');
+        perCell(iCell).avg_corr_same = mean(perCell(iCell).v_same);
+        
+        perCell(iCell).prob_different = histcounts( perCell(iCell).vind_different, 1:(numAngles+1), 'normalization', 'probability');
+        perCell(iCell).avg_corr_different = mean(perCell(iCell).v_different);
+        
+        perCell(iCell).prob_all = histcounts( perCell(iCell).vind_all, 1:(numAngles+1), 'normalization', 'probability');
+        perCell(iCell).avg_corr_all = mean(perCell(iCell).v_all);
+        
+    end % iCell
     
     % Combine the per cell data
     total.vind_same = [];
