@@ -1,8 +1,10 @@
 function ml_two_contexts_plot_best_fit_alignment(projectConfig)
     plot_day_averaged(projectConfig, projectConfig.analysisFeaturePoorFolder, 'poor', 'all');
     plot_day_averaged(projectConfig, projectConfig.analysisFeaturePoorFolder, 'poor', 'within');
+    plot_day_averaged(projectConfig, projectConfig.analysisFeaturePoorFolder, 'poor', 'different');
     plot_day_averaged(projectConfig, projectConfig.analysisFeatureRichFolder, 'rich', 'all');
     plot_day_averaged(projectConfig, projectConfig.analysisFeatureRichFolder, 'rich', 'within');
+    plot_day_averaged(projectConfig, projectConfig.analysisFeatureRichFolder, 'rich', 'different');
 end % function
 
 function plot_day_averaged(projectConfig, analysisFeatureFolder, featureType, contextType)

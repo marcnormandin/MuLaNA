@@ -44,6 +44,9 @@ for iMouse = 1:length(tinimice)
    elseif strcmpi(contexts, 'within')
         tmp = load(fullfile(inputFolder, 'best_fit_orientations_within_contexts.mat'));
         bfo = tmp.best_fit_orientations_within_contexts;
+   elseif strcmpi(contexts, 'different')
+        tmp = load(fullfile(inputFolder, 'best_fit_orientations_different_contexts.mat'));
+        bfo = tmp.best_fit_orientations_different_contexts;
    else
        error('contexts parameter must be all or within');
    end
