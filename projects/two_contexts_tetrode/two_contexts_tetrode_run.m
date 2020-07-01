@@ -4,7 +4,6 @@ clc
 
 tstart = tic;
 
-
 % Don't change these
 projectCfgFilename = fullfile(pwd, 'project_config.json');
 pipeCfgFilename = fullfile(pwd, 'pipeline_config.json');
@@ -141,7 +140,7 @@ end % while
 
 %
 % Let's be good and do our homework
-for iHomework = 1:length(homework)
+parfor iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
     edFilename = homework(iHomework).edFilename;
@@ -173,7 +172,11 @@ for iHomework = 1:length(homework)
         pipeCfg = ml_util_json_read( pipeCfgFilename );
         pipe = MLTetrodePipeline( pipeCfg, recordingsParentFolder, analysisParentFolder);
 
+        pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
+
         pipe.executePerSessionTask('nvt_split_into_trial_nvt');
+        
+
 
         % Ask the user to create the ROIs only when needed (ideally only once)
         % We to have the ROI before the other parts of the pipeline can run.
@@ -181,18 +184,12 @@ for iHomework = 1:length(homework)
             session = pipe.Experiment.getSession(iSession);
 
             % Check if we have all of the ROI needs for the analysis
-            missingRoi = false;
             for iTrial = 1:session.getNumTrials()
                 trial = session.getTrial(iTrial);
                 % Check if we are missing the required ROI
                 if ~isfile(fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trial.getTrialId())))
-                    missingRoi = true;
-                    break;
+                    pipe.executeTrialTask('user_define_trial_arenaroi', session, trial);
                 end
-            end
-
-            if missingRoi
-                pipe.executeSessionTask('user_define_trial_arenaroi', session);
             end
         end
 
@@ -205,10 +202,15 @@ for iHomework = 1:length(homework)
         % ANALYSIS COMPUTATIONS
         pipe.executePerSessionTask('make_pfstats_excel')
         
-        pipe.executePerSessionTask('compute_bfo_90_ac');
-        pipe.executePerSessionTask('compute_bfo_90_wc');
-        pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
-    %     pipe.executePerSessionTask('compute_best_fit_orientations_0_180_per_cell');
+%         pipe.executePerSessionTask('compute_bfo_90_ac');
+%         pipe.executePerSessionTask('compute_bfo_90_wc');
+%         pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
+
+        pipe.executePerSessionTask('compute_bfo_90');
+        pipe.executePerSessionTask('compute_bfo_180');
+        
+%         pipe.executePerSessionTask('compute_bfo_180_ac_per_cell');
+%         pipe.executePerSessionTask('compute_bfo_180_ac');
 
         pipe.executePerSessionTask('make_trial_position_plots_raw');
         pipe.executePerSessionTask('make_trial_position_plots_fixed');
@@ -216,16 +218,17 @@ for iHomework = 1:length(homework)
         pipe.executePerSessionTask('make_session_orientation_plot_aligned');
 
         pipe.executePerSessionTask('plot_movement');
-        pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
         
         pipe.executePerSessionTask('plot_placemaps');
 
         % ANALYSIS PLOTS
         pipe.executeExperimentTask('plot_bfo_90_ac');
         pipe.executeExperimentTask('plot_bfo_90_wc');
+        pipe.executeExperimentTask('plot_bfo_90_dc');
         pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
 
-        %pipe.executePerSessionTask('plot_best_fit_orientations_0_180_per_cell');
+        pipe.executePerSessionTask('plot_bfo_180_ac_per_cell');
+        pipe.executeExperimentTask('plot_bfo_180_ac');
     
     
 %         pipe.executePerSessionTask('plot_across_within_0_180_similarity');
@@ -236,6 +239,7 @@ for iHomework = 1:length(homework)
         pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
         pipe.executePerSessionTask('plot_behaviour_averaged_placemaps');
         pipe.executePerSessionTask('plot_behaviour_averaged_placemaps_contexts');
+        pipe.executePerSessionTask('plot_placemap_information_dists');
 
     catch ME
         % record the error
@@ -268,6 +272,7 @@ if makeMiceAveragedPlots
     ml_two_contexts_plot_best_fit_alignment(projectConfig);
     ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'all');
     ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'within');
+    ml_two_contexts_plot_averaged_combined_orientation(projectConfig, 'different');
 end
 
 % Report the computation time
