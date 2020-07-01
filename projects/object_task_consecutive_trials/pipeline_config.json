@@ -11,9 +11,10 @@
         "smoothingProtocol": "SmoothBeforeDivision",
         "criteria_dwell_time_seconds_per_bin_minimum": 0.05,
         "criteria_spikes_per_bin_minimum": 0,
-        "criteria_spikes_per_map_minimum": 25,
-        "criteria_speed_cm_per_second_minimum": 2.0,
-        "criteria_speed_cm_per_second_maximum": "inf"
+        "criteria_spikes_per_map_minimum": 1,
+        "criteria_speed_cm_per_second_minimum": 0.0,
+        "criteria_speed_cm_per_second_maximum": "inf",
+        "compute_information_rate_pvalue": 0
     },
 
     "rate_difference_matrices": {
