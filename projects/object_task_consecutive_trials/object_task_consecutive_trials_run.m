@@ -173,10 +173,14 @@ for iHomework = 1:length(homework)
     end
     
     try
+        pipeCfg = ml_util_json_read( pipeCfgFilename );
         pipe = MLTetrodePipeline( pipeCfg, recordingsParentFolder, analysisParentFolder);
 
+        pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
 
-pipe.executePerSessionTask('nvt_split_into_trial_nvt');
+        pipe.executePerSessionTask('nvt_split_into_trial_nvt');
+        
+
 
         % Ask the user to create the ROIs only when needed (ideally only once)
         % We to have the ROI before the other parts of the pipeline can run.
@@ -184,18 +188,12 @@ pipe.executePerSessionTask('nvt_split_into_trial_nvt');
             session = pipe.Experiment.getSession(iSession);
 
             % Check if we have all of the ROI needs for the analysis
-            missingRoi = false;
             for iTrial = 1:session.getNumTrials()
                 trial = session.getTrial(iTrial);
                 % Check if we are missing the required ROI
                 if ~isfile(fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trial.getTrialId())))
-                    missingRoi = true;
-                    break;
+                    pipe.executeTrialTask('user_define_trial_arenaroi', session, trial);
                 end
-            end
-
-            if missingRoi
-                pipe.executeSessionTask('user_define_trial_arenaroi', session);
             end
         end
 
@@ -204,14 +202,51 @@ pipe.executePerSessionTask('nvt_split_into_trial_nvt');
         pipe.executePerSessionTask('tfiles_to_singleunits');
         pipe.executePerSessionTask('compute_singleunit_placemap_data');
         pipe.executePerSessionTask('compute_singleunit_placemap_data_shrunk');
+
+        % ANALYSIS COMPUTATIONS
         pipe.executePerSessionTask('make_pfstats_excel')
+        
+%         pipe.executePerSessionTask('compute_bfo_90_ac');
+%         pipe.executePerSessionTask('compute_bfo_90_wc');
+%         pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
+
+        pipe.executePerSessionTask('compute_bfo_90');
+        pipe.executePerSessionTask('compute_bfo_180');
+        
+%         pipe.executePerSessionTask('compute_bfo_180_ac_per_cell');
+%         pipe.executePerSessionTask('compute_bfo_180_ac');
+
         pipe.executePerSessionTask('make_trial_position_plots_raw');
         pipe.executePerSessionTask('make_trial_position_plots_fixed');
         pipe.executePerSessionTask('make_session_orientation_plot_unaligned');
         pipe.executePerSessionTask('make_session_orientation_plot_aligned');
+
         pipe.executePerSessionTask('plot_movement');
-        pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
+        
         pipe.executePerSessionTask('plot_placemaps');
+
+        % ANALYSIS PLOTS
+        pipe.executeExperimentTask('plot_bfo_90_ac');
+        pipe.executeExperimentTask('plot_bfo_90_wc');
+        pipe.executeExperimentTask('plot_bfo_90_dc');
+        pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
+
+        pipe.executePerSessionTask('plot_bfo_180_ac_per_cell');
+        pipe.executeExperimentTask('plot_bfo_180_ac');
+    
+    
+%         pipe.executePerSessionTask('plot_across_within_0_180_similarity');
+  
+        pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
+
+        pipe.executePerSessionTask('plot_rate_difference_matrices');
+        pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
+        pipe.executePerSessionTask('plot_behaviour_averaged_placemaps');
+        pipe.executePerSessionTask('plot_behaviour_averaged_placemaps_contexts');
+        
+        if pipeCfg.placemaps.compute_information_rate_pvalue == 1
+            pipe.executePerSessionTask('plot_placemap_information_dists');
+        end
     
         % custom to this consecutive object task analysis
         object_task_correlations(pipe);
