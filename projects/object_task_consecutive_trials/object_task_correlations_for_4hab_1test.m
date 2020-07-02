@@ -83,7 +83,7 @@ function object_task_correlations_for_4hab_1test(pipe)
         end
     end
     
-    outputFilename = fullfile(pipe.getAnalysisParentDirectory(), sprintf('%s_otcs.xlsx', pipe.Experiment.getAnimalName()));
+    outputFilename = fullfile(pipe.Experiment.getAnalysisParentDirectory(), sprintf('%s_otcs.xlsx', pipe.Experiment.getAnimalName()));
     delete(outputFilename)
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};

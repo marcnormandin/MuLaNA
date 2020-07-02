@@ -11,7 +11,7 @@ function mltp_plot_bfo_90_dc(obj)
         else
             dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
         end
-        tmp = load(fullfile(dataFolder,'bfo_90_dc.mat'));        
+        tmp = load(fullfile(dataFolder,'bfo_90_different.mat'));        
         
         % Use only those angles whose result was not zero
         nonZeroIndices = find(tmp.v > 0);

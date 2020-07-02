@@ -24,6 +24,7 @@ function mltp_plot_placemaps(obj, session)
         end
 
         h = figure('Name', sprintf('%s (%s) tfile: %s', session.getName(), session.getDate(), fnPrefix), 'Position', get(0,'Screensize'));
+        set(h,'color','w');
         for iContext = 1:numContexts
             kstart = numVerticalPlotsPerTrial * q * (iContext - 1) + 1;
             ct = cmap{iContext}; % trials of the current context
@@ -62,7 +63,29 @@ function mltp_plot_placemaps(obj, session)
                 end
                 
                 subplot(p,q,k2)
-                pm.plot()
+                % Don't use the default since we want to control the style
+                % of the plot from the pipleine configuration
+                pmrm = pm.meanFiringRateMapSmoothed;
+
+                [nr,nc] = size(pmrm);
+
+                
+                if obj.Config.placemaps.plot_map_unvisited_bins_as_white == 1
+                    pmrm(pm.visitedCountMap == 0) = nan;
+                end
+                pcolor( [pmrm, nan(nr,1); nan(1,nc+1)] );
+                
+                if strcmpi(obj.Config.placemaps.plot_map_shading, 'flat')
+                    shading flat;
+                elseif strcmpi(obj.Config.placemaps.plot_map_shading, 'interp')
+                    shading interp;
+                end
+                
+                set(gca, 'ydir', 'reverse');
+
+                axis image off
+                colormap jet 
+        
                 %title(sprintf('T%d S%d C%d', trial.getTrialId(), trial.getSequenceId(), trial.getContextId()))
                 title(sprintf('%0.2f Hz | %0.2f Hz\n%0.2f b | %0.2f bps', ...
                     pm.meanFiringRateSmoothed, pm.peakFiringRateSmoothed, ...
