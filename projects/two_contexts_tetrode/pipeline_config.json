@@ -14,7 +14,9 @@
         "criteria_spikes_per_map_minimum": 15,
         "criteria_speed_cm_per_second_minimum": 2.0,
         "criteria_speed_cm_per_second_maximum": "inf",
-        "compute_information_rate_pvalue": 1
+        "compute_information_rate_pvalue": 0,
+        "plot_map_unvisited_bins_as_white": 1,
+        "plot_map_shading": "flat"
     },
 
     "rate_difference_matrices": {
@@ -24,6 +26,10 @@
 
     "behaviour_averaged_placemaps": {
         "outputFolder": "behaviour_averaged_placemaps"
+    },
+
+    "best_fit_orientations": {
+        "outputFolder": "best_fit_orientations"
     },
 
 	"nvt_file_trial_separation_threshold_s": 10.0,

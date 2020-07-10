@@ -11,17 +11,18 @@ function mltp_plot_bfo_90_wc(obj)
         else
             dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
         end
-        tmp = load(fullfile(dataFolder,'bfo_90_wc.mat'));
+        tmp = load(fullfile(dataFolder,'bfo_90_same.mat'));
         
-        % Use only those angles whose result was not zero
-        nonZeroIndices = find(tmp.v > 0);
-        x = tmp.vind(nonZeroIndices);
-        if ~isempty(x)
-            best_fit_orientations_within_contexts(iSession,:) = histcounts(x, 1:numAngles+1); %histcounts(tmp.vind(:));
-            best_fit_orientations_within_contexts(iSession,:) = best_fit_orientations_within_contexts(iSession,:) ./ sum(best_fit_orientations_within_contexts(iSession,:));
-        else
-            best_fit_orientations_within_contexts(iSession,:) = 0*ones(1,4);
-        end
+%         % Use only those angles whose result was not zero
+%         nonZeroIndices = find(tmp.v > 0);
+%         x = tmp.vind(nonZeroIndices);
+%         if ~isempty(x)
+%             best_fit_orientations_within_contexts(iSession,:) = histcounts(x, 1:numAngles+1); %histcounts(tmp.vind(:));
+%             best_fit_orientations_within_contexts(iSession,:) = best_fit_orientations_within_contexts(iSession,:) ./ sum(best_fit_orientations_within_contexts(iSession,:));
+%         else
+%             best_fit_orientations_within_contexts(iSession,:) = 0*ones(1,4);
+%         end
+        best_fit_orientations_within_contexts(iSession,:) = tmp.avg_prob;
         plotlegend{iSession} = session.getName();
     end
     % All of the sessions

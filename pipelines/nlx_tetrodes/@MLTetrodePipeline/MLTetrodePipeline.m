@@ -45,22 +45,29 @@ classdef MLTetrodePipeline < MLPipeline
             
   
             % Best fit orientations for 0, 90, 180, 270
-            obj.registerSessionTask('compute_bfo_90_ac', @obj.mltp_compute_bfo_90_ac);
-            obj.registerSessionTask('compute_bfo_90_wc', @obj.mltp_compute_bfo_90_wc);
-            obj.registerSessionTask('compute_bfo_90_ac_per_cell', @obj.mltp_compute_bfo_90_ac_per_cell);
-            obj.registerExperimentTask('plot_bfo_90_wc', @obj.mltp_plot_bfo_90_wc);
-            obj.registerExperimentTask('plot_bfo_90_ac', @obj.mltp_plot_bfo_90_ac);
-            obj.registerExperimentTask('plot_bfo_90_dc', @obj.mltp_plot_bfo_90_dc);
+%             obj.registerSessionTask('compute_bfo_90_ac', @obj.mltp_compute_bfo_90_ac);
+%             obj.registerSessionTask('compute_bfo_90_wc', @obj.mltp_compute_bfo_90_wc);
+%             obj.registerSessionTask('compute_bfo_90_ac_per_cell', @obj.mltp_compute_bfo_90_ac_per_cell);
+%             obj.registerExperimentTask('plot_bfo_90_wc', @obj.mltp_plot_bfo_90_wc);
+%             obj.registerExperimentTask('plot_bfo_90_ac', @obj.mltp_plot_bfo_90_ac);
+%             obj.registerExperimentTask('plot_bfo_90_dc', @obj.mltp_plot_bfo_90_dc);
 
             obj.registerSessionTask('plot_bfo_90_ac_per_cell', @obj.mltp_plot_bfo_90_ac_per_cell);
             obj.registerExperimentTask('plot_bfo_90_averaged_across_sessions', @obj.mltp_plot_bfo_90_averaged_across_sessions);   
             
+            % New 
             obj.registerSessionTask('compute_bfo_90', @obj.mltp_compute_bfo_90)
+            obj.registerExperimentTask('compute_bfo_90_average', @obj.mltp_compute_bfo_90_average);
+            obj.registerExperimentTask('plot_bfo_90_sessions', @obj.mltp_plot_bfo_90_sessions);
 
                                     
             % Best fit orientations 0, 180 degrees
             obj.registerSessionTask('compute_bfo_180_ac', @obj.mltp_compute_bfo_180_ac);
-            obj.registerExperimentTask('plot_bfo_180_ac', @obj.mltp_plot_bfo_180_ac);
+            %obj.registerExperimentTask('plot_bfo_180_ac', @obj.mltp_plot_bfo_180_ac);
+            obj.registerExperimentTask('compute_bfo_180_average', @obj.mltp_compute_bfo_180_average);
+            obj.registerExperimentTask('plot_bfo_180_sessions', @obj.mltp_plot_bfo_180_sessions);
+
+            
 
             obj.registerSessionTask('compute_bfo_180_ac_per_cell', @obj.mltp_compute_bfo_180_ac_per_cell);
             obj.registerSessionTask('plot_bfo_180_ac_per_cell', @obj.mltp_plot_bfo_180_ac_per_cell);

@@ -80,7 +80,7 @@ function object_task_correlations_for_5sessions(pipe)
         end
     end
     
-    outputFilename = fullfile(pipe.getAnalysisParentDirectory(), sprintf('%s_otcs.xlsx', pipe.Experiment.getAnimalName()));
+    outputFilename = fullfile(pipe.Experiment.getAnalysisParentDirectory(), sprintf('%s_otcs.xlsx', pipe.Experiment.getAnimalName()));
     delete(outputFilename)
     % Write the results to an excel file
     sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
@@ -114,7 +114,7 @@ function object_task_correlations_for_5sessions(pipe)
         %S(1,:) = {'','hab-t1','t1-t2','t2-t3','t3-test'};
         S{1,1} = '';
         for iSession = 1:numComparisons
-            S{1,iSession+1} = sprintf('%s corr %s', s(iSession).name, s(iSession+1).getName());
+            S{1,iSession+1} = sprintf('%s corr %s', s(iSession).getName(), s(iSession+1).getName());
         end
         
         for iT = 1:numTFilesToUse

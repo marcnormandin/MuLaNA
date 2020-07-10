@@ -359,7 +359,7 @@ classdef MLSpikePlacemap < handle
         end
         
         function plot_path_with_spikes(obj)
-            plot(obj.x, obj.y, '-', 'color', [0,0,1,0.8]);
+            plot(obj.x, obj.y, '-', 'color', [0,0,0,0.2]);
 
             hold on
             % These are the spikes that passed the velocity check

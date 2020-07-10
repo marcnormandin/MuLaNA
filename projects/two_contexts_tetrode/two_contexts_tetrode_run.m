@@ -207,7 +207,11 @@ parfor iHomework = 1:length(homework)
 %         pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
 
         pipe.executePerSessionTask('compute_bfo_90');
+        pipe.executeExperimentTask('compute_bfo_90_average');
+        
         pipe.executePerSessionTask('compute_bfo_180');
+        pipe.executeExperimentTask('compute_bfo_180_average');
+        
         
 %         pipe.executePerSessionTask('compute_bfo_180_ac_per_cell');
 %         pipe.executePerSessionTask('compute_bfo_180_ac');
@@ -222,24 +226,31 @@ parfor iHomework = 1:length(homework)
         pipe.executePerSessionTask('plot_placemaps');
 
         % ANALYSIS PLOTS
-        pipe.executeExperimentTask('plot_bfo_90_ac');
-        pipe.executeExperimentTask('plot_bfo_90_wc');
-        pipe.executeExperimentTask('plot_bfo_90_dc');
-        pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
-
-        pipe.executePerSessionTask('plot_bfo_180_ac_per_cell');
-        pipe.executeExperimentTask('plot_bfo_180_ac');
+%         pipe.executeExperimentTask('plot_bfo_90_ac');
+%         pipe.executeExperimentTask('plot_bfo_90_wc');
+%         pipe.executeExperimentTask('plot_bfo_90_dc');
+%         pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
+% % 
+%         pipe.executePerSessionTask('plot_bfo_180_ac_per_cell');
+%         pipe.executeExperimentTask('plot_bfo_180_ac');
     
     
 %         pipe.executePerSessionTask('plot_across_within_0_180_similarity');
   
-        pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
+        pipe.executeExperimentTask('plot_bfo_90_sessions');
+        pipe.executeExperimentTask('plot_bfo_180_sessions');
+        
+        
+        %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
 
         pipe.executePerSessionTask('plot_rate_difference_matrices');
         pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
         pipe.executePerSessionTask('plot_behaviour_averaged_placemaps');
         pipe.executePerSessionTask('plot_behaviour_averaged_placemaps_contexts');
-        pipe.executePerSessionTask('plot_placemap_information_dists');
+
+        if pipe.Config.placemaps.compute_information_rate_pvalue == 1
+            pipe.executePerSessionTask('plot_placemap_information_dists');
+        end
 
     catch ME
         % record the error

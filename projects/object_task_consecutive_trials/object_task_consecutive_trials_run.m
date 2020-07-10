@@ -206,15 +206,12 @@ for iHomework = 1:length(homework)
         % ANALYSIS COMPUTATIONS
         pipe.executePerSessionTask('make_pfstats_excel')
         
-%         pipe.executePerSessionTask('compute_bfo_90_ac');
-%         pipe.executePerSessionTask('compute_bfo_90_wc');
-%         pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
-
         pipe.executePerSessionTask('compute_bfo_90');
-        pipe.executePerSessionTask('compute_bfo_180');
+        pipe.executeExperimentTask('compute_bfo_90_average');
         
-%         pipe.executePerSessionTask('compute_bfo_180_ac_per_cell');
-%         pipe.executePerSessionTask('compute_bfo_180_ac');
+        pipe.executeExperimentTask('plot_bfo_90_sessions');
+        
+        pipe.executePerSessionTask('compute_bfo_180');
 
         pipe.executePerSessionTask('make_trial_position_plots_raw');
         pipe.executePerSessionTask('make_trial_position_plots_fixed');
@@ -226,18 +223,18 @@ for iHomework = 1:length(homework)
         pipe.executePerSessionTask('plot_placemaps');
 
         % ANALYSIS PLOTS
-        pipe.executeExperimentTask('plot_bfo_90_ac');
-        pipe.executeExperimentTask('plot_bfo_90_wc');
-        pipe.executeExperimentTask('plot_bfo_90_dc');
-        pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
-
-        pipe.executePerSessionTask('plot_bfo_180_ac_per_cell');
-        pipe.executeExperimentTask('plot_bfo_180_ac');
+%         pipe.executeExperimentTask('plot_bfo_90_ac');
+%         pipe.executeExperimentTask('plot_bfo_90_wc');
+%         pipe.executeExperimentTask('plot_bfo_90_dc');
+%         pipe.executePerSessionTask('plot_bfo_90_ac_per_cell');
+% 
+%         pipe.executePerSessionTask('plot_bfo_180_ac_per_cell');
+%         pipe.executeExperimentTask('plot_bfo_180_ac');
     
     
 %         pipe.executePerSessionTask('plot_across_within_0_180_similarity');
   
-        pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
+        %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
 
         pipe.executePerSessionTask('plot_rate_difference_matrices');
         pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');

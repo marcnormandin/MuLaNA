@@ -14,6 +14,11 @@ function mltp_make_pfstats_excel(obj, session)
     
     numTFiles = length(tFilesToUse);
     
+    if numTFiles == 0
+        fprintf('No t-files found. Can not run stats.\n');
+        return
+    end
+    
     fprintf('Found %d tfiles present in %s.\n', length(tFilesToUse), session.getName());
     
     placemapSubFolder = obj.Config.placemaps.outputFolder;

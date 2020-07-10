@@ -4,7 +4,7 @@ function mltp_plot_bfo_180_ac(obj)
     plotlegend = cell(obj.Experiment.getNumSessions(), 1);
     for iSession = 1:obj.Experiment.getNumSessions()
         session = obj.Experiment.getSession(iSession);
-        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
+        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.best_fit_orientations.outputFolder);
         
         tmp = load(fullfile(dataFolder,'bfo_180_ac.mat'));        
         
