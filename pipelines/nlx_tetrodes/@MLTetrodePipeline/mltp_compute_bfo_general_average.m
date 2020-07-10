@@ -10,12 +10,7 @@ function mltp_compute_bfo_general_average(obj, rotDeg, group)
     for iSession = 1:obj.Experiment.getNumSessions()
         session = obj.Experiment.getSession(iSession);
         
-        % We have to use the shrunk data if the shape is a rectangle
-        if strcmpi(obj.getArena().shape, 'rectangle')
-            dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
-        else
-            dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
-        end
+        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.best_fit_orientations.outputFolder);
         tmp = load(fullfile(dataFolder,sprintf('bfo_%d_%s.mat', rotDeg, group )));
         
         bfo_session_prob(iSession,:) = tmp.avg_prob;

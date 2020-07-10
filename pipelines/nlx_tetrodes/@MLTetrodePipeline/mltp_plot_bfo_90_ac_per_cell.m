@@ -1,10 +1,6 @@
 function mltp_plot_bfo_90_ac_per_cell(obj, session)
-    % We have to use the shrunk data if the shape is a rectangle
-    if strcmpi(obj.getArena().shape, 'rectangle')
-        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolderShrunk);
-    else
-        dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
-    end
+
+    dataFolder = fullfile(session.getAnalysisDirectory(), obj.Config.best_fit_orientations.outputFolder);
     
     % Load the data
     matFilename = fullfile(dataFolder, 'bfo_90_per_cell.mat');
