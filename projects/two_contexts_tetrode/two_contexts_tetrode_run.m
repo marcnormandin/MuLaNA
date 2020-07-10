@@ -238,7 +238,11 @@ parfor iHomework = 1:length(homework)
 %         pipe.executePerSessionTask('plot_across_within_0_180_similarity');
   
         pipe.executeExperimentTask('plot_bfo_90_sessions');
+        pipe.executePerSessionTask('plot_bfo_90_session_grouped');
+        
         pipe.executeExperimentTask('plot_bfo_180_sessions');
+        pipe.executePerSessionTask('plot_bfo_180_session_grouped');
+
         
         
         %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');

@@ -59,6 +59,8 @@ classdef MLTetrodePipeline < MLPipeline
             obj.registerSessionTask('compute_bfo_90', @obj.mltp_compute_bfo_90)
             obj.registerExperimentTask('compute_bfo_90_average', @obj.mltp_compute_bfo_90_average);
             obj.registerExperimentTask('plot_bfo_90_sessions', @obj.mltp_plot_bfo_90_sessions);
+            obj.registerSessionTask('plot_bfo_90_session_grouped', @obj.mltp_plot_bfo_90_session_grouped);
+            
 
                                     
             % Best fit orientations 0, 180 degrees
@@ -66,6 +68,8 @@ classdef MLTetrodePipeline < MLPipeline
             %obj.registerExperimentTask('plot_bfo_180_ac', @obj.mltp_plot_bfo_180_ac);
             obj.registerExperimentTask('compute_bfo_180_average', @obj.mltp_compute_bfo_180_average);
             obj.registerExperimentTask('plot_bfo_180_sessions', @obj.mltp_plot_bfo_180_sessions);
+            obj.registerSessionTask('plot_bfo_180_session_grouped', @obj.mltp_plot_bfo_180_session_grouped);
+
 
             
 
