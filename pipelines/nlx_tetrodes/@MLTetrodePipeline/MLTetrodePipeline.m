@@ -61,7 +61,12 @@ classdef MLTetrodePipeline < MLPipeline
             obj.registerExperimentTask('plot_bfo_90_sessions', @obj.mltp_plot_bfo_90_sessions);
             obj.registerSessionTask('plot_bfo_90_session_grouped', @obj.mltp_plot_bfo_90_session_grouped);
             
-
+            % New placey
+            obj.registerSessionTask('compute_bfo_90_placey', @obj.mltp_compute_bfo_90_placey)
+            obj.registerExperimentTask('compute_bfo_90_placey_average', @obj.mltp_compute_bfo_90_placey_average);
+            obj.registerExperimentTask('plot_bfo_90_placey_sessions', @obj.mltp_plot_bfo_90_placey_sessions);
+            obj.registerSessionTask('plot_bfo_90_placey_session_grouped', @obj.mltp_plot_bfo_90_placey_session_grouped);
+            
                                     
             % Best fit orientations 0, 180 degrees
             obj.registerSessionTask('compute_bfo_180_ac', @obj.mltp_compute_bfo_180_ac);

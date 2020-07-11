@@ -5,7 +5,7 @@
         "outputFolder": "placemaps",
         "outputFolderShrunk": "placemaps_shrunk",
         "filenameSuffix": "mltetrodeplacemaps.mat",
-        "smoothingKernelGaussianSize_cm": 15,
+        "smoothingKernelGaussianSize_cm": 30,
         "smoothingKernelGaussianSigma_cm": 3,
         "cm_per_bin": 1,
         "smoothingProtocol": "SmoothBeforeDivision",
@@ -14,7 +14,7 @@
         "criteria_spikes_per_map_minimum": 15,
         "criteria_speed_cm_per_second_minimum": 2.0,
         "criteria_speed_cm_per_second_maximum": "inf",
-        "compute_information_rate_pvalue": 0,
+        "compute_information_rate_pvalue": 1,
         "plot_map_unvisited_bins_as_white": 1,
         "plot_map_shading": "flat"
     },
@@ -30,6 +30,11 @@
 
     "best_fit_orientations": {
         "outputFolder": "best_fit_orientations"
+    },
+
+    "best_fit_orientations_placey": {
+        "outputFolder": "best_fit_orientations_placey",
+        "criteria_pvalue_threshold": 0.05
     },
 
 	"nvt_file_trial_separation_threshold_s": 10.0,
