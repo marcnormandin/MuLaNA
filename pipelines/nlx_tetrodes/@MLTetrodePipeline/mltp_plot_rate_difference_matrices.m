@@ -5,6 +5,11 @@ mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRate', 'MFR',
 mltp_plot_rate_difference_matrices_helper(obj, session, 'informationRate', 'IC', false)
 mltp_plot_rate_difference_matrices_helper(obj, session, 'informationPerSpike', 'IPS', false)
 
+mltp_plot_rate_difference_matrices_helper(obj, session, 'peakFiringRateSmoothed', 'PFRS', true)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRateSmoothed', 'MFR', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'informationRateSmoothed', 'IC', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'informationPerSpikeSmoothed', 'IPS', false)
+
 end
     
 function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, figureField, saveMat)

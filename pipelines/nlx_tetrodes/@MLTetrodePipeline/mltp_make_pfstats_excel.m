@@ -42,10 +42,17 @@ function mltp_make_pfstats_excel(obj, session)
             tmp = load( fullfile(placemapDataFolder, sprintf('%s_%d_%s', tFilePrefix, trialId, placemapFilenameSuffix)) );
             placemaps{iTrial} = tmp.mltetrodeplacemap;
 
-           pfStats(iTFile).meanFiringRate(iTrial) = placemaps{iTrial}.meanFiringRateSmoothed;
-           pfStats(iTFile).peakFiringRate(iTrial) = placemaps{iTrial}.peakFiringRateSmoothed;
-           pfStats(iTFile).informationRate(iTrial) = placemaps{iTrial}.informationRateSmoothed;
-           pfStats(iTFile).informationPerSpike(iTrial) = placemaps{iTrial}.informationPerSpikeSmoothed;
+           pfStats(iTFile).meanFiringRate(iTrial) = placemaps{iTrial}.meanFiringRate;
+           pfStats(iTFile).peakFiringRate(iTrial) = placemaps{iTrial}.peakFiringRate;
+           pfStats(iTFile).informationRate(iTrial) = placemaps{iTrial}.informationRate;
+           pfStats(iTFile).informationPerSpike(iTrial) = placemaps{iTrial}.informationPerSpike;
+           
+           pfStats(iTFile).meanFiringRateSmoothed(iTrial) = placemaps{iTrial}.meanFiringRateSmoothed;
+           pfStats(iTFile).peakFiringRateSmoothed(iTrial) = placemaps{iTrial}.peakFiringRateSmoothed;
+           pfStats(iTFile).informationRateSmoothed(iTrial) = placemaps{iTrial}.informationRateSmoothed;
+           pfStats(iTFile).informationPerSpikeSmoothed(iTrial) = placemaps{iTrial}.informationPerSpikeSmoothed;
+           
+           
            pfStats(iTFile).totalDwellTime(iTrial) = placemaps{iTrial}.totalDwellTime; % not smoothed, otherwise it doesnt make sense
            pfStats(iTFile).totalSpikesBeforeCriteria(iTrial) = placemaps{iTrial}.totalSpikesBeforeCriteria;
            pfStats(iTFile).totalSpikesAfterCriteria(iTrial) = placemaps{iTrial}.totalSpikesAfterCriteria;
@@ -55,7 +62,10 @@ function mltp_make_pfstats_excel(obj, session)
     end
     
     % Write the pfStats to an excel file
-    sheets = {'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', 'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
+    sheets = {...
+        'meanFiringRate', 'peakFiringRate', 'informationRate', 'informationPerSpike', ...
+        'meanFiringRateSmoothed', 'peakFiringRateSmoothed', 'informationRateSmoothed', 'informationPerSpikeSmoothed', ...
+        'totalDwellTime', 'totalSpikesBeforeCriteria', 'totalSpikesAfterCriteria'};
     for iSheet = 1:length(sheets)
         sheet = sheets{iSheet};
         S = cell(length(tFilesToUse)+1, length(placemaps)+1);
