@@ -212,6 +212,9 @@ parfor iHomework = 1:length(homework)
         pipe.executePerSessionTask('compute_bfo_180');
         pipe.executeExperimentTask('compute_bfo_180_average');
         
+        pipe.executePerSessionTask('compute_bfo_90_placey');
+        pipe.executeExperimentTask('compute_bfo_90_placey_average');
+        
         
 %         pipe.executePerSessionTask('compute_bfo_180_ac_per_cell');
 %         pipe.executePerSessionTask('compute_bfo_180_ac');
@@ -243,7 +246,8 @@ parfor iHomework = 1:length(homework)
         pipe.executeExperimentTask('plot_bfo_180_sessions');
         pipe.executePerSessionTask('plot_bfo_180_session_grouped');
 
-        
+        pipe.executeExperimentTask('plot_bfo_90_placey_sessions');
+        pipe.executePerSessionTask('plot_bfo_90_placey_session_grouped');
         
         %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
 
@@ -280,7 +284,7 @@ parfor iHomework = 1:length(homework)
     copyfile(pipeCfgFilename, analysisParentFolder);
 end % for subject
 
-
+aligned_similarity_score_run();
 
 if makeMiceAveragedPlots
     % Now run the code that requires the previous analyses to exist

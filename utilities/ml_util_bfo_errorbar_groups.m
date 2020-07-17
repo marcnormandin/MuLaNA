@@ -3,8 +3,8 @@ function ml_util_bfo_errorbar_groups(angles, groupMean, groupStd)
     
     % Give each group a different color
     numGroups = size(groupMean,1);
-    blue = linspace(0.5,1,numGroups);
-    alpha = linspace(0.8, 0.2, numGroups);
+    blue = linspace(0.1,1,numGroups);
+    alpha = 0.5.*ones(1, numGroups); %linspace(0.8, 0.2, numGroups);
     
     hBar = bar(angles, groupMean);
     for iGroup = 1:numGroups
