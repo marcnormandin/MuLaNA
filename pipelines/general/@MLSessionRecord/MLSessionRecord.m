@@ -326,7 +326,7 @@ classdef MLSessionRecord < handle
             for iField = 2:length(sameLengthFields)
                 n = length(obj.json.trial_info.(sameLengthFields{iField}));
                 if n ~= N
-                    error('Invalid array length (%d) for trial_info.%s', n, sameLengthFields{Field});
+                    error('Invalid array length (%d) for trial_info.%s in %s', n, sameLengthFields{iField}, obj.jsonFilename);
                 end
             end
             
