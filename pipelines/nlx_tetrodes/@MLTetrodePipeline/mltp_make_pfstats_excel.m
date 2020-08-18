@@ -44,8 +44,14 @@ function mltp_make_pfstats_excel(obj, session)
 
            pfStats(iTFile).meanFiringRate(iTrial) = placemaps{iTrial}.meanFiringRate;
            pfStats(iTFile).peakFiringRate(iTrial) = placemaps{iTrial}.peakFiringRate;
+           
+           % p-values are only for the not-smoothed placemap
            pfStats(iTFile).informationRate(iTrial) = placemaps{iTrial}.informationRate;
+           pfStats(iTFile).informationRate_pvalue(iTrial) = placemaps{iTrial}.informationRate_pvalue;
+           
+           % p-values are only for the not-smoothed placemap
            pfStats(iTFile).informationPerSpike(iTrial) = placemaps{iTrial}.informationPerSpike;
+           pfStats(iTFile).informationPerSpike_pvalue(iTrial) = placemaps{iTrial}.informationPerSpike_pvalue;
            
            pfStats(iTFile).meanFiringRateSmoothed(iTrial) = placemaps{iTrial}.meanFiringRateSmoothed;
            pfStats(iTFile).peakFiringRateSmoothed(iTrial) = placemaps{iTrial}.peakFiringRateSmoothed;
