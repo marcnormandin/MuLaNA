@@ -15,7 +15,7 @@ function convert_dlc_to_mlbehaviourtrack_per_trial( obj, session, trial )
     if isfile(outputFilename)
         fprintf('Removing previous track ( %s ) ... ', outputFilename);
         delete(outputFilename)
-        fprintf('done!\b');
+        fprintf('done!\n');
     end
     track.save(outputFilename);
 

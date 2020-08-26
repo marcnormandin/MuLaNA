@@ -192,7 +192,11 @@ classdef MLContinuousPlacemap < handle
             
             % Passed: increasing + above speed threshold
             obj.passedTracei = intersect(increasingI, obj.passedSpeedTracei);
-            passedTraceMinimumi = find(obj.trace_value >= obj.p.Results.criteria_trace_threshold_minimum);
+            
+            % Use only values that are larger than a minimum percentile
+            trace_value_minium = prctile(obj.trace_value, obj.p.Results.criteria_trace_threshold_minimum);
+            passedTraceMinimumi = find(obj.trace_value >= trace_value_minium);
+            
             obj.passedTracei = intersect(obj.passedTracei, passedTraceMinimumi);
             
             obj.passed_trace_x = obj.trace_x(obj.passedTracei);
@@ -258,9 +262,13 @@ classdef MLContinuousPlacemap < handle
 
             hold on
             % These are the spikes that passed the velocity check
-            spikeScatter1 = scatter(obj.passed_trace_x, obj.passed_trace_y, 25, 'ro', 'markerfacecolor', 'r');
-            spikeScatter1.MarkerFaceAlpha = 0.6;
-            spikeScatter1.MarkerEdgeAlpha = 0.6;
+%             spikeScatter1 = scatter(obj.passed_trace_x, obj.passed_trace_y, 4, 'mo', 'markerfacecolor', 'm');
+%             spikeScatter1.MarkerFaceAlpha = 0.6;
+%             spikeScatter1.MarkerEdgeAlpha = 0.6;
+            
+            spikeScatter2 = scatter(obj.passed_trace_x, obj.passed_trace_y, 25, 'ro', 'markerfacecolor', 'r');
+            spikeScatter2.MarkerFaceAlpha = 0.6;
+            spikeScatter2.MarkerEdgeAlpha = 0.6;
             
             set(gca, 'ydir', 'reverse')
             axis equal off
@@ -276,7 +284,7 @@ classdef MLContinuousPlacemap < handle
             set(gca, 'ydir', 'reverse');
 
             axis image off
-            colormap jet 
+            %colormap jet 
         end
         
         function plot_eventMap(obj)
@@ -291,7 +299,7 @@ classdef MLContinuousPlacemap < handle
             %title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
             %    obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
-            colormap jet 
+            %colormap jet 
         end
         
         function plot_eventMapSmoothed(obj)
@@ -306,7 +314,7 @@ classdef MLContinuousPlacemap < handle
             %title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
             %    obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
-            colormap jet 
+            %colormap jet 
         end
         
         function plot_traceMap(obj)
@@ -321,7 +329,7 @@ classdef MLContinuousPlacemap < handle
             %title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
             %    obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
-            colormap jet 
+            %colormap jet 
         end
         
         function plot_traceMapSmoothed(obj)
@@ -336,7 +344,7 @@ classdef MLContinuousPlacemap < handle
             %title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
             %    obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
-            colormap jet 
+            %colormap jet 
         end
         
         function plot_dwellTimeMapSmoothed(obj)
@@ -351,7 +359,7 @@ classdef MLContinuousPlacemap < handle
             %title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
             %    obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
-            colormap jet 
+            %colormap jet 
         end
           
         function plot_dwellTimeMap(obj)
@@ -366,7 +374,7 @@ classdef MLContinuousPlacemap < handle
             %title(sprintf('(%0.2f, %0.2f) Hz\n(%0.2f b/s, %0.2f b)', ...
             %    obj.peakFiringRateSmoothed, obj.meanFiringRateSmoothed, obj.informationRateSmoothed, obj.informationPerSpikeSmoothed ))
             axis image off
-            colormap jet 
+            %colormap jet 
             
         end
           

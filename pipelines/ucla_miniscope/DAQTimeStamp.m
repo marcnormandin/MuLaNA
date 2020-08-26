@@ -13,6 +13,9 @@ classdef DAQTimeStamp < handle
             elseif nargin > 1
                 error('Filename is required.')
             end
+            
+            % Fix any duplicated timestamps
+            obj.FixDuplicatedTimestamps();
         end
         
         function obj = ReadFile ( obj, timestampFilename )
@@ -34,9 +37,14 @@ classdef DAQTimeStamp < handle
             obj.sysClock = rows{3}; % ms
             obj.bufferNum = rows{4};
 
-            % The first sysClock value for each camera is junk, so set it to zero
-            obj.sysClock( obj.frameNum == 1 ) = 0; 
-
+            % The first sysClock value for each camera is junk, so set it to (near) zero
+            % Don't first frame of all cameras to zero because it will mess
+            % with finding duplicate timestamps
+            cameraIds = obj.CameraIds();
+            for iCamera = 1:obj.NumCameras()
+                obj.sysClock( obj.cameraNum == cameraIds(iCamera) & obj.frameNum == 1 ) = iCamera; 
+            end
+            
             fclose(fid);
         end
         
@@ -102,4 +110,40 @@ classdef DAQTimeStamp < handle
             obj.bufferNum = [obj.bufferNum; ts.bufferNum];
         end
     end % methods
+    
+    methods(Access = private)
+        function FixDuplicatedTimestamps(obj)
+            cameraIds = obj.CameraIds();
+            numCameras = length(cameraIds);
+
+            for iCamera = 1:numCameras
+                ci = find( obj.cameraNum == cameraIds(iCamera) );
+
+                [~, unique_ind] = unique(obj.sysClock(ci));
+                duplicate_ind = setdiff(1:length(ci), unique_ind);
+                numDuplicates = length(duplicate_ind);
+
+                k = 1;
+                if numDuplicates > 0
+                   fprintf('WARNING! Found (%d) duplicate timestamps for cameraId (%d).\n', numDuplicates, cameraIds(iCamera));
+                   for iDup = 1:numDuplicates
+                       while 1
+                           oldValue = obj.sysClock( ci(duplicate_ind(iDup)) );
+                           newValue = oldValue + k;
+                           if isempty( find(obj.sysClock(ci) == newValue) )
+                               % we can add this new value
+                               fprintf('Changing sysClock for cameraId (%d) from (%d) to (%d)\n', cameraIds(iCamera), oldValue, newValue);
+                               obj.sysClock(ci(duplicate_ind(iDup))) = newValue;
+                               break;
+                           else
+                               % new a new proposed value
+                               k = k + 1;
+                               fprintf('Proposed new value is not available. Iterating.\n');
+                           end
+                       end
+                   end % iDup
+                end
+            end % iCamera
+        end
+    end % private methods
 end % classdef

@@ -17,7 +17,7 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
     
     addParameter(p,'scopeCameraId', 1, @isscalar);
     addParameter(p,'behavCameraId', 0, @isscalar);
-    addParameter(p,'interactive', true, @islogical);
+    addParameter(p,'interactive', false, @islogical);
     addParameter(p,'hasBehaviour', true, @islogical);
     
     parse(p, dataFolder, varargin{:});
@@ -81,10 +81,10 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
             numScopeFrames = (numScopeFiles - 1) * DAQ_MAX_FRAMES_PER_VIDEO;
             % We need to add in the last file which probably has less than the
             % maximum number of frames.
-            lastScopeFileFrames = ml_cai_io_scopereadavi( fullfile(dataFolder, [DAQ_SCOPE_VIDEO_FILENAME_PREFIX num2str(numScopeFiles) DAQ_SCOPE_VIDEO_FILENAME_SUFFIX]) );
-            numScopeFrames = numScopeFrames + size(lastScopeFileFrames,3);
-            scopeVideoWidth = size(lastScopeFileFrames,2);
-            scopeVideoHeight = size(lastScopeFileFrames,1);
+            lastScopeVideo = ml_cai_io_scopereadavi( fullfile(dataFolder, [DAQ_SCOPE_VIDEO_FILENAME_PREFIX num2str(numScopeFiles) DAQ_SCOPE_VIDEO_FILENAME_SUFFIX]) );
+            numScopeFrames = numScopeFrames + lastScopeVideo.numFrames;
+            scopeVideoWidth = lastScopeVideo.width;
+            scopeVideoHeight = lastScopeVideo.height;
 
             if VERBOSE
                 fprintf('Scope frames = %d x %d x %d\n', scopeVideoWidth, scopeVideoHeight, numScopeFrames);
@@ -162,7 +162,11 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
                 scopeId = str2double(answer{2});
                 valueSet = [behavId, scopeId];
             else
-                status = -1;
+                fprintf('Warning. Both the behaviour camera and the miniscope videos have the same number of frames so the camera ids can not be resolved automatically. Assigning default ids.');
+                %status = -1;
+                behavId = 0;
+                scopeId = 1;
+                valueSet = [behavId, scopeId];
             end
         else
             % Determine it automatically based on the frame count

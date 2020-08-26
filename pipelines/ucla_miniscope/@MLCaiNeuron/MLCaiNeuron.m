@@ -98,7 +98,7 @@ classdef MLCaiNeuron < handle
         
         function [p] = plotSpikes(obj)
             indices = find(obj.spikes > 0);
-            p = stem(obj.timestamps_ms(indices), obj.spikes(indices), 'r');
+            p = stem(obj.timestamps_ms(indices), obj.spikes(indices), 'm.');
         end % function
         
         function plotTimeseries(obj)

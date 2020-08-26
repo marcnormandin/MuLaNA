@@ -61,7 +61,7 @@ function compute_placemaps_shrunk(obj, session, trial)
 
         trace_ts_ms = tr.scopeVideoData.timestamp_ms;
 
-        pm = MLContinuousPlacemap(movement.x_cm, movement.y_cm, ts_ms, trace_value, trace_ts_ms,...
+        pm = MLContinuousPlacemap(movement.x_cm, movement.y_cm, movement.timestamps_ms, trace_value, trace_ts_ms,...
             'smoothingProtocol', obj.Config.placemaps.smoothingProtocol, ...
             'speed_cm_per_second', movement.speed_cm_per_s, ...
             'boundsx', [0, shrunk_length_cm], ...
@@ -77,9 +77,9 @@ function compute_placemaps_shrunk(obj, session, trial)
                 
         save(fullfile(outputFolder, sprintf('%s%d%s', obj.Config.placemaps.filenamePrefix, nid, obj.Config.placemaps.filenameSuffix)), 'pm', 'nid', '-v7.3');
         
-        saveas(h, fn1, 'png');
-        savefig(h, fullfile(outputFolder, sprintf('%s.fig', filenamePrefix)));
-        close(h);
+%         saveas(h, fn1, 'png');
+%         savefig(h, fullfile(outputFolder, sprintf('%s.fig', filenamePrefix)));
+%         close(h);
     end % for iNeuron
 end % function
 

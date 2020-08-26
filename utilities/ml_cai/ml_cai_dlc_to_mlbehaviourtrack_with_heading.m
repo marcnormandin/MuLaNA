@@ -35,7 +35,7 @@ for iBehavCamNum = 1:numBehavCamFiles
     fnn = dir(fullfile(trialDLCFolder, fnPrefix));
     
     if isempty(fnn)
-        error('Error! Unable to find %s for reading!', fnPrefix);
+        error('Error! Unable to find %s for reading!', fnn);
     end
     
     fn = fullfile(fnn.folder, fnn.name);

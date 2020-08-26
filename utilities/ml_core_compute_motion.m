@@ -11,6 +11,13 @@ function [speed_cm_per_s, speed_smoothed_cm_per_s, vx, vy, vx_smoothed, vy_smoot
     dy = diff(y_cm);
     dt = diff(timestamps_s);
     
+    % Timestamps can be identical (rate), so find any where dt is there and
+    % replace it with the median
+    badi = find(dt == 0);
+    if ~isempty(badi)
+        dt(badi) = median(dt, 'all');
+    end
+    
     % Velocity components (cm per s)
     vx = dx./dt;
     vy = dy./dt;

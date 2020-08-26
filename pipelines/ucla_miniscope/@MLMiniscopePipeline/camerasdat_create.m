@@ -1,6 +1,6 @@
 function camerasdat_create( obj, session, trial )
     % Create the camera dat files (TEXT)
-    [status, pDat] = ml_cai_daq_camerasdat_create(trial.getTrialDirectory(), 'outputFolder', trial.getAnalysisDirectory(), 'verbose', obj.isVerbose());
+    [status, pDat] = ml_cai_daq_camerasdat_create(trial.getTrialDirectory(), 'outputFolder', trial.getAnalysisDirectory(), 'verbose', obj.isVerbose(), 'interactive', false);
     if status ~= 0
         error('Error encountered in call to ml_cai_daq_createcameradataset');
     end

@@ -3,11 +3,21 @@ function plot_placemaps(obj, session, trial)
     trialResultsFolder = trial.getAnalysisDirectory();
     outputFolder = fullfile(trial.getAnalysisDirectory(), obj.Config.placemaps.outputFolder);
     if ~exist(outputFolder, 'dir')
-        mkdir(outputFolder);
+        %mkdir(outputFolder);
+        error('The folder containing the placemap data does not exist (%s)', outputFolder);
     end
     
+    delete(fullfile(trialResultsFolder, 'fig_*.png'));
+    delete(fullfile(trialResultsFolder, 'fig_*.fig'));
+    
+    %numNeurons = length(dir(fullfile(outputFolder, sprintf('%s*%s', obj.Config.placemaps.filenamePrefix, obj.Config.placemaps.filenameSuffix))));
+    neuronDataset = ml_cai_core_h5_read_header( fullfile(trialResultsFolder, 'neuron.hdf5') );
+    numNeurons = neuronDataset.num_neurons;
+    
+    fprintf('Found (%d) neurons to plot.\n', numNeurons);
+    
     % Calcium data
-    for nid = 1:tr.neuronData.num_neurons
+    for nid = 1:numNeurons
         % Load the placemap
         pmFn = fullfile(outputFolder, sprintf('%s%d%s', obj.Config.placemaps.filenamePrefix, nid, obj.Config.placemaps.filenameSuffix));
 
@@ -42,7 +52,14 @@ function plot_placemaps(obj, session, trial)
         axis equal tight
         title('Spatial Footprint (zoomed')
         subplot(2,4,7:8)
-        neuron.plotTimeseries();
+        neuron.plotTraceRaw()
+        hold on
+        neuron.plotTraceFilt()
+        % plot the CNMFE "spikes" with a vertical value of 0
+        indices = find(neuron.spikes > 0);
+        stem(neuron.timestamps_ms(indices), zeros(1,length(indices)), 'm.');
+        hold on
+        plot(pm.passed_trace_ts_ms/1000.0, pm.passed_trace_value, 'ro', 'markerfacecolor', 'r')
         xlabel('Time, t [s]')
         grid on
         axis tight
