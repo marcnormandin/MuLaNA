@@ -8,7 +8,7 @@ function compute_placemaps(obj, session, trial)
     end
     
     % Remove any pre-existing placemaps
-    delete(fullfile(trialResultsFolder, sprintf('%s*%s', obj.Config.placemaps.filenamePrefix, obj.Config.placemaps.filenameSuffix)));
+    delete(fullfile(outputFolder, sprintf('%s*%s', obj.Config.placemaps.filenamePrefix, obj.Config.placemaps.filenameSuffix)));
     
     %trialResultsFolder = pwd;
     [tr] = ml_cai_trialresult_read( trialResultsFolder );

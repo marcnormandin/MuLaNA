@@ -7,8 +7,8 @@ function plot_placemaps(obj, session, trial)
         error('The folder containing the placemap data does not exist (%s)', outputFolder);
     end
     
-    delete(fullfile(trialResultsFolder, 'fig_*.png'));
-    delete(fullfile(trialResultsFolder, 'fig_*.fig'));
+    delete(fullfile(outputFolder, 'fig_*.png'));
+    delete(fullfile(outputFolder, 'fig_*.fig'));
     
     %numNeurons = length(dir(fullfile(outputFolder, sprintf('%s*%s', obj.Config.placemaps.filenamePrefix, obj.Config.placemaps.filenameSuffix))));
     neuronDataset = ml_cai_core_h5_read_header( fullfile(trialResultsFolder, 'neuron.hdf5') );
