@@ -2,6 +2,8 @@ classdef MLSession < MLSessionInterface
     % MLSession Implementation for a session
     %   An implementation for an experiment session
     properties (SetAccess=private, GetAccess = protected)
+        Config
+        
         Name
         Date
         Trials
@@ -12,9 +14,11 @@ classdef MLSession < MLSessionInterface
     
     methods
         function obj = MLSession(...
+                config, ...
                 name, date, trials, ...
                 sessionDirectory, analysisDirectory)
             
+            obj.Config = config;
             obj.Name = name;
             obj.Date = date;
             obj.Trials = trials;

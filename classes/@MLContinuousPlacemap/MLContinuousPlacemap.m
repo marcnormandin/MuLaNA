@@ -186,24 +186,30 @@ classdef MLContinuousPlacemap < handle
                 obj.passedSpeedTracei = 1:length(obj.trace_ts_ms);
             end
             
-            % Now find periods where the trace is increasing
-            dTrace = [0, diff(obj.trace_value)];
-            increasingI = find(dTrace > 0);
+            spikey = false;
+            if spikey
+                % Now find periods where the trace is increasing
+                dTrace = [0, diff(obj.trace_value)];
+                increasingI = find(dTrace > 0);
+
+                % Passed: increasing + above speed threshold
+                obj.passedTracei = intersect(increasingI, obj.passedSpeedTracei);
+
+                % Use only values that are larger than a minimum percentile
+                trace_value_minium = prctile(obj.trace_value, obj.p.Results.criteria_trace_threshold_minimum);
+                passedTraceMinimumi = find(obj.trace_value >= trace_value_minium);
+
+                obj.passedTracei = intersect(obj.passedTracei, passedTraceMinimumi);
+            else
+                obj.passedTracei = obj.passedSpeedTracei;
+            end
             
-            % Passed: increasing + above speed threshold
-            obj.passedTracei = intersect(increasingI, obj.passedSpeedTracei);
-            
-            % Use only values that are larger than a minimum percentile
-            trace_value_minium = prctile(obj.trace_value, obj.p.Results.criteria_trace_threshold_minimum);
-            passedTraceMinimumi = find(obj.trace_value >= trace_value_minium);
-            
-            obj.passedTracei = intersect(obj.passedTracei, passedTraceMinimumi);
-            
+
             obj.passed_trace_x = obj.trace_x(obj.passedTracei);
             obj.passed_trace_y = obj.trace_y(obj.passedTracei);
             obj.passed_trace_ts_ms = obj.trace_ts_ms(obj.passedTracei);
             obj.passed_trace_value = obj.trace_value(obj.passedTracei);
-            
+
 
             % Discretize the position data so we can bin it
             [obj.x_bounded, obj.y_bounded, obj.xi, obj.yi, obj.xedges, obj.yedges] = ...

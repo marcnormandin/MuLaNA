@@ -45,8 +45,8 @@ function compute_placemaps_shrunk(obj, session, trial)
     %smoothingKernelGaussianSize_cm = 15;
     %smoothingKernelGaussianSigma_cm = 3.0;
 
-    nbinsx = ceil(arenaJson.x_length_cm / cm_per_bin + 1);
-    nbinsy = ceil(arenaJson.y_length_cm / cm_per_bin + 1);
+    nbinsx = ceil(shrunk_length_cm / cm_per_bin + 1);
+    nbinsy = ceil(shrunk_length_cm / cm_per_bin + 1);
 
     % Calcium data
     for nid = 1:tr.neuronData.num_neurons

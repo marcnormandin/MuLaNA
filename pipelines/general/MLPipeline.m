@@ -32,7 +32,7 @@ classdef MLPipeline < handle
             obj.RecordingsParentFolder = recordingsParentFolder;
             obj.AnalysisParentFolder = analysisParentFolder;
             
-            obj.Experiment = MLExperimentBuilder.buildFromJson(recordingsParentFolder, analysisParentFolder);
+            obj.Experiment = MLExperimentBuilder.buildFromJson(obj.Config, recordingsParentFolder, analysisParentFolder);
             
             if ~exist(analysisParentFolder, 'dir')
                 mkdir(analysisParentFolder);
@@ -156,6 +156,8 @@ classdef MLPipeline < handle
             if obj.isValidSessionTask( task )
                 session = obj.Experiment.getSession(iSession);
                 obj.executeSessionTask( task, session );
+            else
+                error('Invalid task');
             end
         end
         
@@ -170,7 +172,7 @@ classdef MLPipeline < handle
                 
                 % execute the session task
                 func = obj.availableSessionTasks(task);
-                func(session);
+                func(obj,session);
             end
         end
         

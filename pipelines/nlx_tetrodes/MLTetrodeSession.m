@@ -8,9 +8,10 @@ classdef MLTetrodeSession < MLSession
     
     methods
         function obj = MLTetrodeSession(...
+                config, ...
                 name, date, trials, ...
                 sessionDirectory, analysisDirectory)
-            obj@MLSession(name, date, trials, sessionDirectory, analysisDirectory);
+            obj@MLSession(config, name, date, trials, sessionDirectory, analysisDirectory);
             
             % init
             obj.initialize();

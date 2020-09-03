@@ -7,16 +7,16 @@ classdef MLExperimentBuilder < handle
     
     methods (Static)
         %%
-        function [experiment] = buildFromJson(sessionsParentDirectory, analysisParentDirectory)
+        function [experiment] = buildFromJson(config, sessionsParentDirectory, analysisParentDirectory)
             % Read the experiment description json file
             expJson = ml_util_json_read(fullfile(sessionsParentDirectory, MLExperimentBuilder.ExperimentDescriptionFilename));
             
             % Switch based on the type because we determine trials
             % differently based on the apparatus
             if strcmpi(expJson.apparatus_type, 'neuralynx_tetrodes')
-                experiment = MLExperimentBuilder.buildFromJsonNeuralyxTetrodes(expJson, sessionsParentDirectory, analysisParentDirectory);
+                experiment = MLExperimentBuilder.buildFromJsonNeuralyxTetrodes(config, expJson, sessionsParentDirectory, analysisParentDirectory);
             elseif strcmpi(expJson.apparatus_type, 'ucla_miniscope')
-                experiment = MLExperimentBuilder.buildFromJsonUclaMiniscope(expJson, sessionsParentDirectory, analysisParentDirectory);
+                experiment = MLExperimentBuilder.buildFromJsonUclaMiniscope(config, expJson, sessionsParentDirectory, analysisParentDirectory);
             else
                 error('Unable to build experiment for the (%s) apparatus.', expJson.apparatus_type);
             end
@@ -25,7 +25,7 @@ classdef MLExperimentBuilder < handle
         
 
         %% TETRODES
-        function [experiment] = buildFromJsonNeuralyxTetrodes(expJson, sessionsParentDirectory, analysisParentDirectory)
+        function [experiment] = buildFromJsonNeuralyxTetrodes(config, expJson, sessionsParentDirectory, analysisParentDirectory)
             numSessions = length(expJson.session_folders);
             sessions = MLTetrodeSession.empty;
             numContexts = expJson.num_contexts;
@@ -61,7 +61,7 @@ classdef MLExperimentBuilder < handle
                         trialDirectory, trialAnalysisDirectory, ...
                         dateString, timeString);
                 end
-                sessions(iSession) = MLTetrodeSession(sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
+                sessions(iSession) = MLTetrodeSession(config, sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
             end
             
             experiment = MLTetrodeExperiment( ...
@@ -94,7 +94,7 @@ classdef MLExperimentBuilder < handle
                 
         
         %% MINISCOPE
-        function [experiment] = buildFromJsonUclaMiniscope(expJson, sessionsParentDirectory, analysisParentDirectory)
+        function [experiment] = buildFromJsonUclaMiniscope(config, expJson, sessionsParentDirectory, analysisParentDirectory)
             numSessions = length(expJson.session_folders);
             sessions = MLMiniscopeSession.empty;
             numContexts = expJson.num_contexts;
@@ -132,7 +132,7 @@ classdef MLExperimentBuilder < handle
                         trialDirectory, trialAnalysisDirectory, ...
                         dateString, timeString);
                 end
-                sessions(iSession) = MLMiniscopeSession(sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
+                sessions(iSession) = MLMiniscopeSession(config, sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
             end
             
             experiment = MLExperiment( ...
