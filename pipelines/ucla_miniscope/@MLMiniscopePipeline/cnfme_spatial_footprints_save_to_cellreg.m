@@ -22,9 +22,9 @@ function cnfme_spatial_footprints_save_to_cellreg(obj, session, trial)
     end
 
     % Save a copy in the 'cellreg' folder for the session
-    sfp_filename = sprintf('sfp_%0.3d.mat', trial.getTrialId());
+    sfp_filename = sprintf('%s%0.3d.mat', obj.Config.cell_registration.spatialFootprintFilenamePrefix, trial.getTrialId());
     save( fullfile(cellRegFolder, sfp_filename), 'SFP', '-v7.3'); 
 
     % Save a copy local to the trial
-    save( fullfile(trial.getAnalysisDirectory(), 'sfp.mat'), 'SFP', '-v7.3' );
+    save( fullfile(trial.getAnalysisDirectory(), sprintf('%s.mat', obj.Config.cell_registration.spatialFootprintFilenamePrefix)), 'SFP', '-v7.3' );
 end

@@ -47,6 +47,7 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerSessionTask('plot_bfo_90_session_grouped', @mlgp_plot_bfo_90_session_grouped);
             
             obj.registerSessionTask('plot_cellreg_placemaps', @plot_cellreg_placemaps);
+            obj.registerSessionTask('plot_cellreg_spatialfootprints', @plot_cellreg_spatialfootprints);
             
             obj.registerSessionTask('compute_bfo_180', @mlgp_compute_bfo_180);
         end % function

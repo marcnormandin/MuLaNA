@@ -110,6 +110,67 @@ classdef MLMiniscopeSession < MLSession
             end % matches across trials
         end % function
         
+        function [score] = getCellScore(obj, iCell)
+            if ~obj.hadCellRegistration()
+                error('No cells are registered. Can not return score.');
+            end
+            
+            if iCell < 1 || iCell > obj.getNumCells()
+                error('Can not return score for cell (%d) because there are only (%d) cells.', iCell, obj.getNumCells());
+            end
+            
+            score = obj.CellRegResult.getCellScore(iCell);
+        end % function
+        
+        function [sfplist] = getCellSpatialFootprints(obj, iCell)
+            if ~obj.hadCellRegistration()
+                error('No cells are registered. Can not return any placemaps.');
+            end
+            
+            if iCell < 1 || iCell > obj.getNumCells()
+                error('Can not return placemaps for cell (%d) because there are only (%d) cells.', iCell, obj.getNumCells());
+            end
+            
+            % For the desired iCell, get the map for the cell's ids in each
+            % trial that it exists in. The key is the trial number, and the
+            % value is the cell id in the respective trial.
+            cmap = obj.CellRegResult.getCellMap(iCell);
+            
+            numMatches = length(cmap);
+            
+            sfplist = []; %struct('trial_id', [], 'context_id', [], 'cell_id', [], 'placemap', []);
+
+            cellRegFolder = fullfile(obj.getAnalysisDirectory(), obj.Config.cell_registration.session_sfp_output_folder);
+            
+            for iMatch = 1:numMatches
+                keys = cmap.keys;
+                values = cmap.values;
+                iTrial = keys{iMatch};
+                iTrialCell = values{iMatch};
+                
+                trial = obj.getTrial(iTrial);
+                
+                if trial.isEnabled()
+                    
+                    fn = fullfile(cellRegFolder, sprintf('%s%0.3d.mat', obj.Config.cell_registration.spatialFootprintFilenamePrefix, iTrial));
+                    
+                    if ~isfile(fn)
+                        error('The requested file does not exist: %s\n', fn);
+                    end
+
+                    tmp = load(fn);
+                    sfp = squeeze(tmp.SFP(iTrialCell,:,:));
+                   
+                    ind = length(sfplist) + 1;
+                    sfplist(ind).trial_id = iTrial;
+                    sfplist(ind).context_id = trial.getContextId();
+                    sfplist(ind).cell_id = iTrialCell;
+                    sfplist(ind).spatial_footprint = sfp;
+                    sfplist(ind).trial_use = trial.isEnabled();
+                end
+            end % matches across trials
+        end % function
+        
         function [h] = plotCellMaps(obj, iRegCell)
             pmall = obj.getCellPlacemaps(iRegCell, 'actual');
 
@@ -161,6 +222,65 @@ classdef MLMiniscopeSession < MLSession
             linkaxes(ax, 'xy')
 
             axis equal off
+        end % function
+        
+        
+        function [h, score] = plotCellSpatialFootprints(obj, iRegCell)
+            score = obj.getCellScore(iRegCell);
+            sfpList = obj.getCellSpatialFootprints(iRegCell);
+            %colors = distinguishable_colors(length(sfpList));
+            
+            contextIds = unique([sfpList.context_id]);
+            numContexts = length(contextIds);
+            numContextTrials = zeros(numContexts, 1);
+            for iContext = 1:numContexts
+                numContextTrials(iContext) = sum([sfpList.context_id] == contextIds(iContext));
+            end
+            numColumns = max(numContextTrials);
+            numVerticalPlotsPerTrial = 1; % scatter and placemap
+            numRows = numVerticalPlotsPerTrial * numContexts;
+            numTotalPlots = numRows * numColumns;
+
+            a = reshape(1:numTotalPlots, numColumns, numRows)';
+            plotIndexMap = cell(numContexts, 1);
+            for i = 1:numVerticalPlotsPerTrial
+                plotIndexMap{i} = a(i:numVerticalPlotsPerTrial:end, :);
+            end
+
+            h = figure('name', sprintf('RegCell: %d, Score: %0.4f', iRegCell, score));
+            ax = [];
+            for iContext = 1:numContexts
+                sfpc = sfpList([sfpList.context_id] == contextIds(iContext));
+                for iContextMap = 1:length(sfpc)
+                    pim1 = plotIndexMap{1};
+                    %k = k + 1;
+
+                    k1 = pim1(iContext, iContextMap);
+
+            %         pim2 = plotIndexMap{2};
+            %         k2 = pim2(iContext, iContextMap);
+
+                    sfp = sfpc(iContextMap).spatial_footprint;
+
+                    ax(k1) = subplot(numRows, numColumns, k1);
+                    
+                    sfpm = ml_core_remove_zero_padding(sfp);
+                    imagesc(sfpm)
+                
+                    title(sprintf('T%d', sfpc(iContextMap).trial_id))
+                    axis equal off
+
+                    %ax(k2) = subplot(numRows, numColumns, k2);
+                    %pm.plot()
+                    %imagesc(pm)
+                    %title(sprintf('T%d', pmcm(iContextMap).trial_id))
+                end % iTrial
+            end % iContext
+
+            linkaxes(ax, 'xy')
+
+            axis equal off
+            
         end % function
         
     end % methods

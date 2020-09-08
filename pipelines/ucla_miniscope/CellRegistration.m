@@ -43,6 +43,13 @@ classdef CellRegistration
                 end
             end
         end
+        
+        function [score] = getCellScore(obj, iCell)
+            if iCell < 1 || iCell > obj.getNumCells()
+                error('Invalid cell number');
+            end
+            score = obj.CellRegisteredStruct.cell_scores(iCell);
+        end
     end
 end
 
