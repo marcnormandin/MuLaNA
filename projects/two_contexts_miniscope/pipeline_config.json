@@ -1,0 +1,163 @@
+{
+    "verbose": 1,
+
+    "cellreg_placemaps_plot": {
+        "outputFolder": "cellreg_placemaps",
+        "filenamePrefix": "pmcr_"
+    },
+
+    "cellreg_spatialfootprints_plot": {
+        "outputFolder": "cellreg_spatialfootprints",
+        "filenamePrefix": "sfpcr_"
+    },
+
+
+    "placemaps": {
+        "outputFolder": "placemaps",
+        "outputFolderShrunk": "placemaps_shrunk",
+        "filenamePrefix": "pm_",
+        "filenameSuffix": ".mat",
+        "smoothingKernelGaussianSize_cm": 30,
+        "smoothingKernelGaussianSigma_cm": 4,
+        "cm_per_bin": 2.0,
+        "smoothingProtocol": "SmoothBeforeDivision",
+        "criteria_dwell_time_seconds_per_bin_minimum": 0.05,
+        "criteria_spikes_per_bin_minimum": 0,
+        "criteria_spikes_per_map_minimum": 5,
+        "criteria_speed_cm_per_second_minimum": 2.0,
+        "criteria_speed_cm_per_second_maximum": "inf"
+    },
+
+    "placemaps_miniscope": {
+        "trace_type": "filtered",
+        "criteria_trace_threshold_minimum": 95.0
+    },
+
+    "rate_difference_matrices": {
+        "outputFolder": "rate_difference_matrices",
+        "outputMatFilename": "rate_difference_matrices.mat"
+    },
+
+    "behaviour_averaged_placemaps": {
+        "outputFolder": "behaviour_averaged_placemaps"
+    },
+
+    "best_fit_orientations": {
+        "outputFolder": "best_fit_orientations"
+    },
+
+    "best_fit_orientations_placey": {
+        "outputFolder": "best_fit_orientations_placey",
+        "criteria_pvalue_threshold": 0.05
+    },
+
+	"nvt_file_trial_separation_threshold_s": 10.0,
+	"nvt_filename": "VT1.nvt",
+
+    "velocity_lowpass_wpass": 0.05,
+
+	"session_orientation_plot": {
+		"draw_feature": 1,
+		"subplot_num_cols": 4,
+		"subplot_num_rows": 4,
+		"subplot_show_title": 1,
+		"arenaroi_vertex_markerfacecolours": "rgbm",
+		"arenaroi_vertex_markeredgecolours": "kkkk",
+		"trial_pos_colours": "rbrbrbrbrbrbrbrbrbrb"
+	},
+
+	"use_d1_xlsx": 0,
+	"trial_nvt_position_plots_folder": "trial_position_plots_raw",
+	"trial_fnvt_position_plots_folder": "trial_position_plots_fixed",
+
+
+"allocentric_placemaps_rectangle": {
+		"width": 20,
+        "length": 30,
+		"nbins_width": 20,
+		"nbins_length": 30,
+        "save_individual_plots": 0,
+        "output_folder": "allocentric_placemaps_rectangle"
+	},
+
+	"allocentric_placemaps_square": {
+		"width": 20,
+		"nbins": 20,
+        "save_individual_plots": 0,
+        "output_folder": "allocentric_placemaps_square"
+	},
+
+    "allocentric_placemaps": {
+        "calcium_activity_type": "trace_raw",
+        "calcium_activity_threshold": 0.20,
+		"gaussian_sigma_before_division": 3.0,
+        "gaussian_sigma_after_division": 0.0,
+        "criteria_dwell_time_seconds_per_bin_minimum": 2,
+        "criteria_speed_cm_per_second_minimum": 2,
+        "criteria_speed_cm_per_second_maximum": 30,
+        "criteria_spikes_per_bin_minimum": 1,
+        "criteria_information_bits_per_second_minimum": 0.49,
+        "criteria_information_bits_per_spike_minimum": 2.0
+    },
+
+    "plot_cellreg_allocentric_placemaps": {
+        "minimium_trials_required_to_plot": 4,
+        "shading": "interp",
+        "zero_bins_as_white": 0
+    },
+
+    "plot_cellreg_allocentric_placemaps_square": {
+        "output_folder": "plot_cellreg_allocentric_placemaps_square"
+    },
+
+    "plot_cellreg_allocentric_placemaps_rectangle": {
+        "output_folder": "plot_cellreg_allocentric_placemaps_rectangle"
+    },
+
+    "analysis_cellreg_correlation_vs_orientation": {
+        "minimium_trials_in_order_to_be_included": 4,
+        "criteria_information_bits_per_second_minimum": 0.49,
+        "criteria_information_bits_per_spike_minimum": 0.5,
+        "use_visited_bins_that_are_zero": 1,
+        "use_smoothed_plot": 1,
+        "output_folder": "correlation_vs_orientation"
+    },
+
+	"behaviour_camera": {
+		"background_frame": {
+			"max_frames_to_use": 2000
+		},
+
+		"simple_tracker": {
+			"const_a": 0.8,
+			"binnerize": 0,
+			"gauss_filt_factor": 2,
+			"scale_with_intensity": 0,
+			"floor_weight": 1.0,
+			"wall_weight": 0.2,
+			"outside_weight": 0.0
+		},
+
+		"quality": {
+			"difference_factor": 4,
+			"separation_min": 10,
+			"separation_max": 75
+		}
+	},
+
+    "cell_registration": {
+        "session_sfp_output_folder": "cellreg",
+        "spatialFootprintFilenamePrefix": "sfp_"
+    },
+
+	"miniscope_camera": {
+		"spatial_downsampling": 1,
+        	"use_nonrigid_alignment": 0,
+
+		"cnmfe": {
+			"cnmfe_data_filename": "cnmfe.mat"
+		}
+	},
+
+    "includeOtherRoi": 1
+}

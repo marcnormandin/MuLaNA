@@ -50,6 +50,14 @@ classdef CellRegistration
             end
             score = obj.CellRegisteredStruct.cell_scores(iCell);
         end
+        
+        function [weightMatrix] = getCellWeightMatrix(obj, iCell)
+            if iCell < 1 || iCell > obj.getNumCells()
+                error('Invalid cell number');
+            end
+            weightMatrix = obj.CellRegisteredStruct.p_same_registered_pairs{iCell};
+        end
+        
     end
 end
 

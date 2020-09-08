@@ -1,0 +1,14 @@
+{	
+    "per_trial": [
+        "camerasdat_create",
+        "behavcam_referenceframe_create",
+        "scopecam_alignvideo",
+        "scopecam_cnmfe_run",
+        "cnfme_spatial_footprints_save_to_cellreg",
+        "cnmfe_to_neuron"
+    ],
+
+    "per_session": [],
+    "per_experiment": []
+}
+

@@ -122,6 +122,18 @@ classdef MLMiniscopeSession < MLSession
             score = obj.CellRegResult.getCellScore(iCell);
         end % function
         
+        function [weightMatrix] = getCellWeightMatrix(obj, iCell)
+            if ~obj.hadCellRegistration()
+                error('No cells are registered. Can not return weight matrix.');
+            end
+            
+            if iCell < 1 || iCell > obj.getNumCells()
+                error('Can not return weight matrix for cell (%d) because there are only (%d) cells.', iCell, obj.getNumCells());
+            end
+            
+            weightMatrix = obj.CellRegResult.getCellWeightMatrix(iCell);
+        end % function
+        
         function [sfplist] = getCellSpatialFootprints(obj, iCell)
             if ~obj.hadCellRegistration()
                 error('No cells are registered. Can not return any placemaps.');
@@ -224,7 +236,7 @@ classdef MLMiniscopeSession < MLSession
             axis equal off
         end % function
         
-        
+       
         function [h, score] = plotCellSpatialFootprints(obj, iRegCell)
             score = obj.getCellScore(iRegCell);
             sfpList = obj.getCellSpatialFootprints(iRegCell);

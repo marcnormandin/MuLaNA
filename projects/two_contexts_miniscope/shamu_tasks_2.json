@@ -1,0 +1,12 @@
+{	
+    "per_trial": [
+        "convert_dlc_to_mlbehaviourtrack",
+        "compute_placemaps",
+        "compute_placemaps_shrunk",
+        "plot_placemaps"
+    ],
+
+    "per_session": [],
+    "per_experiment": []
+}
+
