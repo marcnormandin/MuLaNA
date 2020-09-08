@@ -110,6 +110,59 @@ classdef MLMiniscopeSession < MLSession
             end % matches across trials
         end % function
         
+        function [h] = plotCellMaps(obj, iRegCell)
+            pmall = obj.getCellPlacemaps(iRegCell, 'actual');
+
+            contextIds = unique([pmall.context_id]);
+            numContexts = length(contextIds);
+            numContextTrials = zeros(numContexts, 1);
+            for iContext = 1:numContexts
+                numContextTrials(iContext) = sum([pmall.context_id] == contextIds(iContext));
+            end
+            numColumns = max(numContextTrials);
+            numVerticalPlotsPerTrial = 1; % scatter and placemap
+            numRows = numVerticalPlotsPerTrial * numContexts;
+            numTotalPlots = numRows * numColumns;
+
+            a = reshape(1:numTotalPlots, numColumns, numRows)';
+            plotIndexMap = cell(numContexts, 1);
+            for i = 1:numVerticalPlotsPerTrial
+                plotIndexMap{i} = a(i:numVerticalPlotsPerTrial:end, :);
+            end
+
+            h = figure('name', sprintf('%d', iRegCell));
+            ax = [];
+            for iContext = 1:numContexts
+                pmcm = pmall([pmall.context_id] == contextIds(iContext));
+                for iContextMap = 1:length(pmcm)
+                    pim1 = plotIndexMap{1};
+                    %k = k + 1;
+
+                    k1 = pim1(iContext, iContextMap);
+
+            %         pim2 = plotIndexMap{2};
+            %         k2 = pim2(iContext, iContextMap);
+
+                    pm = pmcm(iContextMap).placemap;
+
+                    ax(k1) = subplot(numRows, numColumns, k1);
+                    %pm.plot_path_with_spikes()
+                    imagesc(pm);
+                    title(sprintf('T%d', pmcm(iContextMap).trial_id))
+                    axis equal off
+
+                    %ax(k2) = subplot(numRows, numColumns, k2);
+                    %pm.plot()
+                    %imagesc(pm)
+                    %title(sprintf('T%d', pmcm(iContextMap).trial_id))
+                end % iTrial
+            end % iContext
+
+            linkaxes(ax, 'xy')
+
+            axis equal off
+        end % function
+        
     end % methods
 end
 
