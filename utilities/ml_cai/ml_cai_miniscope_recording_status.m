@@ -77,6 +77,9 @@ function [status] = ml_cai_miniscope_recording_status( trialFolder )
     
     if status.behavCam.numFrames == status.scopeCam.numFrames
         fprintf('The behaviour and scope cameras both have (%d) frames, which will make automatic determination impossible.\n', status.behavCam.numFrames);
+        status.camerasAreDistinguishable = 0;
+    else
+        status.camerasAreDistinguishable = 1;
     end
     
     if status.timestamp.isValid

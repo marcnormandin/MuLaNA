@@ -63,10 +63,26 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
         perCell(iCell).cell_name = num2str(iCell);
 
         pmlist = session.getCellPlacemaps(iCell, placemapType);
-        weightMatrix = session.getCellWeightMatrix(iCell);
+        % FixMe! Only used by the miniscope
+        sfplist = session.getCellSpatialFootprints(iCell);
+        sfpstats = struct('C1', [], 'C2', [], 'circularity', [], 'numComponents', [], 'occupiedArea', [], 'size', []);
+        for i = 1:length(sfplist)
+            sfpstats(i) = ml_cai_spatialfootprint_stats(sfplist(i).spatial_footprint);
+        end
+        badi = union(find([sfpstats.circularity] > 1 | [sfpstats.circularity] < 0.4), find([sfpstats.size] < 10 | [sfpstats.size] > 20));
+        badi = union(badi, find([sfpstats.numComponents] > 1));
+        sfpValid = ~ismember(1:length(sfplist), badi);
+        
+        %weightMatrix = session.getCellWeightMatrix(iCell);
 
         for iMap1 = 1:length(pmlist)
+            if ~sfpValid(iMap1)
+                continue;
+            end
+            
             x1 = pmlist(iMap1);
+            
+
 
             % Only compare maps that actually have spikes
 %             if x1.mltetrodeplacemap.totalSpikesAfterCriteria == 0
@@ -88,6 +104,10 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
             end
 
             for iMap2 = (iMap1+1):length(pmlist)
+                if ~sfpValid(iMap2)
+                    continue;
+                end
+                
                 x2 = pmlist(iMap2);
                                             % Only compare maps that actually have spikes
 %                 if x2.mltetrodeplacemap.totalSpikesAfterCriteria == 0
@@ -127,7 +147,7 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
                 end
                 
                 % modify the correlation by the weight
-                vn = vn * weightMatrix(x1.trial_id, x2.trial_id);
+                %vn = vn * weightMatrix(x1.trial_id, x2.trial_id);
                 
                 % Now store the result in the appropriate locations
                 if context1 == context2
