@@ -295,6 +295,54 @@ classdef MLMiniscopeSession < MLSession
             
         end % function
         
+        function [h] = plotTrialTracksOnBackground(obj)
+            data = struct('trial_id', [], 'context_id', [], 'image', []);
+            for iTrial = 1:obj.getNumTrials()
+                trial = obj.getTrial(iTrial);
+                data(iTrial).trial_id = trial.getTrialId();
+                data(iTrial).context_id = trial.getContextId();
+                data(iTrial).image = imread(fullfile(trial.getAnalysisDirectory(), 'behavcam_track_pos.png'));
+            end
+                
+            contextIds = unique([data.context_id]);
+            numContexts = length(contextIds);
+            numContextTrials = zeros(numContexts, 1);
+            for iContext = 1:numContexts
+                numContextTrials(iContext) = sum([data.context_id] == contextIds(iContext));
+            end
+            numColumns = max(numContextTrials);
+            numVerticalPlotsPerTrial = 1;
+            numRows = numVerticalPlotsPerTrial * numContexts;
+            numTotalPlots = numRows * numColumns;
+
+            a = reshape(1:numTotalPlots, numColumns, numRows)';
+            plotIndexMap = cell(numContexts, 1);
+            for i = 1:numVerticalPlotsPerTrial
+                plotIndexMap{i} = a(i:numVerticalPlotsPerTrial:end, :);
+            end
+
+            h = figure('name', sprintf('Tracks'));
+            ax = [];
+            for iContext = 1:numContexts
+                dc = data([data.context_id] == contextIds(iContext));
+                for iContextMap = 1:length(dc)
+                    pim1 = plotIndexMap{1};
+
+                    k1 = pim1(iContext, iContextMap);
+
+                    I = dc(iContextMap).image;
+
+                    ax(k1) = subplot(numRows, numColumns, k1);
+                    
+                    imshow(I)
+                
+                    title(sprintf('T%d', dc(iContextMap).trial_id))
+                    axis off
+                end % iTrial
+            end % iContext
+            
+        end % function
+        
     end % methods
 end
 
