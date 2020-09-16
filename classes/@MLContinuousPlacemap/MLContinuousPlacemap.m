@@ -186,7 +186,7 @@ classdef MLContinuousPlacemap < handle
                 obj.passedSpeedTracei = 1:length(obj.trace_ts_ms);
             end
             
-            spikey = true;
+            spikey = false;
             if spikey
                 % Now find periods where the trace is increasing
                 dTrace = [0, diff(obj.trace_value)];

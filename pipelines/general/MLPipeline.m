@@ -140,7 +140,7 @@ classdef MLPipeline < handle
             if obj.isValidExperimentTask( task )
                 % execute the task
                 func = obj.availableExperimentTasks(task);
-                func();
+                func(obj);
             end
         end
         

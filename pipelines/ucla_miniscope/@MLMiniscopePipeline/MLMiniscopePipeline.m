@@ -43,7 +43,9 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerTrialTask('plot_placemaps', @obj.plot_placemaps);
             
             obj.registerSessionTask('compute_bfo_90', @mlgp_compute_bfo_90);
-            obj.registerSessionTask('plot_bfo_90_sessions', @mlgp_plot_bfo_90_sessions);
+            obj.registerExperimentTask('compute_bfo_90_average', @mlgp_compute_bfo_90_average);
+            
+            obj.registerExperimentTask('plot_bfo_90_sessions', @mlgp_plot_bfo_90_sessions);
             obj.registerSessionTask('plot_bfo_90_session_grouped', @mlgp_plot_bfo_90_session_grouped);
             
             obj.registerSessionTask('plot_cellreg_placemaps', @plot_cellreg_placemaps);

@@ -15,8 +15,8 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
     addParameter(p,'outputFolder', dataFolder, @isstr);
     addParameter(p,'verbose', false, @islogical);
     
-    addParameter(p,'scopeCameraId', 1, @isscalar);
-    addParameter(p,'behavCameraId', 0, @isscalar);
+    addParameter(p,'scopeCameraId', 0, @isscalar);
+    addParameter(p,'behavCameraId', 1, @isscalar);
     addParameter(p,'interactive', false, @islogical);
     addParameter(p,'hasBehaviour', true, @islogical);
     
@@ -97,7 +97,9 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
         %hasBehaviourCamera = daqts.NumCameras() > 1;
         behavFiles = dir(fullfile(dataFolder, [DAQ_BEHAV_VIDEO_FILENAME_PREFIX '*' DAQ_BEHAV_VIDEO_FILENAME_SUFFIX]));
         numBehavFiles = length(behavFiles);
+        
         hasBehaviourCamera = true;
+        
         if numBehavFiles == 0
             hasBehaviourCamera = false;
         end
@@ -130,16 +132,19 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
         
         % Now try to find the proper mapping between the camera ids
         % and the video sets
+        if numBehavFrames < 1
+            hasBehaviourCamera = false;
+        end
         
         if hasScope && hasBehaviourCamera
             keySet = {'behav', 'scope'};
             valueSet = [[], []];
         elseif hasScope
             keySet = {'scope'};
-            valueSet = [[]];
+            valueSet = [];
         elseif hasBehaviourCamera
             keySet = {'behav'};
-            valueSet = [[]];
+            valueSet = [];
         else
             error('No scope or behaviour camera videos are present.')
         end
@@ -170,15 +175,19 @@ function [status, p] = ml_cai_daq_camerasdat_create( dataFolder, varargin )
             end
         else
             % Determine it automatically based on the frame count
-            for i = 1:daqts.NumCameras()
-                if length(camts(i).sysClock) == numBehavFrames
-                    valueSet(1) = camts(i).cameraNum(1);
-                end
+            if daqts.NumCameras() == 1
+                valueSet = camts(1).cameraNum(1);
+            else
+                for i = 1:daqts.NumCameras()
+                    if length(camts(i).sysClock) == numBehavFrames
+                        valueSet(1) = camts(i).cameraNum(1);
+                    end
 
-                if length(camts(i).sysClock) == numScopeFrames
-                    valueSet(2) = camts(i).cameraNum(1);
+                    if length(camts(i).sysClock) == numScopeFrames
+                        valueSet(2) = camts(i).cameraNum(1);
+                    end
                 end
-            end
+            end 
         end
     
         camMap = containers.Map(keySet, valueSet);

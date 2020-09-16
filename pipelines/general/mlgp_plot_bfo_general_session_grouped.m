@@ -43,8 +43,16 @@ function mlgp_plot_bfo_general_session_grouped(obj, session, rotDeg)
             end
         end
         
-        groupMean(iGroup,:) = mean(prob,1, 'omitnan');
-        groupStd(iGroup,:) = std(prob,0,1, 'omitnan') ./ sqrt(size(prob,1));
+        x1 = mean(prob,1, 'omitnan');
+        x2 = std(prob,0,1, 'omitnan') ./ sqrt(size(prob,1));
+        
+        if ~isempty(x1)
+            groupMean(iGroup,:) = x1;
+        end
+        
+        if ~isempty(x2)
+            groupStd(iGroup,:) = x2;
+        end
     end
 
     h = figure;

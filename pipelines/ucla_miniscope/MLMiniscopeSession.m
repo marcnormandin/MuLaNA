@@ -321,7 +321,7 @@ classdef MLMiniscopeSession < MLSession
                 plotIndexMap{i} = a(i:numVerticalPlotsPerTrial:end, :);
             end
 
-            h = figure('name', sprintf('Tracks'));
+            h = figure('name', sprintf('Tracks'), 'position', get(0, 'screensize'));
             ax = [];
             for iContext = 1:numContexts
                 dc = data([data.context_id] == contextIds(iContext));
