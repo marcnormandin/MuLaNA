@@ -8,8 +8,8 @@ function ml_util_bfo_errorbar_groups(angles, groupMean, groupStd)
     
     hBar = bar(angles, groupMean');
     for iGroup = 1:numGroups
-        hBar(iGroup).FaceColor = [0, 0, blue(iGroup)];
-        hBar(iGroup).FaceAlpha = alpha(iGroup);
+        %hBar(iGroup).FaceColor = [0, 0, blue(iGroup)];
+        %hBar(iGroup).FaceAlpha = alpha(iGroup);
         hBar(iGroup).LineWidth = 2;
     end
 

@@ -1,12 +1,12 @@
 function mltp_plot_rate_difference_matrices(obj, session)
 
-mltp_plot_rate_difference_matrices_helper(obj, session, 'peakFiringRate', 'PFRS', true)
-mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRate', 'MFR', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'peakFiringRate', 'PFRS', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRate', 'MFR', true)
 mltp_plot_rate_difference_matrices_helper(obj, session, 'informationRate', 'IC', false)
 mltp_plot_rate_difference_matrices_helper(obj, session, 'informationPerSpike', 'IPS', false)
 
-mltp_plot_rate_difference_matrices_helper(obj, session, 'peakFiringRateSmoothed', 'PFRS', true)
-mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRateSmoothed', 'MFR', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'peakFiringRateSmoothed', 'PFRS', false)
+mltp_plot_rate_difference_matrices_helper(obj, session, 'meanFiringRateSmoothed', 'MFR', true)
 mltp_plot_rate_difference_matrices_helper(obj, session, 'informationRateSmoothed', 'IC', false)
 mltp_plot_rate_difference_matrices_helper(obj, session, 'informationPerSpikeSmoothed', 'IPS', false)
 
@@ -26,7 +26,7 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     tfolder = session.getAnalysisDirectory(); %fullfile(pwd, 'analysis','chengs_task_2c', sessionName);
     pfStatsFilename = fullfile(tfolder, 'pfStats.mat');
     if ~isfile(pfStatsFilename)
-        fprintf('Skipping session (%s) because (%s) found.\n', sessionName, pfStatsFilename);
+        fprintf('Skipping session (%s) because (%s) not found.\n', sessionName, pfStatsFilename);
         return;
     end
     pfStats = load(pfStatsFilename);

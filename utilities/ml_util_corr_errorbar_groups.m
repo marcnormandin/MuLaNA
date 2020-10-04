@@ -1,6 +1,6 @@
 function ml_util_corr_errorbar_groups(groupMean, groupStd)    
     % Give each group a different color
-    numGroups = size(groupMean,1);
+    numGroups = size(groupMean,2);
     blue = linspace(0.5,1,numGroups);
     alpha = linspace(0.8, 0.2, numGroups);
     

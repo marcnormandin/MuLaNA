@@ -140,7 +140,7 @@ classdef MLPipeline < handle
             if obj.isValidExperimentTask( task )
                 % execute the task
                 func = obj.availableExperimentTasks(task);
-                func(obj);
+                func();
             end
         end
         
@@ -172,7 +172,12 @@ classdef MLPipeline < handle
                 
                 % execute the session task
                 func = obj.availableSessionTasks(task);
+                
+                % Use this for miniscope
                 func(obj,session);
+                
+                % Use this for tetrode
+                %func(session);
             end
         end
         
@@ -227,6 +232,7 @@ classdef MLPipeline < handle
         function registerExperimentTask(obj, task, fun)
             obj.availableExperimentTasks(task) = fun;
         end
+        
         function configSetup(obj)
             if obj.Config.verbose == 1
                 obj.Config.verbose = true;
