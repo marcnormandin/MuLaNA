@@ -186,24 +186,45 @@ classdef MLContinuousPlacemap < handle
                 obj.passedSpeedTracei = 1:length(obj.trace_ts_ms);
             end
             
-            spikey = false;
-            if spikey
-                % Now find periods where the trace is increasing
-                dTrace = [0, diff(obj.trace_value)];
-                increasingI = find(dTrace > 0);
-
-                % Passed: increasing + above speed threshold
-                obj.passedTracei = intersect(increasingI, obj.passedSpeedTracei);
-
-                % Use only values that are larger than a minimum percentile
-                trace_value_minium = prctile(obj.trace_value, obj.p.Results.criteria_trace_threshold_minimum);
-                passedTraceMinimumi = find(obj.trace_value >= trace_value_minium);
-
-                obj.passedTracei = intersect(obj.passedTracei, passedTraceMinimumi);
-            else
-                obj.passedTracei = obj.passedSpeedTracei;
-            end
+%             spikey = true;
+%             if spikey
+%                 Now find periods where the trace is increasing
+%                 dTrace = [0, diff(obj.trace_value)];
+%                 increasingI = find(dTrace > 0);
+% 
+%                 Passed: increasing + above speed threshold
+%                 obj.passedTracei = intersect(increasingI, obj.passedSpeedTracei);
+% 
+%                 Use only values that are larger than a minimum percentile
+%                 trace_value_minium = prctile(obj.trace_value, obj.p.Results.criteria_trace_threshold_minimum);
+%                 passedTraceMinimumi = find(obj.trace_value >= trace_value_minium);
+% 
+%                 obj.passedTracei = intersect(obj.passedTracei, passedTraceMinimumi);
+%             else
+%                 obj.passedTracei = obj.passedSpeedTracei;
+%             end
             
+            % HACKISH TO GET IT DONE FOR THE MEETING
+            %dt_s = median( diff(obj.trace_ts_ms/1000.0), 'all' );
+            spike_times_ms = ml_cai_estimate_spikes(obj.trace_ts_ms, obj.trace_value);
+            obj.trace_value = zeros(size(obj.trace_value));
+            spikeIndices = zeros(1, length(spike_times_ms));
+            for iSpike = 1:length(spike_times_ms)
+               %fprintf('%d ', iSpike);
+               si = find( obj.trace_ts_ms >= spike_times_ms(iSpike), 1, 'first' );
+               % This shouldn't be possible, but who knows...
+               if isempty(si)
+                   spikeIndices(iSpike) = nan;
+               else
+                   spikeIndices(iSpike) = si;
+               end
+            end
+            % Allow for more than one spike in the given time instant
+            spikeIndices(isnan(spikeIndices)) = [];
+            for iSpike = 1:length(spikeIndices)
+                obj.trace_value(spikeIndices(iSpike)) = obj.trace_value(spikeIndices(iSpike)) + 1;
+            end
+            obj.passedTracei = intersect(spikeIndices, obj.passedSpeedTracei);
 
             obj.passed_trace_x = obj.trace_x(obj.passedTracei);
             obj.passed_trace_y = obj.trace_y(obj.passedTracei);
@@ -384,6 +405,7 @@ classdef MLContinuousPlacemap < handle
             
         end
           
+
         
 
 %         function plot_information_rate_distribution(obj)

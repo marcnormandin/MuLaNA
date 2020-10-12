@@ -172,7 +172,8 @@ classdef MLPipeline < handle
                 
                 % execute the session task
                 func = obj.availableSessionTasks(task);
-                func(obj,session);
+                func(obj,session); % future way of calling used by miniscope
+                %func(session); % old way (used by tetrodes)
             end
         end
         

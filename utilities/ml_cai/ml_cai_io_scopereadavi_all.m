@@ -10,7 +10,7 @@ function allFrames = ml_cai_io_scopereadavi_all(videoFolder, videoPrefix, videoS
     %% Read all of the scope frames to memory (hopefully there is enough RAM)
     allFrames = [];
     for iFile = 1:numFiles
-        fname = fullfile(fileList(iFile).folder, fileList(iFile).name);
+        fname = fullfile(videoFolder, [videoPrefix num2str(iFile) videoSuffix]);
         fprintf('Reading frames from %s... ', fname);
         f = ml_cai_io_scopereadavi(fname);
         fprintf('done.\n');

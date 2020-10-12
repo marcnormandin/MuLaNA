@@ -8,12 +8,14 @@
 %     pwd, '../../analysis/chengs_task_2c' );
 
 
-mainDir = 'M:/Minimice/CMG154_CA1/recordings/chengs_task_2c';
+mainDir = 'M:/Minimice/CMG161_CA1/recordings/chengs_task_2c';
 %cfg = jsondecode(fileread(fullfile(pwd, 'pipeline_config.json')));
+cfg = jsondecode(fileread(fullfile(pwd, 'experiment_description.json'))); % Should be pipeline
+
 %pipe = MLMiniscopePipeline( cfg, mainDir, strrep(mainDir, 'recordings', 'analysis') );
 experimentRecordingsParentFolder = mainDir;
 experimentAnalysisParentFolder = strrep(experimentRecordingsParentFolder, 'recordings', 'analysis');
-experiment = MLExperimentBuilder.buildFromJson( experimentRecordingsParentFolder, experimentAnalysisParentFolder );
+experiment = MLExperimentBuilder.buildFromJson( cfg, experimentRecordingsParentFolder, experimentAnalysisParentFolder );
 
 experimentTracksParentFolder = strrep(experimentRecordingsParentFolder, "recordings", "dlc_tracks");
 
