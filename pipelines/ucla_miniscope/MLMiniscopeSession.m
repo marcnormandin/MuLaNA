@@ -221,6 +221,7 @@ classdef MLMiniscopeSession < MLSession
                     ax(k1) = subplot(numRows, numColumns, k1);
                     %pm.plot_path_with_spikes()
                     imagesc(pm);
+                    colormap jet
                     title(sprintf('T%d', pmcm(iContextMap).trial_id))
                     axis equal off
 
@@ -278,6 +279,7 @@ classdef MLMiniscopeSession < MLSession
                     
                     sfpm = ml_core_remove_zero_padding(sfp);
                     imagesc(sfpm)
+                    colormap jet
                 
                     title(sprintf('T%d', sfpc(iContextMap).trial_id))
                     axis equal off
