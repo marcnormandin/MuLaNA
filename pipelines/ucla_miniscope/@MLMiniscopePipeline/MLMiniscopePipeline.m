@@ -37,6 +37,7 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerTrialTask('scopecam_cnmfe_run', @obj.scopecam_cnmfe_run);
             obj.registerTrialTask('cnfme_spatial_footprints_save_to_cellreg', @obj.cnfme_spatial_footprints_save_to_cellreg);
             obj.registerTrialTask('cnmfe_to_neuron', @obj.cnmfe_to_neuron);
+            obj.registerTrialTask('compactify_sfp', @obj.compactify_sfp);
             
             obj.registerTrialTask('compute_placemaps', @obj.compute_placemaps);
             obj.registerTrialTask('compute_placemaps_shrunk', @obj.compute_placemaps_shrunk);
@@ -52,6 +53,9 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerSessionTask('plot_cellreg_spatialfootprints', @plot_cellreg_spatialfootprints);
             
             obj.registerSessionTask('compute_bfo_180', @mlgp_compute_bfo_180);
+            
+            obj.registerSessionTask('plot_cumulative_similarity', @mlgp_plot_cumulative_similarity);
+            
         end % function
         
     end % methods private

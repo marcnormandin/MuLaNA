@@ -9,8 +9,10 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             mkdir(folder)
         end
 
-        for iTrial = 1:session.getNumTrials()
-            trial = session.getTrial(iTrial);
+%         for iTrial = 1:session.getNumTrials()
+%             trial = session.getTrial(iTrial);
+        for iTrial = 1:session.getNumTrialsToUse()
+            trial = session.getTrialToUse(iTrial);
             trialId = trial.getTrialId();
                 
             trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trialId));

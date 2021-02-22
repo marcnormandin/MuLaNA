@@ -38,6 +38,10 @@ function [v, vind] = ml_core_max_pixel_rotated_pixel_cross_correlation_90deg(T1,
     end
 
     % Find the maximum correlation
-    [v,vind] = max(r);
+    %[v,vind] = max(r);
+    v = max(r);
+    % can have more than one maximum. If more than one, pick one at random.
+    vind = find(r == v);
+    %vind = maxi(randi(length(maxi)));
        
 end % function

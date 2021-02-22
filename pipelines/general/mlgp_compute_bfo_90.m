@@ -6,7 +6,7 @@ function mlgp_compute_bfo_90(obj, session)
     numContexts = obj.Experiment.getNumContexts();
     
     mirrorContexts = zeros(1,numContexts); % Set entry to 1 to mirror the context
-    
+    %mirrorContexts = [0, 0];
     [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirrorContexts);
 
     helper_bfo_save_data(outputFolder, perCell, rotDeg, 'same');

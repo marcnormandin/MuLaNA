@@ -52,7 +52,7 @@ classdef DAQTimeStamp < handle
             fileId = fopen(timestampFilename, 'w');
             fprintf(fileId, 'camNum\tframeNum\tsysClock\tbuffer\n');
             for i = 1:length(obj.sysClock)
-                fprintf(fileId, '%d\t%d\t%d\t%d\n', obj.cameraNum, obj.frameNum(i), obj.sysClock(i), obj.bufferNum(i));
+                fprintf(fileId, '%d\t%d\t%d\t%d\n', obj.cameraNum(i), obj.frameNum(i), obj.sysClock(i), obj.bufferNum(i));
             end
             fclose(fileId); 
         end
@@ -78,6 +78,16 @@ classdef DAQTimeStamp < handle
             tsCam.bufferNum    = obj.bufferNum   ( matchingIndices );
         end
         
+        function obj = AddTimeOffset( obj, timeOffset_ms )
+            obj.sysClock = obj.sysClock + timeOffset_ms;
+        end
+        
+%         function obj = AddFrameOffset( obj, frameOffset )
+%            if frameOffset < 1
+%                error('Frame offset must be a positive whole number.')
+%            end           
+%         end
+        
         function obj = Filter( obj, keepIndices, relabelFrames )
             if length( keepIndices ) ~= length( obj.frameNum )
                 error('Error. DAQTimeStamp::filter requires keepIndices to be the same length as the object data.')
@@ -95,8 +105,15 @@ classdef DAQTimeStamp < handle
             obj.bufferNum = obj.bufferNum( keepIndices);
             
             if relabelFrames
-                obj.frameNum = 1:length(obj.sysClock);
+                cameraIds = obj.CameraIds();
+                for i = 1:length(cameraIds)
+                   icamera = find(obj.cameraNum == cameraIds(i));
+                   numFrames = length(icamera);
+                   obj.frameNum(icamera) = reshape(1:numFrames, numFrames, 1);
+                end
             end
+            
+            obj.frameNum = reshape(obj.frameNum, numel(obj.frameNum), 1);
         end
         
         function obj = Combine( obj, ts )
@@ -104,10 +121,32 @@ classdef DAQTimeStamp < handle
                 error('Can only combine with another DAQTimeStamp object.');
             end
             
+            % Check if there are overlapping timestamps, which should not
+            % happen
+            if ~isempty(intersect(obj.sysClock, ts.sysClock))
+                error('Cannot combine datasets as there are overlapping timestamps.')
+            end
+            
             obj.cameraNum = [obj.cameraNum; ts.cameraNum];
             obj.frameNum = [obj.frameNum; ts.frameNum];
             obj.sysClock = [obj.sysClock; ts.sysClock];
             obj.bufferNum = [obj.bufferNum; ts.bufferNum];
+            
+            % Relabel each cameras frame numbers so that there are no
+            % duplicates (since we are combining two sets).
+            cameraIds = obj.CameraIds();
+            for i = 1:length(cameraIds)
+               icamera = find(obj.cameraNum == cameraIds(i));
+               numFrames = length(icamera);
+               obj.frameNum(icamera) = reshape(1:numFrames, numFrames, 1);
+            end
+            
+            % Start each sysclock low
+            for i = 1:length(cameraIds)
+                icamera = find(obj.cameraNum == cameraIds(i));
+                low = obj.sysClock(icamera(1));
+                obj.sysClock(icamera) = obj.sysClock(icamera) - low + i;
+            end
         end
     end % methods
     
@@ -132,7 +171,7 @@ classdef DAQTimeStamp < handle
                            newValue = oldValue + k;
                            if isempty( find(obj.sysClock(ci) == newValue) )
                                % we can add this new value
-                               fprintf('Changing sysClock for cameraId (%d) from (%d) to (%d)\n', cameraIds(iCamera), oldValue, newValue);
+                               fprintf('Changing sysClock: index (%d) for cameraId (%d) from (%d) to (%d)\n', ci(duplicate_ind(iDup)), cameraIds(iCamera), oldValue, newValue);
                                obj.sysClock(ci(duplicate_ind(iDup))) = newValue;
                                break;
                            else

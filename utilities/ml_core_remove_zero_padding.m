@@ -1,5 +1,6 @@
-function [sfp, i3, i1] = ml_core_remove_zero_padding(sfp)
+function [sfp, row, col] = ml_core_remove_zero_padding(sfp)
 % removes any margins of all zeros from a matrix
+% row is how many rows of zeros and col is how many cols of zeros
 
     % Remove the left margin
     s = sum(sfp, 1);
@@ -35,4 +36,7 @@ function [sfp, i3, i1] = ml_core_remove_zero_padding(sfp)
     if ~isempty(i4)
         sfp(i4:end, :) = [];
     end
+    
+    row = i3;
+    col = i1;
 end % function

@@ -4,8 +4,10 @@ function mltp_plot_movement(obj, session)
         mkdir(outputFolder)
     end
     
-    for iTrial = 1:session.getNumTrials()
-        trial = session.getTrial(iTrial);
+%     for iTrial = 1:session.getNumTrials()
+%         trial = session.getTrial(iTrial);
+    for iTrial = 1:session.getNumTrialsToUse()
+        trial = session.getTrialToUse(iTrial);
         trialId = trial.getTrialId();
                 
         fn = fullfile( session.getAnalysisDirectory(), sprintf('trial_%d_movement.mat', trialId) );

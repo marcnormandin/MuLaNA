@@ -8,6 +8,13 @@ classdef MLContinuousPlacemap < handle
         trace_ts_ms = [];
         trace_value = [];
         
+        x_input = [];
+        y_input = [];
+        ts_ms_input = [];
+        trace_ts_ms_input = [];
+        trace_value_input = [];
+        
+        
         trace_x = [];
         trace_y = [];
         
@@ -116,6 +123,27 @@ classdef MLContinuousPlacemap < handle
             obj.trace_ts_ms = trace_ts_ms;
             obj.trace_value = trace_value;
             
+            obj.x_input = x;
+            obj.y_input = y;
+            obj.ts_ms_input = ts_ms;
+            obj.trace_ts_ms_input = trace_ts_ms;
+            obj.trace_value_input = trace_value; % because we may modify it
+            
+            % FixMe! This shouldn't be needed if the data was always good
+            % Remove bad behaviour data
+            badi = find(diff(obj.ts_ms) <= 0);
+            badi = union(badi, badi+1);
+            obj.ts_ms(badi) = [];
+            obj.x(badi) = [];
+            obj.y(badi) = [];
+            
+            % FixMe! This shouldn't be needed if the data was always good
+            % Remove bad cell data
+            badit = find(diff(obj.trace_ts_ms) <= 0);
+            badit = union(badit, badit+1);
+            obj.trace_ts_ms(badit) = [];
+            obj.trace_value(badit) = [];
+            
             % Process the inputs and optionals
             parse(p, x, y, ts_ms, trace_value, trace_ts_ms, varargin{:});
             
@@ -129,6 +157,10 @@ classdef MLContinuousPlacemap < handle
             obj.trace_x = interp1( obj.ts_ms, obj.x, obj.trace_ts_ms );
             obj.trace_y = interp1( obj.ts_ms, obj.y, obj.trace_ts_ms );
             
+            if ~isempty(obj.speed_cm_per_second)
+                obj.speed_cm_per_second(badi) = [];
+            end
+            
             obj.p = p;
             
             % Check that the array behaviour lengths are the same length and that the
@@ -137,6 +169,8 @@ classdef MLContinuousPlacemap < handle
             if length(obj.y) ~= numPoints || length(obj.ts_ms) ~= numPoints
                 error('The arrays x, y, and ts_ms must all be the same length!');
             end
+           
+            
             if any(diff(obj.ts_ms) < 0)
                 error('The timestamp array, ts_ms, must be monotonically increasing, but it is not!');
             end

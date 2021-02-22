@@ -69,20 +69,45 @@ function mltp_plot_placemaps(obj, session)
 
                 [nr,nc] = size(pmrm);
 
-                
-                if obj.Config.placemaps.plot_map_unvisited_bins_as_white == 1
-                    pmrm(pm.visitedCountMap == 0) = nan;
+                if strcmpi(obj.Config.placemaps.plot_map_shading, 'interp')
+                    pcolor( [pmrm, nan(nr,1); nan(1,nc+1)] );
+                    shading interp
+                        
+                    if obj.Config.placemaps.plot_map_unvisited_bins_as_white == 1
+                        O = pm.dwellTimeMapTrue;
+                        O(O > 0) = 1;
+                        O(O < 1) = 0;
+                        O = 1 - O;
+                        W = ones(size(O,1), size(O,2), 3);
+                        
+                        hold on
+                        hoverlay = imagesc(W);
+                        hold off
+                        set(hoverlay, 'AlphaData', O);
+                    end
+                elseif strcmpi(obj.Config.placemaps.plot_map_shading, 'flat')
+                    if obj.Config.placemaps.plot_map_unvisited_bins_as_white == 1
+                        pmrm(pm.visitedCountMap == 0) = nan;
+                    end
+
+                    pcolor( [pmrm, nan(nr,1); nan(1,nc+1)] );
+                    shading flat
+                else
+                    error('config.placemaps.plot_map_shading must be flat or interp.')
                 end
-                pcolor( [pmrm, nan(nr,1); nan(1,nc+1)] );
                 
-                if strcmpi(obj.Config.placemaps.plot_map_shading, 'flat')
-                    shading flat;
-                elseif strcmpi(obj.Config.placemaps.plot_map_shading, 'interp')
-                    shading interp;
-                end
+%                 if obj.Config.placemaps.plot_map_unvisited_bins_as_white == 1
+%                     pmrm(pm.visitedCountMap == 0) = nan;
+%                 end
+%                 pcolor( [pmrm, nan(nr,1); nan(1,nc+1)] );
+%                 
+%                 if strcmpi(obj.Config.placemaps.plot_map_shading, 'flat')
+%                     shading flat;
+%                 elseif strcmpi(obj.Config.placemaps.plot_map_shading, 'interp')
+%                     shading interp;
+%                 end
                 
                 set(gca, 'ydir', 'reverse');
-
                 axis image off
                 colormap jet 
         
@@ -105,6 +130,7 @@ function mltp_plot_placemaps(obj, session)
         imwrite(F.cdata, fullfile(outputFolder, sprintf('%s_maps.png',fnPrefix)), 'png')
         savefig(h, fullfile(outputFolder, sprintf('%s_maps.fig',fnPrefix)));
         saveas(h, fullfile(outputFolder, sprintf('%s_maps.svg',fnPrefix)), 'svg');
+        saveas(h, fullfile(outputFolder, sprintf('%s_maps.pdf',fnPrefix)), 'pdf');
         print('-painters', '-depsc', fullfile(outputFolder, sprintf('%s_maps.eps',fnPrefix)))
         close(h);
 

@@ -1,5 +1,9 @@
 function [header] = ml_cai_core_h5_read_header( filename )
 
+if ~isfile(filename)
+    error('The file (%s) does not exist.', filename);
+end
+
 s = h5info( filename );
 
 % output

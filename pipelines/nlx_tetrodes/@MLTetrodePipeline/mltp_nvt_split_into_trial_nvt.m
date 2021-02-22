@@ -14,18 +14,23 @@ function mltp_nvt_split_into_trial_nvt(obj, session)
             session.getNumTrials(), numTrials);
     end
 
-    % Save a separate file for each trial in the nvt file, but only for
-    % ones that we will process
+    % Save a separate file for each trial in the nvt file, but we will only process ones that are marked to be used).
     for iTrial = 1:session.getNumTrials()
-        trial = session.getTrial(iTrial);
+        triall = session.getTrial(iTrial);
+%     for iTrial = 1:session.getNumTrialsToUse()
+%         trial = session.getTrialToUse(iTrial);
         
-        trialNvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_nvt.mat', trial.getTrialId()));
+        trialNvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_nvt.mat', triall.getTrialId()));
         if obj.isVerbose()
             fprintf('Saving %s... ', trialNvtFilename);
         end
         
         % get the trials data
         trial = trialsData{iTrial};
+        
+        if trial.trial_id ~= triall.getTrialId()
+            error('Trial id mismatch! (%d vs %d)', trial_id, triall.getTrialId());
+        end
         
         save(trialNvtFilename, 'trial');
         if obj.isVerbose()

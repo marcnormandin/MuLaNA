@@ -14,8 +14,10 @@ function mltp_tfiles_to_singleunits(obj, session)
             % We will store the results in this
             spikes = [];
             
-            for iTrial = 1:session.getNumTrials()
-                trial = session.getTrial(iTrial);
+%             for iTrial = 1:session.getNumTrials()
+%                 trial = session.getTrial(iTrial);
+            for iTrial = 1:session.getNumTrialsToUse()
+                trial = session.getTrialToUse(iTrial);
                 
                 % Load the trials data to get the timestamps for it
                 trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trial.getTrialId()));
@@ -26,6 +28,7 @@ function mltp_tfiles_to_singleunits(obj, session)
                 % happened during it.
                 spikes(iTrial).trialSpikeTimes_mus = spikeTimes_mus(find(spikeTimes_mus >= trialTimeStamps_mus(1) & spikeTimes_mus <= trialTimeStamps_mus(end)));
                 spikes(iTrial).numSpikes = length(spikes(iTrial).trialSpikeTimes_mus);
+                spikes(iTrial).trial_id = trial.getTrialId();
             end
 
             % save the cell data

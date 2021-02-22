@@ -299,7 +299,16 @@ classdef MLSessionRecord < handle
                    for iSub = 1:length(subFields)
                        subField = subFields{iSub};
                        if ~isfield(obj.json.(topField), subField)
-                           error('Error. Unable to find (%s.%s) in (%s).\n', topField, subField, obj.jsonFilename);
+                           if strcmp(subField, 'folders')
+                               fprintf('Warning. Unable to find (%s.%s) in (%s). This is fine for tetrode data.\n', topField, subField, obj.jsonFilename);
+                               % Add empty ones
+                                N = length(obj.json.trial_info.sequence_num);
+                                for iAdd = 1:N
+                                    obj.json.trial_info.folders{iAdd} = "";
+                                end
+                           else
+                                error('Error. Unable to find (%s.%s) in (%s).\n', topField, subField, obj.jsonFilename);
+                           end
                        end
                    end
                else

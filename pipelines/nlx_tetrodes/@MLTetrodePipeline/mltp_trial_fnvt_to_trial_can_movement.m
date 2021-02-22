@@ -9,8 +9,10 @@ function mltp_trial_fnvt_to_trial_can_movement(obj, session)
         fprintf('Computing the movment in cm/s using the arena ROI.\n');
     end
 
-    for iTrial = 1:session.getNumTrials()
-        trial = session.getTrial(iTrial);
+%     for iTrial = 1:session.getNumTrials()
+%         trial = session.getTrial(iTrial);
+    for iTrial = 1:session.getNumTrialsToUse()
+        trial = session.getTrialToUse(iTrial);
 
         % Load the trial position data (fixed)
         trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trial.getTrialId()));

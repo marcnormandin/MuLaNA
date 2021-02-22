@@ -76,6 +76,8 @@ classdef MLMiniscopeSession < MLSession
                 
                 trial = obj.getTrial(iTrial);
                 
+                
+                
                 if trial.isEnabled()
                     % Check if the placemap exists
                     % FixMe! We should have the trial itself load the
@@ -106,6 +108,7 @@ classdef MLMiniscopeSession < MLSession
                     pmlist(ind).cell_id = iTrialCell;
                     pmlist(ind).placemap = pm;
                     pmlist(ind).trial_use = trial.isEnabled();
+                    pmlist(ind).maps = tmp.pm;
                 end
             end % matches across trials
         end % function
@@ -120,6 +123,54 @@ classdef MLMiniscopeSession < MLSession
             end
             
             score = obj.CellRegResult.getCellScore(iCell);
+        end % function
+        
+        function [cell_use_list] = getCellUse(obj, iCell)
+            if ~obj.hadCellRegistration()
+                error('No cells are registered. Can not return any placemaps.');
+            end
+            
+            if iCell < 1 || iCell > obj.getNumCells()
+                error('Can not return placemaps for cell (%d) because there are only (%d) cells.', iCell, obj.getNumCells());
+            end
+            
+            % For the desired iCell, get the map for the cell's ids in each
+            % trial that it exists in. The key is the trial number, and the
+            % value is the cell id in the respective trial.
+            cmap = obj.CellRegResult.getCellMap(iCell);
+            
+            numMatches = length(cmap);
+            
+            cell_use_list = []; %struct('trial_id', [], 'context_id', [], 'cell_id', [], 'placemap', []);
+
+            for iMatch = 1:numMatches
+                keys = cmap.keys;
+                values = cmap.values;
+                iTrial = keys{iMatch};
+                iTrialCell = values{iMatch};
+                
+                trial = obj.getTrial(iTrial);
+
+                if trial.isEnabled()
+                    fn = fullfile(trial.getAnalysisDirectory(), sprintf('cell_use.mat'));
+                    if ~isfile(fn)
+                        error('The requested file does not exist: %s\n', fn);
+                    end
+
+                    tmp = load(fn);
+                    cell_use = tmp.cell_use(iTrialCell);
+%                     if tmp.nid ~= iTrialCell
+%                         error('Loaded cell (%d) does not match what was intended (%d).\n', nid, iTrialCell);
+%                     end
+
+                    ind = length(cell_use_list) + 1;
+                    cell_use_list(ind).trial_id = iTrial;
+                    cell_use_list(ind).context_id = trial.getContextId();
+                    cell_use_list(ind).cell_id = iTrialCell;
+                    cell_use_list(ind).cell_use = cell_use;
+                    cell_use_list(ind).trial_use = trial.isEnabled();
+                end
+            end % matches across trials
         end % function
         
         function [weightMatrix] = getCellWeightMatrix(obj, iCell)

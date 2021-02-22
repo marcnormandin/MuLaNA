@@ -241,10 +241,12 @@ classdef MLSpikePlacemap < handle
 
             % The dwell time map after applying the criteria
             obj.dwellTimeMap = obj.dwellTimeMapTrue;
-            %obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
+            obj.dwellTimeMap( obj.dwellTimeMap < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
             
             obj.dwellTimeMapSmoothed = imfilter( obj.dwellTimeMap, obj.smoothingKernel);
-            obj.dwellTimeMapSmoothed( obj.dwellTimeMapSmoothed < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
+            
+            % PUT THIS BACK
+            %obj.dwellTimeMapSmoothed( obj.dwellTimeMapSmoothed < obj.p.Results.criteriaDwellTimeSecondsPerBinMinimum ) = 0;
 
             
             % Use the unsmoothed maps that passed the criteria
@@ -313,16 +315,19 @@ classdef MLSpikePlacemap < handle
             shiftMin_ms = 20 * 1000;
             numDraws = 1000;
 
-            tshift_min = shiftMin_ms;
-            tshift_max = ts_ms(end) - ts_ms(1) - tshift_min;
-            tshift_draw = (tshift_max - tshift_min).*rand(1,numDraws) + tshift_min;
+%             tshift_min = shiftMin_ms;
+%             tshift_max = ts_ms(end) - ts_ms(1) - tshift_min;
+%             tshift_draw = (tshift_max - tshift_min).*rand(1,numDraws) + tshift_min;
+            
+            [tshift_draw_ms, tshift_draw_n] = ml_util_rand_timeshift(ts_ms, shiftMin_ms, numDraws);
 
             % Allocate memory
             informationRateSim = zeros(1, numDraws);
             informationPerSpikeSim = zeros(1, numDraws);
 
+            %h = figure();
             for iDraw = 1:numDraws
-                sim_spike_ts_ms = spike_ts_ms + tshift_draw(iDraw);
+                sim_spike_ts_ms = spike_ts_ms + tshift_draw_ms(iDraw);
                 outsideRange_indices = find(sim_spike_ts_ms > ts_ms(end));
                 sim_spike_ts_ms(outsideRange_indices) = sim_spike_ts_ms(outsideRange_indices) - ts_ms(end) + ts_ms(1);
                 %disp(outsideRange_indices)
@@ -344,6 +349,16 @@ classdef MLSpikePlacemap < handle
                     'criteria_speed_cm_per_second_minimum', pmTrue.p.Results.criteria_speed_cm_per_second_minimum, ...
                     'criteria_speed_cm_per_second_maximum', pmTrue.p.Results.criteria_speed_cm_per_second_maximum, ...
                     'compute_information_rate_pvalue', false);
+                
+%                 figure
+%                 subplot(1,2,1)
+%                 pmSim.plot_path_with_spikes()
+%                 title(sprintf('Shuffle %d', iDraw))
+%                 subplot(1,2,2)
+%                 pmSim.plot();
+
+%                 plot(sim_spike_ts_ms, iDraw.*ones(1,length(sim_spike_ts_ms)), 'r.')
+%                 hold on
 
                 informationRateSim(iDraw) = pmSim.informationRate;
                 informationPerSpikeSim(iDraw) = pmSim.informationPerSpike;
@@ -359,11 +374,24 @@ classdef MLSpikePlacemap < handle
         end
         
         function plot_path_with_spikes(obj)
-            plot(obj.x, obj.y, '-', 'color', [0,0,0,0.2]);
+            plot(obj.x, obj.y, '-', 'color', [0,0,0,0.4]);
 
             hold on
             % These are the spikes that passed the velocity check
-            spikeScatter1 = scatter(obj.passed_spike_x, obj.passed_spike_y, 25, 'ro', 'markerfacecolor', 'r');
+            spikeScatter1 = scatter(obj.passed_spike_x, obj.passed_spike_y, 50, 'ro', 'markerfacecolor', 'r');
+            %spikeScatter1.MarkerFaceAlpha = 0.4;
+            %spikeScatter1.MarkerEdgeAlpha = 0.8;
+
+            set(gca, 'ydir', 'reverse')
+            axis equal off
+        end
+        
+        function plot_path_with_spikes_all(obj)
+            plot(obj.x, obj.y, '-', 'color', [0,0,0,0.4]);
+
+            hold on
+            % These are the spikes that passed the velocity check
+            spikeScatter1 = scatter(obj.spike_x, obj.spike_y, 50, 'ko', 'markerfacecolor', 'k');
             spikeScatter1.MarkerFaceAlpha = 0.4;
             spikeScatter1.MarkerEdgeAlpha = 0.8;
 

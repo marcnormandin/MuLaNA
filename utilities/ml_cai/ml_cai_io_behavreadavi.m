@@ -13,6 +13,7 @@ if k == 0
     error('No frames were read from %s', behavFilename);
 end
 
+video.frameRate = o.FrameRate;
 video.numFrames = length(mov);
 video.filename = behavFilename;
 video.width = vidWidth;

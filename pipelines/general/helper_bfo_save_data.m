@@ -13,8 +13,10 @@ function helper_bfo_save_data(outputFolder, perCell, rotDeg, group)
         % Only include the non-nan data.
         x = perCell(iCell).(sprintf('prob_%s', group));
         if ~any(isnan(x))
-            avg_prob = avg_prob + x;
-            num_prob = num_prob + 1;
+            if ~isempty(x)
+                avg_prob = avg_prob + x;
+                num_prob = num_prob + 1;
+            end
             
             if isempty(prob)
                 prob = x;
@@ -26,8 +28,10 @@ function helper_bfo_save_data(outputFolder, perCell, rotDeg, group)
         % Only include the non-nan data.
         y = perCell(iCell).(sprintf('avg_corr_%s', group));
         if ~any(isnan(y))
-            avg_corr = avg_corr + y;
-            num_corr = num_corr + 1;
+            if ~isempty(y)
+                avg_corr = avg_corr + y;
+                num_corr = num_corr + 1;
+            end
             
             if isempty(corr)
                 corr = y;

@@ -52,6 +52,9 @@ classdef MLTetrodePipeline < MLPipeline
 %             obj.registerExperimentTask('plot_bfo_90_ac', @obj.mltp_plot_bfo_90_ac);
 %             obj.registerExperimentTask('plot_bfo_90_dc', @obj.mltp_plot_bfo_90_dc);
 
+            obj.registerSessionTask('compute_best_match_rotations', @obj.mltp_compute_best_match_rotation_rect);
+            obj.registerExperimentTask('plot_best_match_rotations_rect_per_session', @obj.mltp_plot_best_match_rotations_rect_per_session);
+
             obj.registerSessionTask('plot_bfo_90_ac_per_cell', @obj.mltp_plot_bfo_90_ac_per_cell);
             obj.registerExperimentTask('plot_bfo_90_averaged_across_sessions', @obj.mltp_plot_bfo_90_averaged_across_sessions);   
             

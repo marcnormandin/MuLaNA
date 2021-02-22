@@ -2,9 +2,14 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
             if obj.isVerbose()
                 fprintf('Fixing the trial data.\n');
             end
+            
+            for iTrial = 1:session.getNumTrialsToUse()
+                triall = session.getTrialToUse(iTrial);
+%                 trialId = trial.getTrialId();
 
-            for iTrial = 1:session.getNumTrials()
-                triall = session.getTrial(iTrial);
+
+%             for iTrial = 1:session.getNumTrials()
+%                 triall = session.getTrial(iTrial);
                 
                 % Check
 %                 if iTrial ~= trial.getSequenceId()
@@ -39,6 +44,7 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
                 %goodIndices = sort(setdiff(allIndices, badIndices));
 
                 % Use the good values for the interpolation
+                % This fails if a trial doesn't have enough points
                 %interpX = movmean(interp1(goodIndices, smoothedX(goodIndices), allIndices), WS);
                 %interpY = movmean(interp1(goodIndices, smoothedY(goodIndices), allIndices), WS);
                 %interpAngle = movmean(interp1(goodIndices, smoothedAngle(goodIndices), allIndices), WS);
@@ -57,6 +63,8 @@ function mltp_trial_nvt_to_trial_fnvt(obj, session)
                 trial.targets = t.targets;
                 trial.points = t.points;
                 trial.header = t.header;
+                trial.trial_id = triall.getTrialId();
+                trial.sequence_id = triall.getSequenceId();
 
                 trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', triall.getTrialId()));
                 fprintf('Saving %s ... ', trialFnvtFilename);

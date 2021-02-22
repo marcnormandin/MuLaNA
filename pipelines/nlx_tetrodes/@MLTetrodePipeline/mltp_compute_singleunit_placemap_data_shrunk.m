@@ -12,8 +12,8 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
         data = load(singleUnitFilename);
         singleunit = data.singleunit;
         
-        for iTrial = 1:session.getNumTrials()
-            trial = session.getTrial(iTrial);
+        for iTrial = 1:session.getNumTrialsToUse()
+            trial = session.getTrialToUse(iTrial);
             trialId = trial.getTrialId();
                 
             % Load the data
@@ -25,7 +25,9 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
             
             % WE NEED TO TRANSFORM THE DATA FROM A RECTANGLE TO A SQUARE
             trueArena = movement.arena;
-            shrunk_length_cm = trueArena.x_length_cm; % should be the smallest dimension (width or x_length_cm)
+            arenaLength_smallest = min([trueArena.x_length_cm, trueArena.y_length_cm]);
+            cm_per_bin = obj.Config.placemaps.cm_per_bin_square_smallest_dim;
+            shrunk_length_cm = arenaLength_smallest; %trueArena.x_length_cm; % should be the smallest dimension (width or x_length_cm)
             shrunkArena = MLArenaSquare(...
                 movement.arena.getReferencePointsVideo(), ...
                 shrunk_length_cm);
@@ -37,19 +39,21 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
             
             % Compute the number of bins we need in each dimension
             % The bounds are in cm
-            cm_per_bin = obj.Config.placemaps.cm_per_bin;
-            nbinsx = ceil((boundsX(2) - boundsX(1))/cm_per_bin); 
-            nbinsy = ceil((boundsY(2) - boundsY(1))/cm_per_bin);
+            %cm_per_bin = obj.Config.placemaps.cm_per_bin;
+            %nbinsx = ceil((boundsX(2) - boundsX(1))/cm_per_bin); 
+            %nbinsy = ceil((boundsY(2) - boundsY(1))/cm_per_bin);
+            
+            nbins_square = round(arenaLength_smallest / obj.Config.placemaps.cm_per_bin_square_smallest_dim);
 
             % The speed should come from whatever the true shape is
             mltetrodeplacemap = MLSpikePlacemap(x_shrunk_cm, y_shrunk_cm, movement.timestamps_ms, spike_ts_ms, ...
                 'speed_cm_per_second', movement.speed_smoothed_cm_per_s, ...
                 'boundsx', boundsX, ...
                 'boundsy', boundsY, ...
-                'nbinsx', nbinsx, ...
-                'nbinsy', nbinsy, ...
+                'nbinsx', nbins_square, ...
+                'nbinsy', nbins_square, ...
                 'SmoothingProtocol', obj.Config.placemaps.smoothingProtocol, ...
-                'smoothingKernel', obj.SmoothingKernel, ...
+                'smoothingKernel', obj.SmoothingKernelRectCompressed, ...
                 'criteriaDwellTimeSecondsPerBinMinimum', obj.Config.placemaps.criteria_dwell_time_seconds_per_bin_minimum, ...
                 'criteriaSpikesPerBinMinimum', obj.Config.placemaps.criteria_spikes_per_bin_minimum, ...
                 'criteriaSpikesPerMapMinimum', obj.Config.placemaps.criteria_spikes_per_map_minimum, ...
@@ -64,7 +68,7 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
                 mkdir(outputFolder)
             end
 
-
+            trial_id = trialId;
             trial_num = trial.getSequenceId();
             trial_use = trial.isEnabled();
             trial_first_dig = trial.getDigs();
@@ -91,7 +95,7 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
             fnPrefix = fnPrefix{1};
             placemapFilename = fullfile(outputFolder, sprintf('%s_%d_%s', fnPrefix, trialId, obj.Config.placemaps.filenameSuffix));
             fprintf('Saving placemap data to file: %s\n', placemapFilename);
-            save(placemapFilename, 'mltetrodeplacemap', 'cm_per_bin', 'trial_num', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
+            save(placemapFilename, 'mltetrodeplacemap', 'cm_per_bin', 'trial_id', 'trial_num', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
         end % trial
     end % for each t-file    
 end % function

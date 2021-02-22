@@ -8,10 +8,12 @@ timestamps_ms = reshape(timestamps_ms, 1, length(timestamps_ms));
         refQ = reshape(arenaroi.inside.i, 1, 4);
         if strcmpi(arenaJson.shape, 'rectangle')
             arena = MLArenaRectangle([refP; refQ], arenaJson.x_length_cm , arenaJson.y_length_cm);
-        elseif strcmp(arenaJson.shape, 'square')
+        elseif strcmpi(arenaJson.shape, 'square')
             arena = MLArenaSquare([refP; refQ], arenaJson.length_cm);
+        elseif strcmpi(arenaJson.shape, 'circle')
+            arena = MLArenaCircle([refP; refQ], arenaJson.diameter_cm);
         else
-            error('Inappropriate shape (%s). Must be square or rectangle', arenaJson.shape);
+            error('Inappropriate shape (%s). Must be square, rectangle, or circle.', arenaJson.shape);
         end
 
         % Transform positions from video to canonical (pixels to

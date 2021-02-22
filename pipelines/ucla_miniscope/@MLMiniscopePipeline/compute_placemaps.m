@@ -34,20 +34,49 @@ function compute_placemaps(obj, session, trial)
     
     movement = mulana_compute_movement(arenaJson, tr.behavcam_roi, x_px, y_px, ts_ms);
 
-    movement.x_cm(movement.x_cm > arenaJson.x_length_cm) = arenaJson.x_length_cm;
-    movement.y_cm(movement.y_cm > arenaJson.y_length_cm) = arenaJson.y_length_cm;
-    movement.x_cm(movement.x_cm < 0) = 0;
-    movement.y_cm(movement.y_cm < 0) = 0;
+    cm_per_bin = obj.Config.placemaps.cm_per_bin;
+    
+    if strcmpi( arenaJson.shape, 'rectangle' )
+        movement.x_cm(movement.x_cm > arenaJson.x_length_cm) = arenaJson.x_length_cm;
+        movement.y_cm(movement.y_cm > arenaJson.y_length_cm) = arenaJson.y_length_cm;
+        movement.x_cm(movement.x_cm < 0) = 0;
+        movement.y_cm(movement.y_cm < 0) = 0;
+            
+        nbinsx = ceil(arenaJson.x_length_cm / cm_per_bin + 1);
+        nbinsy = ceil(arenaJson.y_length_cm / cm_per_bin + 1);
+        
+        maxx_cm = arenaJson.x_length_cm;
+        maxy_cm = arenaJson.y_length_cm;
+    elseif strcmpi( arenaJson.shape, 'square' )
+        movement.x_cm(movement.x_cm > arenaJson.length_cm) = arenaJson.length_cm;
+        movement.y_cm(movement.y_cm > arenaJson.length_cm) = arenaJson.length_cm;
+        movement.x_cm(movement.x_cm < 0) = 0;
+        movement.y_cm(movement.y_cm < 0) = 0;
+        
+        nbinsx = ceil(arenaJson.length_cm / cm_per_bin + 1);
+        nbinsy = nbinsx;
+        
+        maxx_cm = arenaJson.length_cm;
+        maxy_cm = maxx_cm;
+    elseif strcmpi (arenaJson.shape, 'circle' )
+        movement.x_cm(movement.x_cm > arenaJson.diameter_cm) = arenaJson.diameter_cm;
+        movement.y_cm(movement.y_cm > arenaJson.diameter_cm) = arenaJson.diameter_cm;
+        movement.x_cm(movement.x_cm < 0) = 0;
+        movement.y_cm(movement.y_cm < 0) = 0;
+        
+        nbinsx = ceil(arenaJson.diameter_cm / cm_per_bin + 1);
+        nbinsy = ceil(arenaJson.diameter_cm / cm_per_bin + 1);
+        
+        maxx_cm = arenaJson.diameter_cm;
+        maxy_cm = maxx_cm;
+    else
+        error('Invalid arena shape. Must be rectangle, square, or circle.');
+    end
     
     % save the movement data
     save(fullfile(trial.getAnalysisDirectory(), 'movement.mat'), 'movement', '-v7.3');
     
-    cm_per_bin = obj.Config.placemaps.cm_per_bin;
-    %smoothingKernelGaussianSize_cm = 15;
-    %smoothingKernelGaussianSigma_cm = 3.0;
 
-    nbinsx = ceil(arenaJson.x_length_cm / cm_per_bin + 1);
-    nbinsy = ceil(arenaJson.y_length_cm / cm_per_bin + 1);
 
     % Construct the kernel. Make sure that it is valid.
     % The kernel sizes must be odd so that they are symmetric
@@ -80,8 +109,8 @@ function compute_placemaps(obj, session, trial)
         pm = MLContinuousPlacemap(movement.x_cm, movement.y_cm, movement.timestamps_ms, trace_value, trace_ts_ms,...
             'smoothingProtocol', obj.Config.placemaps.smoothingProtocol, ...
             'speed_cm_per_second', movement.speed_smoothed_cm_per_s, ...
-            'boundsx', [0, arenaJson.x_length_cm], ...
-            'boundsy', [0, arenaJson.y_length_cm], ...
+            'boundsx', [0, maxx_cm], ...
+            'boundsy', [0, maxy_cm], ...
             'nbinsx', nbinsx, ...
             'nbinsy', nbinsy, ...
             'smoothingKernel', obj.SmoothingKernel, ...

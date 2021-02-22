@@ -10,7 +10,8 @@ classdef MLPipeline < handle
         Experiment
 
         % Kernel used to smooth the placemaps
-        SmoothingKernel
+        SmoothingKernelSymmetric % Used for square and rectangular arenas
+        SmoothingKernelRectCompressed % Used for rectangular arena compressed to a square for the best fit analysis
         
     end
     
@@ -243,27 +244,24 @@ classdef MLPipeline < handle
                 obj.Verbose = false;
             end
             
-            obj.configSetupSmoothingKernel();
+            obj.configSetupSmoothingKernels();
             
             obj.configValidateSpeed();
         end
         
-        function configSetupSmoothingKernel(obj)
-            % Construct the kernel. Make sure that it is valid.
-            % The kernel sizes must be odd so that they are symmetric
-            %if mod(obj.Config.placemaps.smoothingKernelGaussianSize_cm,2) ~= 1
-            %    error('The config value placemaps.smoothingKernelGaussianSize_cm must be odd, but it is %d.', obj.Config.placemaps.smoothingKernelGaussianSize_cm);
-            %end
-            % Make sure that the size is odd so that gaussian peak is at
-            % the central bin
-            hsize = ceil(obj.Config.placemaps.smoothingKernelGaussianSize_cm / obj.Config.placemaps.cm_per_bin);
-            if mod(hsize,2) ~= 1
-                hsize = hsize + 1;
-            end
-            obj.SmoothingKernel = fspecial('gaussian', hsize, obj.Config.placemaps.smoothingKernelGaussianSigma_cm / obj.Config.placemaps.cm_per_bin);
-            %obj.SmoothingKernel = obj.SmoothingKernel ./ max(obj.SmoothingKernel(:)); % Isabel wants this like the other
-            obj.SmoothingKernel = obj.SmoothingKernel ./ sum(obj.SmoothingKernel(:), 'all'); % Isabel wants this like the other
+        function configSetupSmoothingKernels(obj)
+            % Kernel for rectangle (symmetric kernel, and so bins should be squares (eg. 1cm x 1cm)            
+            obj.SmoothingKernelSymmetric = ml_util_compute_rect_kernel(obj.Config.placemaps.smoothingKernelGaussianSize_cm, obj.Config.placemaps.smoothingKernelGaussianSigma_cm, obj.Config.placemaps.cm_per_bin_rect_both_dim);
 
+            % Kernel for compressed rectangle (assymetric kernel, real bin
+            % size is not square (eg. 1x1.5 cm bins)
+            arena = obj.Experiment.getArenaGeometry();
+            if strcmpi(arena.shape, 'rectangle') 
+                arenaLengthRatio = arena.x_length_cm / arena.y_length_cm;
+                obj.SmoothingKernelRectCompressed = ml_util_compute_rect_compressed_kernel(arenaLengthRatio, obj.Config.placemaps.smoothingKernelGaussianSize_cm, obj.Config.placemaps.smoothingKernelGaussianSigma_cm, obj.Config.placemaps.cm_per_bin_square_smallest_dim);
+            else
+                obj.SmoothingKernelRectCompressed = obj.SmoothingKernelSymmetric;   
+            end
         end
         
         function configValidateSpeed(obj)

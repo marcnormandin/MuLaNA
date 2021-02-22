@@ -8,9 +8,9 @@
 %     pwd, '../../analysis/chengs_task_2c' );
 
 
-mainDir = 'M:/Minimice/CMG161_CA1/recordings/chengs_task_2c';
+mainDir = 'M:/Minimice/CMG169_CA1/recordings/chengs_task_2c';
 %cfg = jsondecode(fileread(fullfile(pwd, 'pipeline_config.json')));
-cfg = jsondecode(fileread(fullfile(pwd, 'experiment_description.json'))); % Should be pipeline
+cfg = jsondecode(fileread(fullfile(mainDir, 'experiment_description.json'))); % Should be pipeline
 
 %pipe = MLMiniscopePipeline( cfg, mainDir, strrep(mainDir, 'recordings', 'analysis') );
 experimentRecordingsParentFolder = mainDir;

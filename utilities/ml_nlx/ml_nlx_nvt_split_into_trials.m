@@ -28,5 +28,6 @@ function [trial] = ml_nlx_nvt_split_into_trials( nvtFilename, nvt_file_trial_sep
         trial{i}.targets = Targets(:,p:q);
         trial{i}.points = Points(:,p:q);
         trial{i}.header = Header; % full header
+        trial{i}.trial_id = i;
     end
 end

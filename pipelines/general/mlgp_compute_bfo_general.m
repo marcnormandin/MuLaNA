@@ -25,8 +25,20 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
         error('Invalid rotDeg (%f) given. Can only be 90 or 180.', rotDeg);
     end
     
+    % Load whether to use the cells or not
+    use_cell_per_trial = {};
+    if obj.Config.use_spatial_footprint_filter == 1
+        fprintf('The spatial footprint filter will be used.\n');
+        for iTrial = 1:session.getNumTrials()
+            trial = session.getTrial(iTrial);
+            tmp = load(fullfile(trial.getAnalysisDirectory(), 'cell_use.mat'), 'cell_use');
+            use_cell_per_trial{iTrial} = tmp.cell_use;
+        end
+    end
     
     numCells = session.getNumCells();
+    fprintf('We will process %d cells.\n', numCells);
+    
     numContexts = obj.Experiment.getNumContexts();
     
     % Will be the length of the number of cells
@@ -63,15 +75,23 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
         perCell(iCell).cell_name = num2str(iCell);
 
         pmlist = session.getCellPlacemaps(iCell, placemapType);
-        % FixMe! Only used by the miniscope
-        sfplist = session.getCellSpatialFootprints(iCell);
-        sfpstats = struct('C1', [], 'C2', [], 'circularity', [], 'numComponents', [], 'occupiedArea', [], 'size', []);
-        for i = 1:length(sfplist)
-            sfpstats(i) = ml_cai_spatialfootprint_stats(sfplist(i).spatial_footprint);
+        
+        sfpValid = ones(1, length(pmlist)); % by default dont use the filter
+        if obj.Config.use_spatial_footprint_filter == 1
+%             % FixMe! Only used by the miniscope
+%             sfplist = session.getCellSpatialFootprints(iCell);
+%             sfpstats = struct('C1', [], 'C2', [], 'circularity', [], 'numComponents', [], 'occupiedArea', [], 'size', []);
+%             for i = 1:length(sfplist)
+%                 sfpstats(i) = ml_cai_spatialfootprint_stats(sfplist(i).spatial_footprint);
+%             end
+%             badi = union(find([sfpstats.circularity] > 1 | [sfpstats.circularity] < 0.4), find([sfpstats.size] < 10 | [sfpstats.size] > 20));
+%             badi = union(badi, find([sfpstats.numComponents] > 1));
+%             sfpValid = ~ismember(1:length(sfplist), badi);
+            for iPM = 1:length(pmlist)
+               sfpValid(iPM) = use_cell_per_trial{pmlist(iPM).trial_id}(pmlist(iPM).cell_id);
+            end
+              
         end
-        badi = union(find([sfpstats.circularity] > 1 | [sfpstats.circularity] < 0.4), find([sfpstats.size] < 10 | [sfpstats.size] > 20));
-        badi = union(badi, find([sfpstats.numComponents] > 1));
-        sfpValid = ~ismember(1:length(sfplist), badi);
         
         %weightMatrix = session.getCellWeightMatrix(iCell);
 
@@ -82,6 +102,9 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
             
             x1 = pmlist(iMap1);
             
+            if sum(x1.placemap, 'all') == 0
+                continue;
+            end
 
 
             % Only compare maps that actually have spikes
@@ -93,22 +116,31 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
             context1 = x1.context_id;
 
             T1 = x1.placemap;
-            T1 = T1 ./ sum(T1, 'all');
+            %T1 = T1 ./ sum(T1, 'all');
 
             W1 = ones(size(T1));
-            W1(isnan(T1)) = 0;
+            %W1(isnan(T1)) = 0;
             
             if mirrorContexts(context1) == 1
                 T1 = fliplr(T1);
                 W1 = fliplr(W1);
             end
 
-            for iMap2 = (iMap1+1):length(pmlist)
+            for iMap2 = 1:length(pmlist)
+                
+                if iMap1 == iMap2
+                    continue;
+                end
+                
                 if ~sfpValid(iMap2)
                     continue;
                 end
                 
                 x2 = pmlist(iMap2);
+                
+                if sum(x2.placemap, 'all') == 0
+                    continue;
+                end
                                             % Only compare maps that actually have spikes
 %                 if x2.mltetrodeplacemap.totalSpikesAfterCriteria == 0
 %                     continue;
@@ -125,10 +157,10 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
                 end
 
                 T2 = x2.placemap;
-                T2 = T2 ./ sum(T2, 'all');
+                %T2 = T2 ./ sum(T2, 'all');
 
                 W2 = ones(size(T2));
-                W2(isnan(T2)) = 0;
+                %W2(isnan(T2)) = 0;
 
                 if mirrorContexts(context2) == 1
                     T2 = fliplr(T2);
@@ -146,22 +178,36 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
                     error('Logic error!');
                 end
                 
+                % vindn may have more than one value
+                
+                if any(isnan(vn)) || any(isnan(vindn))
+                    error('Nan should be impossible!');
+                end
+                
+                
+                % HACK TO CHECK
+                vindn = vindn(randi(length(vindn)));
+                
                 % modify the correlation by the weight
                 %vn = vn * weightMatrix(x1.trial_id, x2.trial_id);
                 
                 % Now store the result in the appropriate locations
                 if context1 == context2
-                    perCell(iCell).v_same(end+1) = vn;
-                    perCell(iCell).vind_same(end+1) = vindn;
+                    for iR = 1:length(vindn)
+                        perCell(iCell).v_same(end+1) = vn;
+                        perCell(iCell).vind_same(end+1) = vindn(iR);
+                    end
                     
                     % Assign it to the correct context. First grap what we
                     % already have stored.
                     tmp_v = perCell(iCell).(sprintf('v_context%d', context1));
                     tmp_vind = perCell(iCell).(sprintf('vind_context%d', context1));
         
-                    % Add the new entry
-                    tmp_v(end+1) = vn;
-                    tmp_vind(end+1) = vindn;
+                    for iR = 1:length(vindn)
+                        % Add the new entry
+                        tmp_v(end+1) = vn;
+                        tmp_vind(end+1) = vindn(iR);
+                    end
                     
                     % Store the old and new
                     perCell(iCell).(sprintf('v_context%d', context1)) = tmp_v;
@@ -170,12 +216,16 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
                 end
                 
                 if context1 ~= context2
-                    perCell(iCell).v_different(end+1) = vn;
-                    perCell(iCell).vind_different(end+1) = vindn;
+                    for iR = 1:length(vindn)
+                        perCell(iCell).v_different(end+1) = vn;
+                        perCell(iCell).vind_different(end+1) = vindn(iR);
+                    end
                 end
                 
-                perCell(iCell).v_all(end+1) = vn;
-                perCell(iCell).vind_all(end+1) = vindn;
+                for iR = 1:length(vindn)
+                    perCell(iCell).v_all(end+1) = vn;
+                    perCell(iCell).vind_all(end+1) = vindn(iR);
+                end
                 
             end % iMap2
         end % iMap1
@@ -197,29 +247,36 @@ function [perCell, total] = mlgp_compute_bfo_general(obj, session, rotDeg, mirro
     end % iCell
     
     % Combine the per cell data
-    total.vind_same = [];
-    total.v_same = [];
-    total.vind_different = [];
-    total.v_different = [];
-    total.vind_all = [];
-    total.v_all = [];
+    total = {};
+    
+    blah = {'same', 'different', 'all'};
     for iContext = 1:numContexts
-        total.(sprintf('vind_context%d', iContext)) = [];
-        total.(sprintf('v_context%d', iContext)) = [];
+        blah{end+1} = sprintf('context%d', iContext);
     end
     
-    for iCell = 1:numCells
-        total.vind_same = [total.vind_same, perCell(iCell).vind_same];
-        total.v_same = [total.v_same, perCell(iCell).v_same];
-        total.vind_different = [total.vind_different, perCell(iCell).vind_different];
-        total.v_different = [total.v_different, perCell(iCell).v_different];
-        total.vind_all = [total.vind_all, perCell(iCell).vind_all];
-        total.v_all = [total.v_all, perCell(iCell).v_all];
-        
-        for iContext = 1:numContexts
-            total.(sprintf('vind_context%d', iContext)) = [total.(sprintf('vind_context%d', iContext)), perCell(iCell).(sprintf('vind_context%d', iContext))];
-            total.(sprintf('v_context%d', iContext)) = [total.(sprintf('v_context%d', iContext)), perCell(iCell).(sprintf('v_context%d', iContext))];
+    for iB = 1:length(blah)
+        blahType = blah{iB};
+        counts = zeros(1, numAngles);
+        for iCell = 1:numCells
+            vind = perCell(iCell).(sprintf('vind_%s', blahType));
+            %v = perCell(iCell).(sprintf('v_%s', blahType));
+            s = histcounts(vind, 1:(numAngles+1));
+            maxc = max(s);
+            maxi = find(s == maxc);
+            
+            % It should be done this way
+%             for iR = 1:length(maxi)
+%                 counts( maxi(iR) ) = counts( maxi(iR) ) + 1;
+%                 corr = [corr, v(maxi(iR))];
+%             end
+            
+            j = randi(length(maxi));
+            counts( maxi(j) ) = counts( maxi(j) ) + 1;
         end
-    end
+        prob = counts ./ sum(counts, 'all') * 100;
+        
+        total.(sprintf('counts_%s', blahType)) = counts;
+        total.(sprintf('prob_%s', blahType)) = prob;
+    end % blah
         
 end % function
