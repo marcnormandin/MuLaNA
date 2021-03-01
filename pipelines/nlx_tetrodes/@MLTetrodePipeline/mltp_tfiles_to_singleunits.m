@@ -2,8 +2,9 @@ function mltp_tfiles_to_singleunits(obj, session)
         % Due to the problem with the 32bit vs 64bit, we need
         % to load the NLX timestamps for comparison
         nvtFilename = fullfile(session.getSessionDirectory(), obj.Experiment.getNvtFilename());
-        [nlxNvtTimeStamps_mus, ~, ~, ~, ~, ~, ~] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
-
+        %[nlxNvtTimeStamps_mus, ~, ~, ~, ~, ~, ~] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+        [nlxNvtTimeStamps_mus, ~, ~, ~, ~, ~, ~] = ml_nlx_nvt_load( nvtFilename );
+        
         fl = dir(fullfile(session.getSessionDirectory(), 'TT*.t'));
         tfiles = { fl.name };
         for iFile = 1:length(tfiles)

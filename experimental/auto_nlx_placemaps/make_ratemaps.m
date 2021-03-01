@@ -16,7 +16,9 @@ dataFolder = pwd;
 
 nvtFilename = fullfile( dataFolder, 'VT1.nvt');
 fprintf('Loading position data from (%s) ... ', nvtFilename);
-[t_mus, x_px, y_px, ~, ~, ~, ~] = Nlx2MatVT( nvtFilename, [1 1 1 1 1 1], 1, 1, [] );
+%[t_mus, x_px, y_px, ~, ~, ~, ~] = Nlx2MatVT( nvtFilename, [1 1 1 1 1 1], 1, 1, [] );
+[t_mus, x_px, y_px, ~, ~, ~, ~] = ml_nlx_nvt_load( nvtFilename );
+
 fprintf('done!\n');
     
 tFiles = dir(fullfile(dataFolder, 'TT*.t*'));

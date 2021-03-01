@@ -7,8 +7,9 @@ function [trial] = ml_nlx_nvt_split_into_trials( nvtFilename, nvt_file_trial_sep
         error('The trial separation threshold must be >= 0, but is (%d).', nvt_file_trial_separation_threshold_s);
     end
     
-    [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
-
+    %[TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+    [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = ml_nlx_nvt_load( nvtFilename );
+    
     inds = ml_nlx_nvt_find_trial_indices(TimeStamps_mus, nvt_file_trial_separation_threshold_s);
 
     numTrials = size(inds,2);

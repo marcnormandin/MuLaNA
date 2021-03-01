@@ -25,13 +25,6 @@ classdef MLTetrodeSession < MLSession
             n = length(obj.getTFilesFilenamePrefixes());
         end
         
-    end
-    
-    methods(Access = protected)
-        function obj = initialize(obj)
-            obj.updateListOfTFiles();
-        end
-        
         function updateListOfTFiles(obj)
             obj.TFilesFilenamePrefixes = {};
             
@@ -65,6 +58,15 @@ classdef MLTetrodeSession < MLSession
             % Store the now sorted list
             obj.TFilesFilenamePrefixes = tFilesToUse;
         end % function
+        
+    end
+    
+    methods(Access = protected)
+        function obj = initialize(obj)
+            obj.updateListOfTFiles();
+        end
+        
+        
     end % methods protected
 end
 

@@ -3,7 +3,8 @@ clear all
 clc
 
 nvtFilename = fullfile(pwd, 'VT1.nvt');
-[TimeStamps, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+%[TimeStamps, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+[TimeStamps, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = ml_nlx_nvt_load(  nvtFilename );
 
 outputFilename = 'VT1_nvt.h5';
 

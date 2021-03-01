@@ -94,6 +94,8 @@ classdef MLTetrodePipeline < MLPipeline
             
             obj.registerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits', @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits);
             
+            obj.registerSessionTask('remove_invalid_t_files', @obj.mltp_nlx_mclust_remove_invalid_t_files);
+            
             obj.registerSessionTask('plot_rate_difference_matrices', @obj.mltp_plot_rate_difference_matrices);
             obj.registerExperimentTask('plot_rate_difference_matrix_average_days', @obj.mltp_plot_rate_difference_matrix_average_days);
             

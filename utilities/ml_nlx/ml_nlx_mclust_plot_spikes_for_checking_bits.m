@@ -3,8 +3,9 @@ function [h] = ml_nlx_mclust_plot_spikes_for_checking_bits( nvtFilename, tFilena
     tmp = split(tFilenameFull, filesep);
     tFilename = tmp{end};
     
-    [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
-
+    %[TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+    [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, ~, ~, ~] = ml_nlx_nvt_load( nvtFilename );
+    
     x = ml_nlx_mclust_load_spikes_32bit( tFilenameFull );
     ts_mus_32 = x .* 10^6;
     x = ml_nlx_mclust_load_spikes_64bit( tFilenameFull );

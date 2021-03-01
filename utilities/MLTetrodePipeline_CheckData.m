@@ -11,8 +11,8 @@ for iSession = 1:pipe.experiment.numSessions
     
     % Load the position information for the session
     nvtFilename = fullfile(session.rawFolder, 'VT1.nvt');
-    [nlxNvtTimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
-
+    %[nlxNvtTimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+    [nlxNvtTimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, ~, ~, ~] = ml_nlx_nvt_load( nvtFilename );
     
     tfiles = session.tfiles_filename_full;
     numSingleUnits = length(tfiles);

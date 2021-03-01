@@ -39,9 +39,16 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerTrialTask('cnmfe_to_neuron', @obj.cnmfe_to_neuron);
             obj.registerTrialTask('compactify_sfp', @obj.compactify_sfp);
             
+            
+            
+            
             obj.registerTrialTask('compute_placemaps', @obj.compute_placemaps);
             obj.registerTrialTask('compute_placemaps_shrunk', @obj.compute_placemaps_shrunk);
+            
+            
+            
             obj.registerTrialTask('plot_placemaps', @obj.plot_placemaps);
+            
             
             obj.registerSessionTask('compute_bfo_90', @mlgp_compute_bfo_90);
             obj.registerExperimentTask('compute_bfo_90_average', @mlgp_compute_bfo_90_average);

@@ -1,5 +1,7 @@
 nvtFilename = fullfile('/work/muzziolab/PROJECTS/two_contexts_CA1/tetrodes/recordings/feature_rich/AK42_CA1/d7', 'VT1.nvt');
 [TimeStamps_mus, ExtractedX, ExtractedY, ExtractedAngle, Targets, Points, Header] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
+% Use the offical neuralynx loader or use ours which removes possible
+% duplicates made by neuraview when splitting data.
 
 d = struct('reserved', [], 'pureRed', [], 'pureGreen', [], 'pureBlue', [], ...
     'yLocation', [], ...
