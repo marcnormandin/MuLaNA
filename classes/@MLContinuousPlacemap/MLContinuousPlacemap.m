@@ -241,7 +241,7 @@ classdef MLContinuousPlacemap < handle
             % HACKISH TO GET IT DONE FOR THE MEETING
             %dt_s = median( diff(obj.trace_ts_ms/1000.0), 'all' );
             spike_times_ms = ml_cai_estimate_spikes(obj.trace_ts_ms, obj.trace_value);
-            obj.trace_value = zeros(size(obj.trace_value));
+            %obj.trace_value = zeros(size(obj.trace_value));
             spikeIndices = zeros(1, length(spike_times_ms));
             for iSpike = 1:length(spike_times_ms)
                %fprintf('%d ', iSpike);
@@ -255,9 +255,9 @@ classdef MLContinuousPlacemap < handle
             end
             % Allow for more than one spike in the given time instant
             spikeIndices(isnan(spikeIndices)) = [];
-            for iSpike = 1:length(spikeIndices)
-                obj.trace_value(spikeIndices(iSpike)) = obj.trace_value(spikeIndices(iSpike)) + 1;
-            end
+%             for iSpike = 1:length(spikeIndices)
+%                 obj.trace_value(spikeIndices(iSpike)) = obj.trace_value(spikeIndices(iSpike)); % + 1;
+%             end
             obj.passedTracei = intersect(spikeIndices, obj.passedSpeedTracei);
 
             obj.passed_trace_x = obj.trace_x(obj.passedTracei);

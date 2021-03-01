@@ -57,7 +57,7 @@ function plot_placemaps(obj, session, trial)
         neuron.plotTraceFilt()
         % plot the CNMFE "spikes" with a vertical value of 0
         indices = find(neuron.spikes > 0);
-        stem(neuron.timestamps_ms(indices), zeros(1,length(indices)), 'm.');
+        stem(neuron.timestamps_ms(indices)/1000.0, zeros(1,length(indices)), 'm.');
         hold on
         plot(pm.passed_trace_ts_ms/1000.0, pm.passed_trace_value, 'ro', 'markerfacecolor', 'r')
         xlabel('Time, t [s]')

@@ -41,7 +41,7 @@ function compute_placemaps_shrunk(obj, session, trial)
     movement.y_cm = movement.y_cm / arenaJson.y_length_cm * shrunk_length_cm;
     % So now all points are in a square with dimension shrunk_length_cm
     
-    cm_per_bin = obj.Config.placemaps.cm_per_bin;
+    cm_per_bin = obj.Config.placemaps.cm_per_bin_square_smallest_dim;
     %smoothingKernelGaussianSize_cm = 15;
     %smoothingKernelGaussianSigma_cm = 3.0;
 
