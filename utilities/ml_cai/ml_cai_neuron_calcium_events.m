@@ -1,14 +1,28 @@
-function [calciumEvents] = ml_cai_neuron_calcium_events(neuron, timestamps_ms)
-   SPIKE_THRESHOLD = 0;
-   MAX_SPIKE_SEPARATION_MS = 100;
+function [calciumEvents] = ml_cai_neuron_calcium_events(neuron, timestamps_ms, spike_timestamps_ms, MAX_SPIKE_SEPARATION_MS)
+   %SPIKE_THRESHOLD = 0;
+   %MAX_SPIKE_SEPARATION_MS = 100;
    
 
   
-   % Only use spikes whose values exceed the given threshold
-   si = find(neuron.spikes > SPIKE_THRESHOLD);
-   
-   % Timestamps of all the spikes that passed the threshold
-   spike_timestamps_ms = timestamps_ms(si);
+%    % Only use spikes whose values exceed the given threshold
+%    si = find(neuron.spikes > SPIKE_THRESHOLD);
+%    
+%    % Timestamps of all the spikes that passed the threshold
+%    spike_timestamps_ms = timestamps_ms(si);
+   numSpikes = length(spike_timestamps_ms);
+   si = nan(1,numSpikes);
+   for i = 1:numSpikes
+       k = find(timestamps_ms > spike_timestamps_ms(i), 1, 'first');
+       if ~isempty(k)
+           si(i) = k;
+       else
+           si(i) = nan;
+       end
+   end
+   spike_timestamps_ms(isnan(si)) = [];
+   si(isnan(si)) = [];
+
+   numSpikes = length(si);
 
    % Form groups of spikes
    spike_groups = ml_util_group_points(spike_timestamps_ms, MAX_SPIKE_SEPARATION_MS);
@@ -27,13 +41,15 @@ function [calciumEvents] = ml_cai_neuron_calcium_events(neuron, timestamps_ms)
    s = cell2struct(c,matFields);
    calciumEvents = repmat(s, numSpikeGroups, 1);
    
-   
+   if isempty(si)
+       calciumEvents = [];
+   end
 
    for iGroup = 1:numSpikeGroups
        % indices of the current spike group
        gsi = si(spike_groups == iGroup);
        
-       calciumEvents(iGroup).spike_values = neuron.spikes(gsi);
+       calciumEvents(iGroup).spike_values = ones(1, length(gsi)); % original used this when using cnmfe spikes => neuron.spikes(gsi);
        
        calciumEvents(iGroup).num_spikes = length(gsi);
        

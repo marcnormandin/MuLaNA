@@ -72,5 +72,46 @@ classdef MLArenaRectangle < MLArena
                 hold off
             end
         end % function
+        
+        % Plot the arena shape in canonical frame (but centered about the
+        % origin
+        function plotCanonCentered(obj)
+            % r, g, b, m
+            x = obj.referencePointsCanon(1,:) - obj.x_length_cm/2;
+            y = obj.referencePointsCanon(2,:) - obj.y_length_cm/2;
+            
+            
+            % Draw the north/feature
+            tf = ishold;
+            hold on
+            
+            % Plot the boundary
+            p = zeros(length(x)+1,1);
+            q = zeros(length(y)+1,1);
+            p(1:length(x)) = x;
+            p(end) = x(1);
+            q(1:length(y)) = y;
+            q(end) = y(1);
+            plot(p,q,'k:','linewidth', 4);
+            
+            % Plot the feature
+            plot([x(2), x(1)], [y(2), y(1)], 'k-', 'linewidth', 4);
+            
+            % Plot the corners
+            plot(x(1), y(1), 'ro', 'markerfacecolor', 'r', 'markeredgecolor', 'k');
+            plot(x(2), y(2), 'go', 'markerfacecolor', 'g', 'markeredgecolor', 'k');
+            plot(x(3), y(3), 'bo', 'markerfacecolor', 'b', 'markeredgecolor', 'k');
+            plot(x(4), y(4), 'mo', 'markerfacecolor', 'm', 'markeredgecolor', 'k');
+            
+            
+            
+            
+            % resume the hold state
+            if tf
+                hold on
+            else
+                hold off
+            end
+        end % function
     end % methods
 end % classdef

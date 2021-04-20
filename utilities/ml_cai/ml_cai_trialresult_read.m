@@ -19,6 +19,13 @@ function [tr] = ml_cai_trialresult_read( trialResultsFolder )
         error('Number of scope time samples (%d) does not match neuron samples (%d)', tr.scopeVideoData.num_frames, numTimeSamples);
     end
 
+    mfn = fullfile(trialResultsFolder, 'movement.mat');
+    if isfile( mfn )
+       tmp = load( mfn );
+       tr.movement = tmp.movement;
+       
+    end
+    
     % Compute the calcium events for each neuron
     %for iN = 1:tr.neuronData.num_neurons
     %   tr.neuronData.neuron{iN}.calciumEvents = ml_cai_neuron_calcium_events(tr.neuronData.neuron{iN}, tr.scopeVideoData.timestamp_ms);
