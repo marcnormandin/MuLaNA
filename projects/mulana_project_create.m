@@ -2,6 +2,10 @@ function mulana_project_create(projectType)
 
 [projectsAvailable, projectFolder] = mulana_project_helper_get_list();
 
+if nargin ~= 1
+    error('A project type must be specified as one of the following: %s', [strjoin(projectsAvailable, ', ') '.']);
+end
+
 if ismember(projectType, projectsAvailable)
     referenceFolder = fullfile(projectFolder, projectType);
         

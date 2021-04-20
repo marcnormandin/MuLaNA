@@ -8,9 +8,14 @@ classdef MLExperimentBuilder < handle
     methods (Static)
         %%
         function [experiment] = buildFromJson(config, sessionsParentDirectory, analysisParentDirectory)
-            % Read the experiment description json file
-            expJson = ml_util_json_read(fullfile(sessionsParentDirectory, MLExperimentBuilder.ExperimentDescriptionFilename));
+            expJsonFilename = fullfile(sessionsParentDirectory, MLExperimentBuilder.ExperimentDescriptionFilename);
+            if ~isfile(expJsonFilename)
+                error('The required file (%s) does not exist.', expJsonFilename);
+            end
             
+            % Read the experiment description json file
+            expJson = mlgp_read_experiment_description_json(expJsonFilename);
+ 
             % Switch based on the type because we determine trials
             % differently based on the apparatus
             if strcmpi(expJson.apparatus_type, 'neuralynx_tetrodes')
@@ -18,7 +23,7 @@ classdef MLExperimentBuilder < handle
             elseif strcmpi(expJson.apparatus_type, 'ucla_miniscope')
                 experiment = MLExperimentBuilder.buildFromJsonUclaMiniscope(config, expJson, sessionsParentDirectory, analysisParentDirectory);
             else
-                error('Unable to build experiment for the (%s) apparatus.', expJson.apparatus_type);
+                error('Unable to build experiment for the ''apparatus_type'' (%s). It must be ''neuralynx_tetrodes'', or ''ucla_miniscope''.', expJson.apparatus_type);
             end
         end
         
@@ -31,6 +36,10 @@ classdef MLExperimentBuilder < handle
             numContexts = expJson.num_contexts;
             for iSession = 1:numSessions
                 sessionDirectory = fullfile(sessionsParentDirectory, expJson.session_folders{iSession});
+                if ~exist(sessionDirectory, 'dir')
+                    error('The session recording directory (%s) does not exist. Remove name from experiment_description or create it.', sessionDirectory);
+                end
+                
                 sessionAnalysisDirectory = fullfile(analysisParentDirectory, expJson.session_folders{iSession});
                 
                 % Check if the session record exists, and if it doesn't
@@ -78,8 +87,15 @@ classdef MLExperimentBuilder < handle
 
             % We need to load the nvt to figure out the number of
             % trials.
+
             nvtFullFilename = fullfile(sessionDirectory, expJson.nvt_filename);
+            if ~isfile(nvtFullFilename)
+                error('The required file (%s) does not exist.', nvtFullFilename);
+            end
+            
             defaultRecordNumTrialsTotal = ml_nlx_nvt_get_num_trials(nvtFullFilename, expJson.nvt_file_trial_separation_threshold_s);
+            
+
             defaultRecordNumContexts = expJson.num_contexts;
 
             MLSessionRecord.createDefaultFile(...
@@ -102,6 +118,10 @@ classdef MLExperimentBuilder < handle
             for iSession = 1:numSessions
                 sessionName = expJson.session_folders{iSession};
                 sessionDirectory = fullfile(sessionsParentDirectory, sessionName);
+                if ~exist(sessionDirectory, 'dir')
+                    error('The session recording directory (%s) does not exist. Remove name from experiment_description or create it.', sessionDirectory);
+                end
+                
                 sessionAnalysisDirectory = fullfile(analysisParentDirectory, sessionName);
                 
                 % Check if the session record exists, and if it doesn't

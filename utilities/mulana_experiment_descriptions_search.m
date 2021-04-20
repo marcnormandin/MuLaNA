@@ -15,7 +15,8 @@ function [validDescriptions, invalidDescriptions] = mulana_experiment_descriptio
         end
         edjson = [];
         try 
-            edjson = jsondecode( fileread(edFilename) );
+            %edjson = jsondecode( fileread(edFilename) );
+            edjson = mlgp_read_experiment_description_json(edFilename);
         catch ME
             fprintf('Error encountered while reading from (%s): %s', edFilename, ME.identifier)
             l = length(invalidDescriptions)+1;

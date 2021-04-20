@@ -176,10 +176,10 @@ classdef MLPipeline < handle
 
                 
                 % Use this for miniscope
-                %func(obj,session);
+                func(obj,session);
                 
                 % Use this for tetrode
-                func(session);
+                %func(session);
             end
         end
         

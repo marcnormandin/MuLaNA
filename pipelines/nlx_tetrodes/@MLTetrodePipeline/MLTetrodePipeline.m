@@ -22,26 +22,26 @@ classdef MLTetrodePipeline < MLPipeline
         function registerAvailableTasks(obj)
             % These should go through a registration function to allow for
             % checking of duplicates
-            obj.registerSessionTask('nvt_split_into_trial_nvt', @obj.mltp_nvt_split_into_trial_nvt);
-            obj.registerSessionTask('trial_nvt_to_trial_fnvt', @obj.mltp_trial_nvt_to_trial_fnvt);
+            obj.registerSessionTask('nvt_split_into_trial_nvt', @mltp_nvt_split_into_trial_nvt);
+            obj.registerSessionTask('trial_nvt_to_trial_fnvt', @mltp_trial_nvt_to_trial_fnvt);
             obj.registerTrialTask('user_define_trial_arenaroi', @obj.mltp_user_define_trial_arenaroi);
-            obj.registerSessionTask('user_define_session_arenaroi', @obj.mltp_user_define_session_arenaroi);
-            obj.registerSessionTask('make_trial_position_plots_raw', @obj.mltp_make_trial_position_plots_raw);
-            obj.registerSessionTask('make_trial_position_plots_fixed', @obj.mltp_make_trial_position_plots_fixed);
-            obj.registerSessionTask('make_session_orientation_plot_unaligned', @obj.mltp_make_session_orientation_plot_unaligned);
-            obj.registerSessionTask('make_session_orientation_plot_aligned', @obj.mltp_make_session_orientation_plot_aligned);
+            obj.registerSessionTask('user_define_session_arenaroi', @mltp_user_define_session_arenaroi);
+            obj.registerSessionTask('make_trial_position_plots_raw', @mltp_make_trial_position_plots_raw);
+            obj.registerSessionTask('make_trial_position_plots_fixed', @mltp_make_trial_position_plots_fixed);
+            obj.registerSessionTask('make_session_orientation_plot_unaligned', @mltp_make_session_orientation_plot_unaligned);
+            obj.registerSessionTask('make_session_orientation_plot_aligned', @mltp_make_session_orientation_plot_aligned);
             
-            obj.registerSessionTask('trial_fnvt_to_trial_can_movement', @obj.mltp_trial_fnvt_to_trial_can_movement);
+            obj.registerSessionTask('trial_fnvt_to_trial_can_movement', @mltp_trial_fnvt_to_trial_can_movement);
 
-            obj.registerSessionTask('tfiles_to_singleunits', @obj.mltp_tfiles_to_singleunits);
-            obj.registerSessionTask('compute_singleunit_placemap_data', @obj.mltp_compute_singleunit_placemap_data);
-            obj.registerSessionTask('compute_singleunit_placemap_data_shrunk', @obj.mltp_compute_singleunit_placemap_data_shrunk);
+            obj.registerSessionTask('tfiles_to_singleunits', @mltp_tfiles_to_singleunits);
+            obj.registerSessionTask('compute_singleunit_placemap_data', @mltp_compute_singleunit_placemap_data);
+            obj.registerSessionTask('compute_singleunit_placemap_data_shrunk', @mltp_compute_singleunit_placemap_data_shrunk);
             
             % Old version
             %obj.registerSessionTask('plot_singleunit_placemap_data', @obj.mltp_plot_singleunit_placemap_data);
             
-            obj.registerSessionTask('plot_placemaps', @obj.mltp_plot_placemaps);
-            obj.registerSessionTask('plot_placemap_information_dists', @obj.mltp_plot_placemap_information_dists);
+            obj.registerSessionTask('plot_placemaps', @mltp_plot_placemaps);
+            obj.registerSessionTask('plot_placemap_information_dists', @mltp_plot_placemap_information_dists);
             
   
             % Best fit orientations for 0, 90, 180, 270
@@ -52,55 +52,50 @@ classdef MLTetrodePipeline < MLPipeline
 %             obj.registerExperimentTask('plot_bfo_90_ac', @obj.mltp_plot_bfo_90_ac);
 %             obj.registerExperimentTask('plot_bfo_90_dc', @obj.mltp_plot_bfo_90_dc);
 
-            obj.registerSessionTask('compute_best_match_rotations', @obj.mltp_compute_best_match_rotation_rect);
+            obj.registerSessionTask('compute_best_match_rotations', @mltp_compute_best_match_rotation_rect);
             obj.registerExperimentTask('plot_best_match_rotations_rect_per_session', @obj.mltp_plot_best_match_rotations_rect_per_session);
 
-            obj.registerSessionTask('plot_bfo_90_ac_per_cell', @obj.mltp_plot_bfo_90_ac_per_cell);
+            obj.registerSessionTask('plot_bfo_90_ac_per_cell', @mltp_plot_bfo_90_ac_per_cell);
             obj.registerExperimentTask('plot_bfo_90_averaged_across_sessions', @obj.mltp_plot_bfo_90_averaged_across_sessions);   
             
             % New 
-            obj.registerSessionTask('compute_bfo_90', @obj.mltp_compute_bfo_90)
+            obj.registerSessionTask('compute_bfo_90', @mltp_compute_bfo_90)
             obj.registerExperimentTask('compute_bfo_90_average', @obj.mltp_compute_bfo_90_average);
             obj.registerExperimentTask('plot_bfo_90_sessions', @obj.mltp_plot_bfo_90_sessions);
-            obj.registerSessionTask('plot_bfo_90_session_grouped', @obj.mltp_plot_bfo_90_session_grouped);
+            obj.registerSessionTask('plot_bfo_90_session_grouped', @mltp_plot_bfo_90_session_grouped);
             
             % New placey
-            obj.registerSessionTask('compute_bfo_90_placey', @obj.mltp_compute_bfo_90_placey)
+            obj.registerSessionTask('compute_bfo_90_placey', @mltp_compute_bfo_90_placey)
             obj.registerExperimentTask('compute_bfo_90_placey_average', @obj.mltp_compute_bfo_90_placey_average);
             obj.registerExperimentTask('plot_bfo_90_placey_sessions', @obj.mltp_plot_bfo_90_placey_sessions);
-            obj.registerSessionTask('plot_bfo_90_placey_session_grouped', @obj.mltp_plot_bfo_90_placey_session_grouped);
+            obj.registerSessionTask('plot_bfo_90_placey_session_grouped', @mltp_plot_bfo_90_placey_session_grouped);
             
-                                    
             % Best fit orientations 0, 180 degrees
-            obj.registerSessionTask('compute_bfo_180_ac', @obj.mltp_compute_bfo_180_ac);
+            obj.registerSessionTask('compute_bfo_180_ac', @mltp_compute_bfo_180_ac);
             %obj.registerExperimentTask('plot_bfo_180_ac', @obj.mltp_plot_bfo_180_ac);
             obj.registerExperimentTask('compute_bfo_180_average', @obj.mltp_compute_bfo_180_average);
             obj.registerExperimentTask('plot_bfo_180_sessions', @obj.mltp_plot_bfo_180_sessions);
-            obj.registerSessionTask('plot_bfo_180_session_grouped', @obj.mltp_plot_bfo_180_session_grouped);
+            obj.registerSessionTask('plot_bfo_180_session_grouped', @mltp_plot_bfo_180_session_grouped);
 
-
+            obj.registerSessionTask('compute_bfo_180_ac_per_cell', @mltp_compute_bfo_180_ac_per_cell);
+            obj.registerSessionTask('plot_bfo_180_ac_per_cell', @mltp_plot_bfo_180_ac_per_cell);
             
-
-            obj.registerSessionTask('compute_bfo_180_ac_per_cell', @obj.mltp_compute_bfo_180_ac_per_cell);
-            obj.registerSessionTask('plot_bfo_180_ac_per_cell', @obj.mltp_plot_bfo_180_ac_per_cell);
+            obj.registerSessionTask('compute_bfo_180', @mltp_compute_bfo_180)
+          
+            obj.registerSessionTask('plot_across_within_0_180_similarity', @mltp_plot_across_within_0_180_similarity);
+            obj.registerSessionTask('make_pfstats_excel', @mltp_make_pfstats_excel);
             
-            obj.registerSessionTask('compute_bfo_180', @obj.mltp_compute_bfo_180)
-
-                        
-            obj.registerSessionTask('plot_across_within_0_180_similarity', @obj.mltp_plot_across_within_0_180_similarity);
-            obj.registerSessionTask('make_pfstats_excel', @obj.mltp_make_pfstats_excel);
+            obj.registerSessionTask('plot_movement', @mltp_plot_movement);
             
-            obj.registerSessionTask('plot_movement', @obj.mltp_plot_movement);
+            obj.registerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits', @mltp_nlx_mclust_plot_spikes_for_checking_bits);
             
-            obj.registerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits', @obj.mltp_nlx_mclust_plot_spikes_for_checking_bits);
+            obj.registerSessionTask('remove_invalid_t_files', @mltp_nlx_mclust_remove_invalid_t_files);
             
-            obj.registerSessionTask('remove_invalid_t_files', @obj.mltp_nlx_mclust_remove_invalid_t_files);
-            
-            obj.registerSessionTask('plot_rate_difference_matrices', @obj.mltp_plot_rate_difference_matrices);
+            obj.registerSessionTask('plot_rate_difference_matrices', @mltp_plot_rate_difference_matrices);
             obj.registerExperimentTask('plot_rate_difference_matrix_average_days', @obj.mltp_plot_rate_difference_matrix_average_days);
             
-            obj.registerSessionTask('plot_behaviour_averaged_placemaps', @obj.mltp_plot_behaviour_averaged_placemaps);
-            obj.registerSessionTask('plot_behaviour_averaged_placemaps_contexts', @obj.mltp_plot_behaviour_averaged_placemaps_contexts);
+            obj.registerSessionTask('plot_behaviour_averaged_placemaps', @mltp_plot_behaviour_averaged_placemaps);
+            obj.registerSessionTask('plot_behaviour_averaged_placemaps_contexts', @mltp_plot_behaviour_averaged_placemaps_contexts);
             
         end % function
         

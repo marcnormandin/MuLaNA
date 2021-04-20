@@ -140,7 +140,7 @@ end % while
 
 %
 % Let's be good and do our homework
-parfor iHomework = 1:length(homework)
+for iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
     edFilename = homework(iHomework).edFilename;
@@ -255,6 +255,10 @@ parfor iHomework = 1:length(homework)
         pipe.executeExperimentTask('plot_rate_difference_matrix_average_days');
         pipe.executePerSessionTask('plot_behaviour_averaged_placemaps');
         pipe.executePerSessionTask('plot_behaviour_averaged_placemaps_contexts');
+        
+        %% NEW code
+        pipe.executePerSessionTask('compute_best_match_rotations');
+        pipe.executeExperimentTask('plot_best_match_rotations_rect_per_session');
 
         if pipe.Config.placemaps.compute_information_rate_pvalue == 1
             pipe.executePerSessionTask('plot_placemap_information_dists');
@@ -284,7 +288,7 @@ parfor iHomework = 1:length(homework)
     copyfile(pipeCfgFilename, analysisParentFolder);
 end % for subject
 
-aligned_similarity_score_run();
+%aligned_similarity_score_run();
 
 if makeMiceAveragedPlots
     % Now run the code that requires the previous analyses to exist
