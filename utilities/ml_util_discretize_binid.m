@@ -6,4 +6,6 @@ function binId = ml_util_discretize_binid(x, cm_per_bin)
     % them to index into a matrix a minimum value must be added, but that
     % depends on the total points and matrix used.
     binId = floor((x-cm_per_bin/2)/cm_per_bin)+1;
+    
+    %binId = round((x-cm_per_bin/2)/cm_per_bin)+1; % doesnt work
 end
