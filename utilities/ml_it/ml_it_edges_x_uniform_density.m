@@ -1,6 +1,7 @@
 function [edgesX] = ml_it_edges_x_uniform_density(x)
     nBinsX = 100;
 
+    x = reshape(x, 1, numel(x));
     nSamples = length(x);
     
     minX = min(x, [], 'all');

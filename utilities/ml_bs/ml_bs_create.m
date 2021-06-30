@@ -16,7 +16,7 @@ function binSystem = ml_bs_create(boundsx, boundsy, cm_per_bin_x, cm_per_bin_y)
     binSystem.XX = XX;
     binSystem.YY = YY;
     binSystem.boundsx = boundsx;
-    binSystem.bountsy = boundsy;
+    binSystem.boundsy = boundsy;
     binSystem.cm_per_bin_x = cm_per_bin_x;
     binSystem.cm_per_bin_y = cm_per_bin_y;
 end
