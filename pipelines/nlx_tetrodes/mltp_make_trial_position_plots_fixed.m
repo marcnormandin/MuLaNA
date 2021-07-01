@@ -11,26 +11,27 @@ function mltp_make_trial_position_plots_fixed(obj, session)
 
 %         for iTrial = 1:session.getNumTrials()
 %             trial = session.getTrial(iTrial);
-        for iTrial = 1:session.getNumTrialsToUse()
-            trial = session.getTrialToUse(iTrial);
+        for iTrial = 1:session.getNumTrials()
+            trial = session.getTrialByOrder(iTrial);
             trialId = trial.getTrialId();
+            sliceId = trial.getSliceId();
                 
-            trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trialId));
+            trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('slice_%d_fnvt.mat', sliceId));
             fprintf('Loading %s ... ', trialFnvtFilename);
             data = load(trialFnvtFilename);
             fprintf('done!\n');
-            t = data.trial;
+            t = data.slice;
 
             % 1)  Scatter plot 
             h = figure('Position', get(0,'Screensize'));
             plot(t.extractedX, t.extractedY, 'b.')
             set(gca, 'ydir', 'reverse')
             axis equal off
-            title(sprintf('Trial: %d, Sequence: %d, Context: %d\n Dig: %s', trial.getTrialId(), trial.getSequenceId(), trial.getContextId(), trial.getDig()))
+            title(sprintf('Trial: %d, Slice: %d, Context: %d\n Dig: %s', trialId, sliceId, trial.getContextId(), trial.getDig()))
 
 
             % Save the data here
-            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', trialId, 'pos_scatter'));
+            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_pos_scatter', trialId));
             fprintf('Saving plots %s ... ', trialPlotFilenamePrefix);
             savefig(h, sprintf('%s.fig', trialPlotFilenamePrefix))
             saveas(h, sprintf('%s.png', trialPlotFilenamePrefix), 'png');
@@ -52,7 +53,7 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             xlabel('Trial time, t (s)')
             ylabel('X Position (px)')
             grid on
-            title(sprintf('Trial: %d, Sequence: %d, Context: %d\n Dig: %s', trial.getTrialId(), trial.getSequenceId(), trial.getContextId(), trial.getDig()))
+            title(sprintf('Trial: %d, Slice: %d, Context: %d\n Dig: %s', trialId, sliceId, trial.getContextId(), trial.getDig()))
 
             ax(2) = subplot(3,1,2);
             plot(ts, t.extractedY, 'b.-')
@@ -69,7 +70,7 @@ function mltp_make_trial_position_plots_fixed(obj, session)
             linkaxes(ax, 'x');
 
             % Save the data here
-            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_fnvt_%s', trialId, 'pos_timeseries'));
+            trialPlotFilenamePrefix = fullfile(folder, sprintf('trial_%d_pos_timeseries', trialId));
             fprintf('Saving plots %s ... ', trialPlotFilenamePrefix);
             savefig(h, sprintf('%s.fig', trialPlotFilenamePrefix))
             saveas(h, sprintf('%s.png', trialPlotFilenamePrefix), 'png');

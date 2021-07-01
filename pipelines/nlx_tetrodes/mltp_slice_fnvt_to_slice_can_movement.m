@@ -1,4 +1,4 @@
-function mltp_trial_fnvt_to_trial_can_movement(obj, session)
+function mltp_slice_fnvt_to_slice_can_movement(obj, session)
     % This function calculates the movement in cm/s for each trial. We need
     % to store this because when we map a rectangle to a square for the 90
     % degree correlations the spike maps has a minimum speed threshold,
@@ -11,18 +11,22 @@ function mltp_trial_fnvt_to_trial_can_movement(obj, session)
 
 %     for iTrial = 1:session.getNumTrials()
 %         trial = session.getTrial(iTrial);
-    for iTrial = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrial);
+%     for iTrial = 1:session.getNumTrials()
+%         trial = session.getTrialByOrder(iTrial);
 
-        % Load the trial position data (fixed)
-        trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trial.getTrialId()));
-        fprintf('Loading %s ... ', trialFnvtFilename);
-        data = load(trialFnvtFilename);
+    % Get the sliced nvt files
+    regStr = '^(slice_)\d+(_fnvt.mat)$';
+    fnvtFilenames = ml_dir_regexp_files(session.getAnalysisDirectory(), regStr, false);
+    for iSlice = 1:length(fnvtFilenames)
+        % Load the fnvt data was that sliced
+        sliceFnvtFilename = fnvtFilenames{iSlice};
+        fprintf('Loading %s ... ', sliceFnvtFilename);
+        data = load(sliceFnvtFilename);
+        sData = data.slice;
         fprintf('done!\n');
-        tdata = data.trial;
-
+               
         % Load the trial ROI
-        arenaRoiFilename = fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trial.getTrialId()));
+        arenaRoiFilename = fullfile(session.getSessionDirectory(), sprintf('slice_%d_arenaroi.mat', sData.slice_id));
         fprintf('Loading %s ... ', arenaRoiFilename);
         data = load(arenaRoiFilename);
         fprintf('done!\n');
@@ -43,21 +47,22 @@ function mltp_trial_fnvt_to_trial_can_movement(obj, session)
 
         % Transform positions from video to canonical (pixels to
         % cm)
-        [x_cm, y_cm] = arena.tranformVidToCanonPoints(tdata.extractedX, tdata.extractedY);
+        [x_cm, y_cm] = arena.tranformVidToCanonPoints(sData.extractedX, sData.extractedY);
 
         % Compute the speed in the canonical frame (in cm/s)
-        timestamps_ms = tdata.timeStamps_mus ./ 10^3;
+        timestamps_ms = sData.timeStamps_mus ./ 10^3;
         [speed_cm_per_s, speed_smoothed_cm_per_s, vx, vy, vx_smoothed, vy_smoothed] ...
             = ml_core_compute_motion(x_cm, y_cm, timestamps_ms, obj.Config.velocity_lowpass_wpass);
 
         % Store the values to be saved
-        movement.sequenceId = trial.getSequenceId();
-        movement.trialId = trial.getTrialId();
+        %movement.sequenceId = trial.getSequenceId();
+        %movement.trialId = sData.trial_id;
+        movement.sliceId = sData.slice_id;
         movement.arena = arena;
         movement.arenaShape = arena.getShapeType();
         [movement.boundsX, movement.boundsY] = arena.getCanonicalBounds();
-        movement.x_px = tdata.extractedX; % store the video coordinates
-        movement.y_px = tdata.extractedY; % store the video coordinates
+        movement.x_px = sData.extractedX; % store the video coordinates
+        movement.y_px = sData.extractedY; % store the video coordinates
         movement.x_cm = x_cm;
         movement.y_cm = y_cm;
         movement.isInsideArena = arena.inInterior( x_cm, y_cm );
@@ -69,7 +74,7 @@ function mltp_trial_fnvt_to_trial_can_movement(obj, session)
         movement.vx_smoothed = vx_smoothed;
         movement.vy_smoothed = vy_smoothed;
 
-        trialCanonFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_movement.mat', trial.getTrialId()));
+        trialCanonFilename = fullfile(session.getAnalysisDirectory(), sprintf('slice_%d_movement.mat', sData.slice_id));
         fprintf('Saving %s ... ', trialCanonFilename);
         save(trialCanonFilename, 'movement')
         fprintf('done!\n');

@@ -6,11 +6,12 @@ function mltp_plot_movement(obj, session)
     
 %     for iTrial = 1:session.getNumTrials()
 %         trial = session.getTrial(iTrial);
-    for iTrial = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrial);
+    for iTrial = 1:session.getNumTrials()
+        trial = session.getTrialByOrder(iTrial);
         trialId = trial.getTrialId();
+        sliceId = trial.getSliceId();
                 
-        fn = fullfile( session.getAnalysisDirectory(), sprintf('trial_%d_movement.mat', trialId) );
+        fn = fullfile( session.getAnalysisDirectory(), sprintf('slice_%d_movement.mat', sliceId) );
         if ~isfile(fn)
             error('The required file (%s) does not exist:', fn);
         end
@@ -28,7 +29,7 @@ function mltp_plot_movement(obj, session)
         plot(t, movement.vx_smoothed, 'r-', 'linewidth', 2)
         grid on
         ylabel('v_x(t) [cm/s]')
-        title(sprintf('%s %s\n T: %d, S: %d, C: %d', obj.Experiment.getAnimalName(), session.getName(), trialId, trial.getSequenceId(), trial.getContextId()), 'interpreter', 'none');
+        title(sprintf('%s %s\n T: %d, S: %d, C: %d', obj.Experiment.getAnimalName(), session.getName(), trialId, sliceId, trial.getContextId()), 'interpreter', 'none');
 
         ax(2) = subplot(p,q,3);
         plot(t, movement.vy,'b.');

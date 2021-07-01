@@ -37,7 +37,7 @@ function [bfo_dist, angleCorrelations, angleCounts] = compute_best_match_rotatio
            cellPlacemaps{iMap} = load( fullfile(fileNames(iMap).folder, fileNames(iMap).name) ); 
         end
 
-        trialIds = cellfun(@(x)(x.trial_num), cellPlacemaps);
+        trialIds = cellfun(@(x)(x.trial_id), cellPlacemaps);
         contextIds_unsorted = cellfun(@(x)(x.trial_context_id), cellPlacemaps);
         maxId = max(trialIds);
         exampleMap = cellPlacemaps{1}.mltetrodeplacemap.meanFiringRateMapSmoothed;
@@ -79,12 +79,12 @@ function [bfo_dist, angleCorrelations, angleCounts] = compute_best_match_rotatio
         r = [];
         for iMap1 = 1:numMaps
             m1 = ratemaps(:,:,iMap1);
-            if all(m1==0)
+            if all(m1==0, 'all') || isempty(m1)
                 continue;
             end
             for iMap2 = iMap1+1:numMaps
                 m2 = ratemaps(:,:,iMap2);
-                if all(m2 == 0)
+                if all(m2 == 0, 'all') || isempty(m2)
                     continue;
                 end
                 r(k,:) = compute_corr_rot(m1,m2);

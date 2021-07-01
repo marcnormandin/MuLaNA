@@ -1,4 +1,4 @@
-function mltp_plot_behaviour_averaged_placemaps(obj, session)
+function mltp_plot_behaviour_averaged_placemaps_contexts(obj, session)
 
     tfiles_filename_prefixes = session.getTFilesFilenamePrefixes();
 
@@ -7,16 +7,15 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
     numCells = session.getNumTFiles();
 
     firstDigs = {};
-    for iTrialToUse = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrialToUse);
-        firstDigs{end+1} = trial.getDig();
+    trialIds = zeros(1, session.getNumTrials());
+    contexts = zeros(1, session.getNumTrials());
+    for iTrial = 1:session.getNumTrials()
+        trial = session.getTrialByOrder(iTrial);
+        firstDigs{iTrial} = trial.getDig();
+        trialIds(iTrial) = trial.getTrialId();
+        contexts(iTrial) = trial.getContextId();
     end
 
-    contexts = [];
-    for iTrialToUse = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrialToUse);
-        contexts(end+1) = trial.getContextId();
-    end
     contexts = sort(unique(contexts));
     numContexts = length(contexts);
     
@@ -33,8 +32,8 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
                 if ~any(ids)
                     continue;
                 end
-                ti = 1:session.getNumTrialsToUse();
-                timatch = ti(ids);
+                %ti = 1:session.getNumTrialsToUse();
+                timatch = trialIds(ids);
 
                 pmAveraged = {};
                 numAveraged = 0;
@@ -42,7 +41,7 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
 
                 % Average the matching placemaps for the current dig type
                 for iMatch = 1:length(timatch)
-                    trial = session.getTrialToUse(timatch(iMatch));
+                    trial = session.getTrial(timatch(iMatch)); % Get the trial by the actual Trial ID
                     
                     % The context must match as well
                     if trial.getContextId() ~= contexts(iContext)

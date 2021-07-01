@@ -4,8 +4,8 @@ classdef MLTrialInterface < handle
         
     methods (Abstract)
         getName(obj)
-        getTrialId(obj) % id of this trial
-        getSequenceId(obj)
+        getSliceId(obj) % id of this trial
+        getTrialId(obj)
         getContextId(obj)        
 
         getDigs(obj) % return 1 or more digs

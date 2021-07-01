@@ -3,7 +3,7 @@ classdef MLTrial < MLTrialInterface
     %   An implementation for a trial interface
     properties (SetAccess=private, GetAccess = protected)
         Name
-        SequenceId
+        SliceId
         TrialId
         ContextId
         Digs
@@ -18,11 +18,11 @@ classdef MLTrial < MLTrialInterface
     end % properties
     
     methods
-        function obj = MLTrial(name, trialId, sequenceId, contextId, hasDigs, digs, isEnabled, ...
+        function obj = MLTrial(name, sliceId, trialId, contextId, hasDigs, digs, isEnabled, ...
                 trialDirectory, analysisDirectory, dateString, timeString)
            obj.Name = name;
            obj.TrialId = trialId;
-           obj.SequenceId = sequenceId;
+           obj.SliceId = sliceId;
            obj.ContextId = contextId;
            obj.HasDigs = hasDigs;
            obj.Digs = digs;
@@ -37,8 +37,8 @@ classdef MLTrial < MLTrialInterface
             s = obj.Name;
         end
         
-        function [id] = getSequenceId(obj)
-            id = obj.SequenceId;
+        function [id] = getSliceId(obj)
+            id = obj.SliceId;
         end
         
         function [id] = getTrialId(obj) % id of this trial

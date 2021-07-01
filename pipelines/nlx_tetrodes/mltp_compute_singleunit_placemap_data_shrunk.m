@@ -12,16 +12,17 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
         data = load(singleUnitFilename);
         singleunit = data.singleunit;
         
-        for iTrial = 1:session.getNumTrialsToUse()
-            trial = session.getTrialToUse(iTrial);
+        for iTrial = 1:session.getNumTrials()
+            trial = session.getTrialByOrder(iTrial);
             trialId = trial.getTrialId();
+            sliceId = trial.getSliceId();
                 
             % Load the data
-            spikes = singleunit.trialSpikes(trialId);
-            tmp = load(fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_movement.mat', trialId)));
+            spikes = singleunit.sliceSpikes(sliceId);
+            tmp = load(fullfile(session.getAnalysisDirectory(), sprintf('slice_%d_movement.mat', sliceId)));
             movement = tmp.movement;
             
-            spike_ts_ms = spikes.trialSpikeTimes_mus(:) / (1.0*10^3);
+            spike_ts_ms = spikes.sliceSpikeTimes_mus(:) / (1.0*10^3);
             
             % WE NEED TO TRANSFORM THE DATA FROM A RECTANGLE TO A SQUARE
             trueArena = movement.arena;
@@ -69,7 +70,7 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
             end
 
             trial_id = trialId;
-            trial_num = trial.getSequenceId();
+            slice_id = sliceId;
             trial_use = trial.isEnabled();
             trial_first_dig = trial.getDigs();
             % FixMe!
@@ -85,7 +86,7 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
 %             end
             trial_context_num = 0;
             for iTmp = 1:iTrial
-                z = session.getTrial(iTmp);
+                z = session.getTrialByOrder(iTmp);
                 if z.getContextId() == trial.getContextId()
                     trial_context_num = trial_context_num + 1;
                 end
@@ -95,7 +96,7 @@ function mltp_compute_singleunit_placemap_data_shrunk(obj, session)
             fnPrefix = fnPrefix{1};
             placemapFilename = fullfile(outputFolder, sprintf('%s_%d_%s', fnPrefix, trialId, obj.Config.placemaps.filenameSuffix));
             fprintf('Saving placemap data to file: %s\n', placemapFilename);
-            save(placemapFilename, 'mltetrodeplacemap', 'cm_per_bin', 'trial_id', 'trial_num', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
+            save(placemapFilename, 'mltetrodeplacemap', 'cm_per_bin', 'trial_id', 'slice_id', 'trial_context_id', 'trial_use', 'trial_first_dig', 'trial_context_index', 'trial_context_num');
         end % trial
     end % for each t-file    
 end % function

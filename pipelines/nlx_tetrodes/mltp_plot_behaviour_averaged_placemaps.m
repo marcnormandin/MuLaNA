@@ -7,10 +7,13 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
     numCells = session.getNumTFiles();
 
     firstDigs = {};
-    for iTrialToUse = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrialToUse);
+    trialIds = zeros(1, session.getNumTrials());
+    for iTrial = 1:session.getNumTrials()
+        trial = session.getTrialByOrder(iTrial);
         firstDigs{end+1} = trial.getDig();
+        trialIds(iTrial) = trial.getTrialId();
     end
+    %trialIds = session.getTrialIds();
 
     for iCell = 1:numCells
         hasMaps = false;
@@ -23,14 +26,14 @@ function mltp_plot_behaviour_averaged_placemaps(obj, session)
             if ~any(ids)
                 continue;
             end
-            ti = 1:session.getNumTrialsToUse();
-            timatch = ti(ids);
+            
+            timatch = trialIds(ids);
 
             pmAveraged = {};
 
             % Average the matching placemaps for the current dig type
             for iMatch = 1:length(timatch)
-                trial = session.getTrialToUse(timatch(iMatch));
+                trial = session.getTrial(timatch(iMatch)); % Return by actual Trial ID
                 tid = trial.getTrialId();
                 prefix = sprintf('%s_%d', tfileName, tid);
                 fn = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder, ...

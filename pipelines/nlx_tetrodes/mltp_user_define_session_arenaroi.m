@@ -1,28 +1,35 @@
 function mltp_user_define_session_arenaroi(obj, session)
+    % We need to define the ROI for each slice of data, not just the trials
+    % because the user may find problems with the slices and not use them
+    % as trials.
+    
     if obj.isVerbose()
         fprintf('Defining the ROI for all trials of the session.\n');
     end
 
-    for iTrial = 1:session.getNumTrials()
-        trial = session.getTrial(iTrial);
-        trialId = trial.getTrialId();
-        
+    % Get the sliced nvt files
+    regStr = '^(slice_)\d+(_nvt.mat)$';
+    nvtFilenames = ml_dir_regexp_files(session.getAnalysisDirectory(), regStr, false);
+    numSlices = length(nvtFilenames);
+    
+    for iSlice = 1:numSlices
         % Changed from fnvt to nvt to allow for the fnvt creation to use
         % the ROI bounds to exclude outliers.
-        trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_nvt.mat', trialId));
-        fprintf('Loading %s ... ', trialFnvtFilename);
-        data = load(trialFnvtFilename);
+        sliceNvtFilename = nvtFilenames{iSlice};
+        
+        fprintf('Loading %s ... ', sliceNvtFilename);
+        data = load(sliceNvtFilename);
         fprintf('done!\n');
-        tdata = data.trial;
+        sdata = data.slice;
 
-        [xVertices, yVertices] = ml_nlx_user_select_arena_roi( tdata.extractedX, tdata.extractedY, sprintf('TrialId %d', trialId) );
+        [xVertices, yVertices] = ml_nlx_user_select_arena_roi( sdata.extractedX, sdata.extractedY, sprintf('Slice Id %d', sdata.slice_id) );
         arenaroi.xVertices = xVertices;
         arenaroi.yVertices = yVertices;
 
         % Save it in the recording folder, as we will treat
         % it like raw data (and it takes a lot of user time
-        % to create).
-        roiFilename = fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trialId));
+        % to create so we don't want to do this over and over again).
+        roiFilename = fullfile(session.getSessionDirectory(), sprintf('slice_%d_arenaroi.mat', sdata.slice_id));
         if obj.isVerbose()
             fprintf('Saving ROI to %s ... ', roiFilename);
         end

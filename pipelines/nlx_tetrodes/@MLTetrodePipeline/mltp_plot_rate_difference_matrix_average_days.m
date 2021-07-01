@@ -14,7 +14,7 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
             obj.Config.rate_difference_matrices.outputFolder, ...
             obj.Config.rate_difference_matrices.outputMatFilename);
         if ~isfile(dataFilename)
-            fprintf('Skipping session (%s) because (%s) found.\n', sessionName, dataFilename);
+            fprintf('Skipping session (%s) because (%s) not found.\n', sessionName, dataFilename);
             return;
         end
         data = load(dataFilename);
@@ -22,7 +22,7 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
         % If it is the first one loaded, then just store it
         if isempty(averageMatrix)
             averageMatrix = data.rate_difference_matrix_average;
-            numTrials = data.numTrials;
+            maxTrialId = data.maxTrialId;
             seqNum = data.seqNum;
             labels = data.labels;
         else
@@ -44,9 +44,9 @@ function mltp_plot_rate_difference_matrix_average_days(obj)
     havg = figure('name', sprintf('%s', obj.Experiment.getAnimalName()));
         imagesc(averageMatrix)
         colormap jet
-        xticks(1:numTrials)
+        xticks(1:maxTrialId)
         xticklabels(labels);
-        yticks(1:numTrials)
+        yticks(1:maxTrialId)
         yticklabels(labels);
         title(sprintf('%s\nAVERAGE ACROSS (%d) DAYS', obj.Experiment.getAnimalName(), numSessions), 'interpreter', 'none')
         hold on;

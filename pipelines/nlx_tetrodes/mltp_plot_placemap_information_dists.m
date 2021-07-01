@@ -7,9 +7,9 @@ function mltp_plot_placemap_information_dists(obj, session)
         
         % We need to know which trials belong to each context.
         cmap = cell(obj.Experiment.getNumContexts(),1);
-        for iTrialToUse = 1:session.getNumTrialsToUse()
-            trial = session.getTrialToUse(iTrialToUse);
-            cmap{trial.getContextId()} = [cmap{trial.getContextId()}, iTrialToUse];
+        for iTrial = 1:session.getNumTrials()
+            trial = session.getTrialByOrder(iTrial);
+            cmap{trial.getContextId()} = [cmap{trial.getContextId()}, trial.getTrialId()];
         end
 
 
@@ -26,11 +26,15 @@ function mltp_plot_placemap_information_dists(obj, session)
         h = figure('Name', sprintf('%s (%s) tfile: %s', session.getName(), session.getDate(), fnPrefix), 'Position', get(0,'Screensize'));
         for iContext = 1:numContexts
             kstart = numVerticalPlotsPerTrial * q * (iContext - 1) + 1;
-            ct = cmap{iContext}; % trials of the current context
+            ct = sort(cmap{iContext}); % trials of the current context
             for k = 1:length(ct)
-                iTrialToUse = ct(k);
-                trial = session.getTrialToUse(iTrialToUse);
+                trialId = ct(k);
+                trial = session.getTrial(trialId);
 
+                if trialId ~= trial.getTrialId()
+                    error('Logic error because the trial ids do not match.');
+                end
+                
                 fn = fullfile(session.getAnalysisDirectory(), obj.Config.placemaps.outputFolder, ...
                     sprintf('%s_%d_%s', fnPrefix, trial.getTrialId(), obj.Config.placemaps.filenameSuffix));
                 tmp = load(fn);

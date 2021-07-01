@@ -53,24 +53,26 @@ classdef MLExperimentBuilder < handle
                 sr = MLSessionRecord( srFilename );
                 trials = MLTrial.empty;
                 numTrials = sr.getNumTrials();
-                tri = sr.getTrialInfoAll(); % Get the trial info for every trial
+                tri = sr.getTrialsInfo(); % Get the trial info for every trial
                 dateString = sr.getDate();
                 
                 for iTrial = 1:numTrials
-                    name = sprintf('T%d', tri(iTrial).sequenceNum);
+                    trialId = tri(iTrial).trialId;
+                    
+                    name = sprintf('T%d', trialId);
                     
                     timeString = sprintf('%d', iTrial);
                     
                     trialDirectory = sessionDirectory;
                     
-                    trialAnalysisDirectory = fullfile(sessionAnalysisDirectory, sprintf('trial_%d', iTrial));
+                    trialAnalysisDirectory = fullfile(sessionAnalysisDirectory, sprintf('trial_%d', trialId));
                     
                     trials(iTrial) = MLTrial(...
-                        name, tri(iTrial).id, tri(iTrial).sequenceNum, tri(iTrial).context, expJson.has_digs, tri(iTrial).digs, tri(iTrial).use==1, ...
+                        name, tri(iTrial).sliceId, tri(iTrial).trialId, tri(iTrial).context, expJson.has_digs, tri(iTrial).digs, tri(iTrial).use==1, ...
                         trialDirectory, trialAnalysisDirectory, ...
                         dateString, timeString);
                 end
-                sessions(iSession) = MLTetrodeSession(config, sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
+                sessions(iSession) = MLTetrodeSession(config, sr, sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
             end
             
             experiment = MLTetrodeExperiment( ...
@@ -134,25 +136,28 @@ classdef MLExperimentBuilder < handle
                 sr = MLSessionRecord( srFilename );
                 trials = MLTrial.empty;
                 numTrials = sr.getNumTrials();
-                tri = sr.getTrialInfoAll(); % Get the trial info for every trial
+                tri = sr.getTrialsInfo(); % Get the trial info for every trial
                 dateString = sr.getDate();
                 for iTrial = 1:numTrials
-                    name = sprintf('T%d', tri(iTrial).sequenceNum);
+                    trialId = tri(iTrial).trialId;
+                    sliceId = tri(iTrial).sliceId;
+                    
+                    name = sprintf('T%d', trialId);
                         % Load the json directory to get the trial folder
                         % names
                         sjson = ml_util_json_read(fullfile(sessionDirectory, MLExperimentBuilder.SessionRecordFilename));
-                        trialDirectory = fullfile(sessionDirectory, sjson.trial_info.folders{iTrial});
+                        trialDirectory = fullfile(sessionDirectory, sjson.trial_info.folders{sliceId});
         
-                    timeString = sjson.trial_info.folders{iTrial};
+                    timeString = sjson.trial_info.folders{sliceId};
                     
-                    trialAnalysisDirectory = fullfile(sessionAnalysisDirectory, sprintf('trial_%d', iTrial));
+                    trialAnalysisDirectory = fullfile(sessionAnalysisDirectory, sprintf('trial_%d', trialId));
                     
                     trials(iTrial) = MLTrial(...
-                        name, tri(iTrial).id, tri(iTrial).sequenceNum, tri(iTrial).context, expJson.has_digs, tri(iTrial).digs, tri(iTrial).use==1, ...
+                        name, tri(iTrial).sliceId, tri(iTrial).trialId, tri(iTrial).context, expJson.has_digs, tri(iTrial).digs, tri(iTrial).use==1, ...
                         trialDirectory, trialAnalysisDirectory, ...
                         dateString, timeString);
                 end
-                sessions(iSession) = MLMiniscopeSession(config, sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
+                sessions(iSession) = MLMiniscopeSession(config, sr, sr.getName(), sr.getDate(), trials, sessionDirectory, sessionAnalysisDirectory);
             end
             
             experiment = MLExperiment( ...

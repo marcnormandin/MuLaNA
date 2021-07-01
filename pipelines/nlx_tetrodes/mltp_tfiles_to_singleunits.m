@@ -4,6 +4,20 @@ function mltp_tfiles_to_singleunits(obj, session)
         nvtFilename = fullfile(session.getSessionDirectory(), obj.Experiment.getNvtFilename());
         %[nlxNvtTimeStamps_mus, ~, ~, ~, ~, ~, ~] = Nlx2MatVT(  nvtFilename, [1, 1, 1, 1, 1, 1], 1, 1, 1 );
         [nlxNvtTimeStamps_mus, ~, ~, ~, ~, ~, ~] = ml_nlx_nvt_load( nvtFilename );
+
+        % Get the sliced nvt files
+        regStr = '^(slice_)\d+(_fnvt.mat)$';
+        fnvtFilenames = ml_dir_regexp_files(session.getAnalysisDirectory(), regStr, false);
+
+        %sDataAll = [];
+        for iSlice = 1:length(fnvtFilenames)
+            % Load the nvt data was that sliced
+            sliceFnvtFilename = fnvtFilenames{iSlice};
+            fprintf('Loading %s ... ', sliceFnvtFilename);
+            data = load(sliceFnvtFilename);
+            sDataAll(data.slice.slice_id) = data.slice;
+            fprintf('done!\n');
+        end
         
         fl = dir(fullfile(session.getSessionDirectory(), 'TT*.t'));
         tfiles = { fl.name };
@@ -17,19 +31,20 @@ function mltp_tfiles_to_singleunits(obj, session)
             
 %             for iTrial = 1:session.getNumTrials()
 %                 trial = session.getTrial(iTrial);
-            for iTrial = 1:session.getNumTrialsToUse()
-                trial = session.getTrialToUse(iTrial);
-                
-                % Load the trials data to get the timestamps for it
-                trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trial.getTrialId()));
-                data = load(trialFnvtFilename);
-                trialTimeStamps_mus = data.trial.timeStamps_mus;
+%             for iTrial = 1:session.getNumTrials()
+%                 trial = session.getTrialByOrder(iTrial);
+
+            for iSlice = 1:length(sDataAll)
+                % Load the nvt data was that sliced
+                sData = sDataAll(iSlice);
+     
+                trialTimeStamps_mus = sData.timeStamps_mus;
                 
                 % Associate the spike times with the current trial if they
                 % happened during it.
-                spikes(iTrial).trialSpikeTimes_mus = spikeTimes_mus(find(spikeTimes_mus >= trialTimeStamps_mus(1) & spikeTimes_mus <= trialTimeStamps_mus(end)));
-                spikes(iTrial).numSpikes = length(spikes(iTrial).trialSpikeTimes_mus);
-                spikes(iTrial).trial_id = trial.getTrialId();
+                spikes(sData.slice_id).sliceSpikeTimes_mus = spikeTimes_mus(find(spikeTimes_mus >= trialTimeStamps_mus(1) & spikeTimes_mus <= trialTimeStamps_mus(end)));
+                spikes(sData.slice_id).numSpikes = length(spikes(sData.slice_id).sliceSpikeTimes_mus);
+                spikes(sData.slice_id).slice_id = sData.slice_id;
             end
 
             % save the cell data
@@ -37,7 +52,7 @@ function mltp_tfiles_to_singleunits(obj, session)
             singleunit.tfileName = mclustTFilename;
             singleunit.cellName = fnPrefix{1}; % eg. TT3_2
             singleunit.spikeTimes_mus = spikeTimes_mus; % All the spike timestamps, but not split into trials
-            singleunit.trialSpikes = spikes;
+            singleunit.sliceSpikes = spikes;
             singleunit.numTrials = session.getNumTrials();
 
             singleunit.sessionName = session.getName();

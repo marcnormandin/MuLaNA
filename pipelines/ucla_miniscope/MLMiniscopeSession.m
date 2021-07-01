@@ -7,9 +7,9 @@ classdef MLMiniscopeSession < MLSession
     end % properties
     
     methods
-        function obj = MLMiniscopeSession(config, name, date, trials, ...
+        function obj = MLMiniscopeSession(config, sessionRecord, name, date, trials, ...
                 sessionDirectory, analysisDirectory)
-            obj@MLSession(config, name, date, trials, sessionDirectory, analysisDirectory);
+            obj@MLSession(config, sessionRecord, name, date, trials, sessionDirectory, analysisDirectory);
             
             obj.CellRegResult = [];
             
@@ -74,6 +74,7 @@ classdef MLMiniscopeSession < MLSession
                 iTrial = keys{iMatch};
                 iTrialCell = values{iMatch};
                 
+                warning('This should be getting the trial and needed to be updated. See MLMiniscopeSession::getCellPlacemaps')
                 trial = obj.getTrial(iTrial);
                 
                 

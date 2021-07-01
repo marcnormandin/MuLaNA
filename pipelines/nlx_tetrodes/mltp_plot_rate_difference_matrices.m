@@ -37,16 +37,26 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     % Get the number of trials to process because that is all that the
     % pfStats contains. It doesn't contain any data from trials not
     % processed.
-    numTrials = session.getNumTrialsToUse();
-    numCells = length(pfStats); % or use the session itself
-    if numTrials ~= length(pfStats(1).meanFiringRate)
-        error('The number of trials to use (%d) and those stored in pfStats (%d) do not match, but they should!', ...
-            numTrials, size(pfStats,2));
+    % Updated. Find the maximum trial id because the pfStats will have that
+    % many rows
+    maxTrialId = -1;
+    for iTrial = 1:session.getNumTrials()
+        trial = session.getTrialByOrder(iTrial);
+        if trial.getTrialId() > maxTrialId
+            maxTrialId = trial.getTrialId();
+        end
     end
     
+    if maxTrialId ~= length(pfStats(1).meanFiringRate)
+        error("The session's maximum trial id (%d) and the length of the rows in pfStats (%d) do not match, but they should!", ...
+            maxTrialId, size(pfStats,2));
+    end
+    
+    numCells = length(pfStats); % or use the session itself
+        
     % Cells are the rows and columns are the trials. Load the mean
     % firing rate for each cell.
-    MFRT = zeros(numCells, numTrials);
+    MFRT = zeros(numCells, maxTrialId);
     for iCell = 1:numCells
         rate = pfStats(iCell).(pfStatsField); %some firingRate;
         %rate(isnan(rate)) = nan;
@@ -60,11 +70,11 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
 
     
     DALL = cell(numCells,1);
-    DAVG = zeros(numTrials, numTrials); % store to average
+    DAVG = zeros(maxTrialId, maxTrialId); % store to average
     for iCell = 1:numCells
-        D = zeros(numTrials, numTrials);
-        for iTrial1 = 1:numTrials
-            for iTrial2 = 1:numTrials
+        D = zeros(maxTrialId, maxTrialId);
+        for iTrial1 = 1:maxTrialId
+            for iTrial2 = 1:maxTrialId
                 % Calculate the absolute difference
                 if ~isnan(MFRT(iCell, iTrial1)) && ~isnan(MFRT(iCell, iTrial2))
                     D(iTrial1, iTrial2) = abs( MFRT(iCell, iTrial1) - MFRT(iCell, iTrial2) );
@@ -79,11 +89,13 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     DAVG = DAVG ./ numCells; % compute the average over the cells
     
     % Sort based on context. We find indices grouped by context
-    contexts = []; % We do this to not assume that the context ids are 1,2,3, and allow them to be 1,32,55, etc.
-    for iTrialToUse = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrialToUse);
-        contexts(end+1) = trial.getContextId();
-    end
+    %contexts = []; % We do this to not assume that the context ids are 1,2,3, and allow them to be 1,32,55, etc.
+    contexts = pfStats(1).context_id; % Every cell will have the same contexts so just index the first cell
+%     for iTrial = 1:maxTrialId
+%         %trial = session.getTrialToUse(iTrialToUse);
+%         %contexts(end+1) = trial.getContextId();
+%         contexts(end+1) = pfStats(1).(pfStatsField)
+%     end
     contexts = sort(unique(contexts));
     numContexts = length(contexts);
     % Check for any possible bug
@@ -95,11 +107,12 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     tids = [];
     cids = [];
     for iContext = 1:numContexts
-        for iTrialToUse = 1:session.getNumTrialsToUse()
-            trial = session.getTrialToUse(iTrialToUse);
-            if trial.getContextId() == contexts(iContext)
-                tids(end+1) = iTrialToUse;
-                cids(end+1) = trial.getContextId();
+        for iTrial = 1:maxTrialId
+            %trial = session.getTrialToUse(iTrialToUse);
+            
+            if pfStats(1).context_id(iTrial) == contexts(iContext)
+                tids(end+1) = pfStats(1).trial_id(iTrial);
+                cids(end+1) = pfStats(1).context_id(iTrial);
             end
         end
     end
@@ -116,15 +129,17 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     %seqNum = [ti.sequenceNum];
     % This is for labeling the axes. We use the sequence numbers
     % become some actual trials may have been redone/not used.
-    seqNum = [];
-    for iTrialToUse = 1:session.getNumTrialsToUse()
-        trial = session.getTrialToUse(iTrialToUse);
-        seqNum(end+1) = trial.getSequenceId();
-    end
+%     seqNum = [];
+%     for iTrialToUse = 1:session.getNumTrialsToUse()
+%         trial = session.getTrialToUse(iTrialToUse);
+%         seqNum(end+1) = trial.getSequenceId();
+%     end
+    seqNum = pfStats(1).trial_id;
+    
     % Now sort them by the contexts
     seqNum = seqNum(tids); % get the sequences like 1,3,5,...
-    labels = cell(1, numTrials);
-    for iTrial = 1:numTrials
+    labels = cell(1, maxTrialId);
+    for iTrial = 1:maxTrialId
         labels{iTrial} = num2str(seqNum(iTrial));
     end
     
@@ -145,9 +160,9 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
             
         %imagesc(DALL{iCell})
         colormap jet
-        xticks(1.5:(numTrials+0.5))
+        xticks(1.5:(maxTrialId+0.5))
         xticklabels(labels);
-        yticks(1.5:(numTrials+0.5))
+        yticks(1.5:(maxTrialId+0.5))
         yticklabels(labels);
         %title(sprintf('Cell %d', iCell));
         title(sprintf('%s', cellName), 'interpreter', 'none');
@@ -193,11 +208,11 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     set(gca, 'ydir', 'reverse');
         
     colormap jet
-    xticks(1.5:(numTrials+0.5))
+    xticks(1.5:(maxTrialId+0.5))
     xticklabels(labels);
-    yticks(1.5:(numTrials+0.5))
+    yticks(1.5:(maxTrialId+0.5))
     yticklabels(labels);
-    title(sprintf('AVERAGE ACROSS CELLS (%s: %s)', obj.Experiment.getAnimalName(), sessionName), 'interpreter', 'none')
+    title(sprintf('AVERAGE ACROSS CELLS\n(%s: %s)', obj.Experiment.getAnimalName(), sessionName), 'interpreter', 'none')
     hold on;
     for iContext = 1:numContexts
         nb = sum( cids < contexts(iContext) ) + 1;
@@ -222,6 +237,6 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     if saveMat
         rate_difference_matrices_per_cell = DALL;
         rate_difference_matrix_average = DAVG;
-        save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'numTrials', 'labels', 'seqNum', 'tids', 'cids');
+        save(fullfile(outputFolder, obj.Config.rate_difference_matrices.outputMatFilename), 'rate_difference_matrices_per_cell', 'rate_difference_matrix_average', 'maxTrialId', 'labels', 'seqNum', 'tids', 'cids');
     end
 end % function

@@ -5,6 +5,8 @@ classdef MLSessionRecord < handle
     properties (SetAccess = private)
         jsonFilename;
         json;
+        
+        defaultStructStr = "struct('context', [], 'use', [], 'digs', [], 'sliceId', [], 'trialId', [], 'folders', [])";
     end % properties
     
     methods (Access = public)
@@ -21,6 +23,7 @@ classdef MLSessionRecord < handle
             ml_util_json_save(obj.json, obj.jsonFilename);
         end % function
         
+        %% Raw data access
         function [name] = getName(obj)
             name = obj.json.session_info.name;
         end
@@ -29,73 +32,29 @@ classdef MLSessionRecord < handle
             d = obj.json.session_info.date;
         end
         
-        % Total number of trials, including those we dont want to process
-        function [numTrials] = getNumTrials(obj)
-            numTrials = length(obj.json.trial_info.sequence_num);
-        end % function
-        
-        % This returns information for every trial regardless
-        % of context or use (not filtered).
-        function [trialInfo] = getTrials(obj)
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
-
-            numTrials = obj.getNumTrials();
-            for iTrial = 1:numTrials
-                trialInfo(iTrial) = obj.getTrialInfo_single(iTrial);
-            end
-        end
-        
-        % Set a trial id not to use "drop it"
-        function dropTrialId(obj, trialId)
-           if trialId < 0 || trialId > obj.getNumTrials()
-               error('Trial id (%d) is invalid. Cannot drop requested trial.', trialId);
-           end
-           
-           obj.json.trial_info.use(trialId) = 0;
-           
-           % Renumber the sequence array
-           ids = find(obj.json.trial_info.use == 1);
-           for i = 1:length(ids)
-               obj.json.trial_info.sequence_num(ids(i)) = i;
-           end
-        end % function
-        
-        % The number of trials we want to process (marked use = 1).
-        function [numTrials] = getNumTrialsToProcess(obj)
-            ti = obj.getTrialInfoAll();
-            numTrials = sum([ti.use] == 1);
-        end % function
-        
-        function [trialInfo] = getTrialsToProcess(obj)
-            trialInfo = obj.getTrialInfoAll();
-            use = [trialInfo.use];
-            
-            trialInfo(use == 0) = [];
-        end % function
-        
-        function [trialIds] = getTrialIdsToProcess(obj)
-            trialInfo = obj.getTrialsToProcess();
-            trialIds = [trialInfo.id];
-        end % function
-        
         % Return the json array
-        function [sequenceNums] = getSequenceNumsArray(obj)
+        function [sequenceNums] = getRawSequenceNumsArray(obj)
             sequenceNums = obj.json.trial_info.sequence_nums;
         end % function
         
         % Return the json array
-        function [contexts] = getContextsArray(obj)
+        function [contexts] = getRawContextsArray(obj)
             contexts = obj.json.trial_info.contexts;
         end % function
         
         % Return the json array
-        function [use] = getUseArray(obj)
+        function [use] = getRawUseArray(obj)
             use = obj.json.trial_info.use;
         end % function
         
         % Return the negation of the use array
         function [dropped] = getDroppedArray(obj)
-            dropped = ~obj.json.trial_info.use;
+            dropped = ~getRawUseArray(obj);
+        end % function
+        
+        % How many trials were marked as to not be used
+        function [numDroppedTrials] = getNumDroppedTrials(obj)
+            numDroppedTrials = sum(obj.getDroppedArray());
         end % function
         
         % Return the json array
@@ -105,164 +64,96 @@ classdef MLSessionRecord < handle
         
         
         
-        function [trialInfo] = getTrialInfoByContextId(obj, iContext)
-            if iContext < 0 || iContext > obj.getNumContexts()
-                error('Requested an invalid context id (%d).', iContext);
-            end
-            
-            
-            
-            % Struct array to hold all matches for the requested context
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
-            
-            numTrials = obj.getNumTrials();
-            for iTrial = 1:numTrials
-                ti = obj.getTrialInfo(iTrial);
-                if ti.context == iContext
-                    trialInfo(end+1) = ti;
-                end
-            end
-        end
+        %% The basic unit is a slice.
         
-        % How many trials were marked as to not be used
-        function [numDroppedTrials] = getNumDroppedTrials(obj)
-            numDroppedTrials = sum(obj.getDroppedArray());
+        % Total number of slices, including those we dont want to process
+        function [numSlices] = getNumSlices(obj)
+            numSlices = length(obj.json.trial_info.sequence_num); % or length of any of the arrays
         end % function
        
-        % This returns information for every trial regardless
-        % of context or use (not filtered).
-        function [trialInfo] = getTrialInfoAll(obj)
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
+        % Helper function
+        function [sliceInfo] = getSliceInfo(obj, iSlice)
+            if iSlice < 0 || iSlice > obj.getNumSlices()
+                error('Invalid slice id (%d).', iSlice);
+            end
+            
+            sliceInfo.context = obj.json.trial_info.contexts(iSlice);
+            sliceInfo.use = obj.json.trial_info.use(iSlice);
+            sliceInfo.trialId = obj.json.trial_info.sequence_num(iSlice);
+            sliceInfo.digs = obj.json.trial_info.digs(iSlice);
+            sliceInfo.sliceId = iSlice;
+            sliceInfo.folders = obj.json.trial_info.folders{iSlice};
+        end
+        
+        % This returns information for every slice (not filtered)
+        function [slicesInfo] = getSlicesInfo(obj)
+            slicesInfo = eval(obj.defaultStructStr);
 
-            numTrials = obj.getNumTrials();
-            for iTrial = 1:numTrials
-                trialInfo(iTrial) = obj.getTrialInfo_single(iTrial);
+            numSlices = obj.getNumSlices();
+            for iSlice = 1:numSlices
+                slicesInfo(iSlice) = obj.getSliceInfo(iSlice);
             end
         end
         
         
-        % Vectorized.
-        % e.g. trialIds = 6, or trialIds = [1,4,5]. or nothing.
-        function [trialInfo] = getTrialInfo(obj, varargin)
-            % Make the input parameter optional. If no input is given
-            % then assume user wants information on all of the trials
-            p = inputParser;
-            p.CaseSensitive = false;
-            addRequired(p, 'obj');
+        %% Most of the analyses work on trials, which are slices
+        %  that have "use == true'.
+                
+        % The number of trials we want to process are slices
+        % that are marked as "use = true".
+        function [numTrials] = getNumTrials(obj)
+            sia = obj.getSlicesInfo();
+            numTrials = sum([sia.use] == 1);
+        end % function
+        
+        % Returns array of a single trial
+        function [trial] = getTrialInfo(obj, trialId)
+            trialsInfo = getTrialsInfo(obj);
             
-            % All trials, single trial, or array of trials
-            defaultTrialIds = 1:obj.getNumTrials(true); % include the dropped frames
-            addOptional(p, 'trialIds', defaultTrialIds, @(x) isnumeric(x));
-            
-            % Include or exclude dropped trials
-            useDroppedDefault = true;
-            addOptional(p,'useDropped',useDroppedDefault,...
-                 @(x) islogical(x));
-             
-            parse(p, obj, varargin{:});
-            
-            if isempty(p.Results.trialIds)
-                trialIds = defaultTrialIds;
+            trialIds = [trialsInfo.trialId];
+            ind = find(trialIds == trialId);
+            trial = [];
+            if length(ind) ~= 1
+                warning('Trial ID %d can not be found.', trialId);
             else
-                trialIds = p.Results.trialIds;
-            end
-            useDropped = p.Results.useDropped;
-            
-            trialInfo = struct('context', [], 'use', [], 'sequenceNum', [], 'digs', [], 'id', [], 'folders', []);
-
-            % Get all of the data, and then filter it for what user wants
-            trialInfoAll = obj.getTrialInfoAll();
-            
-            if length(trialIds) > 1
-                % array
-                for iTrial = 1:length(trialIds)
-                    ti = trialInfoAll(trialIds(iTrial));
-                    if ~useDropped
-                        if ti.use == 0
-                            % skip it
-                            continue;
-                        end
-                    end
-                       
-                    % write over the first one since it is empty
-                    if length(trialInfo) == 1 && isempty(trialInfo.sequenceNum)
-                        trialInfo(1) = ti;
-                    else
-                        trialInfo(end+1) = ti;
-                    end
-                end
-            else
-                % single
-                trialInfo = trialInfoAll(trialIds);
-                if ~useDropped && trialInfo.use == 0
-                    trialInfo = [];
+                trial = trialsInfo(ind);
+                
+                if trial.trialId ~= trialId
+                    error('Logic error');
                 end
             end
         end
         
-        
-        function [trialIds] = getTrialIdsByContext(obj, iContext, varargin)
-            if iContext < 0 || iContext > obj.getNumContexts()
-                error('Requested an invalid context id (%d).', iContext);
-            end
-            
-            % See if the user wants all possible contexts, or only the
-            % the ones marked "use == 1"
-            p = inputParser;
-            p.CaseSensitive = false;
-            
-            addRequired(p, 'obj');
-            addRequired(p, 'iContext');
-            
-            useDroppedDefault = true;
-            
-            % Include or exclude dropped trials
-            addOptional(p,'useDropped',useDroppedDefault,...
-                 @(x) islogical(x));
-            
-            parse(p, obj, iContext, varargin{:});
-            
-            useDropped = p.Results.useDropped;
-            
-            ti = obj.getTrialInfoByContextId(iContext);
-            
-            if useDropped
-                trialIds = [ti.id];
-            else
-                % eliminate the dropped trials
-                eliminate = [];
-                for i = 1:length(ti)
-                    if ti(i).use == 0
-                        eliminate(end+1) = i;
-                    end
-                end
-                trialIds = [ti.id];
-                trialIds(eliminate) = [];
-            end
-            
-            if isempty(trialIds)
-                warning('No matching trials ids for context (%d).', iContext);
-            end
-            
+        % Returns array of all trials
+        function [trialsInfo] = getTrialsInfo(obj)
+            trialsInfo = getSlicesInfo(obj);
+            use = [trialsInfo.use];
+            trialsInfo(use == 0) = [];
         end
         
+        % Get the trial ids
+        function [trialIds] = getTrialIds(obj)
+            trialsInfo = getTrialsInfo(obj);
+            trialIds = [trialsInfo.trialId];
+        end
+        
+        % Get the number of unique contexts used for trials
         function [numContexts] = getNumContexts(obj)
-            ti = obj.getTrialInfo();
+            ti = obj.getTrialsInfo();
             trialContexts = [ti.context];
             numContexts = length(unique(trialContexts));
         end % function
         
+        % Get the slice id associated with a given trial id
+        % or returns empty if not found.
+        function [sliceId] = getSliceIdByTrialId(obj, trialId)
+            ti = obj.getTrialInfo( trialId );
+            sliceId = [];
+            if ~isempty(ti)
+               sliceId = ti.sliceId; 
+            end
+        end % function
 
-        
-        function [sequenceNum] = getSequenceNumByTrialId(obj, iTrial)
-            ti = obj.getTrialInfo( iTrial );
-            sequenceNum = ti.sequenceNum;
-        end % function
-        
-        function [trialNum] = getTrialNumByTrialId(obj, iTrial)
-            ti = obj.getTrialInfo(iTrial);
-            trialNum = ti.trialNum;
-        end % function
     end % methods
     
     methods (Access = private)
@@ -361,19 +252,7 @@ classdef MLSessionRecord < handle
             
         end % function
         
-        % Helper function
-        function [trialInfo] = getTrialInfo_single(obj, iTrial)
-            if iTrial < 0 || iTrial > obj.getNumTrials()
-                error('Invalid trial id (%d).', iTrial);
-            end
-            
-            trialInfo.context = obj.json.trial_info.contexts(iTrial);
-            trialInfo.use = obj.json.trial_info.use(iTrial);
-            trialInfo.sequenceNum = obj.json.trial_info.sequence_num(iTrial);
-            trialInfo.digs = obj.json.trial_info.digs(iTrial);
-            trialInfo.id = iTrial;
-            trialInfo.folders = obj.json.trial_info.folders{iTrial};
-        end
+
     end % private methods
     
     methods ( Static )

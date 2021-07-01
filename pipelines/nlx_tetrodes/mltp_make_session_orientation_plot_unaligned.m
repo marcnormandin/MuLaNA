@@ -7,27 +7,28 @@ function mltp_make_session_orientation_plot_unaligned(obj, session)
         p = obj.Config.session_orientation_plot.subplot_num_rows; 
         q = obj.Config.session_orientation_plot.subplot_num_cols; 
         k = 1;
-        for iTrial = 1:session.getNumTrialsToUse()
-            trial = session.getTrialToUse(iTrial);
+        for iTrial = 1:session.getNumTrials()
+            trial = session.getTrialByOrder(iTrial);
             trialId = trial.getTrialId();
+            sliceId = trial.getSliceId();
                 
-            trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('trial_%d_fnvt.mat', trialId));
+            trialFnvtFilename = fullfile(session.getAnalysisDirectory(), sprintf('slice_%d_fnvt.mat', sliceId));
             fprintf('Loading %s ... ', trialFnvtFilename);
             data = load(trialFnvtFilename);
             fprintf('done!\n');
-            tdata = data.trial;
+            tdata = data.slice;
 
-            trialArenaroiFilename = fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trialId));
+            trialArenaroiFilename = fullfile(session.getSessionDirectory(), sprintf('slice_%d_arenaroi.mat', sliceId));
             fprintf('Loading %s ... ', trialArenaroiFilename);
             data = load(trialArenaroiFilename);
             fprintf('done!\n');
             arenaroi = data.arenaroi;
 
 
-            subplot(p,q,k)
+            subplot(p,q,trialId)
             plot(tdata.extractedX, tdata.extractedY, '.', 'color', obj.Config.session_orientation_plot.trial_pos_colours(trial.getContextId()));
             if obj.Config.session_orientation_plot.subplot_show_title == 1
-                title(sprintf('T: %d, S: %d, C: %d', trialId, trial.getSequenceId(), trial.getContextId()))
+                title(sprintf('T: %d, S: %d, C: %d', trialId, sliceId, trial.getContextId()))
             end
             hold on
             % FixMe! This will probably mess up if not a square or
