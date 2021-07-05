@@ -140,7 +140,7 @@ end % while
 
 %
 % Let's be good and do our homework
-for iHomework = 1:length(homework)
+parfor iHomework = 1:length(homework)
     subjectName = homework(iHomework).subjectName;
     experiment = homework(iHomework).experiment;
     edFilename = homework(iHomework).edFilename;
@@ -174,7 +174,7 @@ for iHomework = 1:length(homework)
 
         pipe.executePerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits');
 
-        pipe.executePerSessionTask('nvt_split_into_trial_nvt');
+        pipe.executePerSessionTask('nvt_split_into_slice_nvt');
         
 
 
@@ -185,16 +185,16 @@ for iHomework = 1:length(homework)
 
             % Check if we have all of the ROI needs for the analysis
             for iTrial = 1:session.getNumTrials()
-                trial = session.getTrial(iTrial);
+                trial = session.getTrialByOrder(iTrial);
                 % Check if we are missing the required ROI
-                if ~isfile(fullfile(session.getSessionDirectory(), sprintf('trial_%d_arenaroi.mat', trial.getTrialId())))
-                    pipe.executeTrialTask('user_define_trial_arenaroi', session, trial);
+                if ~isfile(fullfile(session.getSessionDirectory(), sprintf('slice_%d_arenaroi.mat', trial.getSliceId())))
+                    pipe.executeTrialTask('user_define_slice_arenaroi', session, trial);
                 end
             end
         end
 
-        pipe.executePerSessionTask('trial_nvt_to_trial_fnvt');
-        pipe.executePerSessionTask('trial_fnvt_to_trial_can_movement');
+        pipe.executePerSessionTask('slice_nvt_to_slice_fnvt');
+        pipe.executePerSessionTask('slice_fnvt_to_slice_can_movement');
         pipe.executePerSessionTask('tfiles_to_singleunits');
         pipe.executePerSessionTask('compute_singleunit_placemap_data');
         pipe.executePerSessionTask('compute_singleunit_placemap_data_shrunk');
@@ -206,14 +206,14 @@ for iHomework = 1:length(homework)
 %         pipe.executePerSessionTask('compute_bfo_90_wc');
 %         pipe.executePerSessionTask('compute_bfo_90_ac_per_cell');
 
-        pipe.executePerSessionTask('compute_bfo_90');
-        pipe.executeExperimentTask('compute_bfo_90_average');
-        
-        pipe.executePerSessionTask('compute_bfo_180');
-        pipe.executeExperimentTask('compute_bfo_180_average');
-        
-        pipe.executePerSessionTask('compute_bfo_90_placey');
-        pipe.executeExperimentTask('compute_bfo_90_placey_average');
+%         pipe.executePerSessionTask('compute_bfo_90');
+%         pipe.executeExperimentTask('compute_bfo_90_average');
+%         
+%         pipe.executePerSessionTask('compute_bfo_180');
+%         pipe.executeExperimentTask('compute_bfo_180_average');
+%         
+%         pipe.executePerSessionTask('compute_bfo_90_placey');
+%         pipe.executeExperimentTask('compute_bfo_90_placey_average');
         
         
 %         pipe.executePerSessionTask('compute_bfo_180_ac_per_cell');
@@ -240,14 +240,14 @@ for iHomework = 1:length(homework)
     
 %         pipe.executePerSessionTask('plot_across_within_0_180_similarity');
   
-        pipe.executeExperimentTask('plot_bfo_90_sessions');
-        pipe.executePerSessionTask('plot_bfo_90_session_grouped');
-        
-        pipe.executeExperimentTask('plot_bfo_180_sessions');
-        pipe.executePerSessionTask('plot_bfo_180_session_grouped');
-
-        pipe.executeExperimentTask('plot_bfo_90_placey_sessions');
-        pipe.executePerSessionTask('plot_bfo_90_placey_session_grouped');
+%         pipe.executeExperimentTask('plot_bfo_90_sessions');
+%         pipe.executePerSessionTask('plot_bfo_90_session_grouped');
+%         
+%         pipe.executeExperimentTask('plot_bfo_180_sessions');
+%         pipe.executePerSessionTask('plot_bfo_180_session_grouped');
+% 
+%         pipe.executeExperimentTask('plot_bfo_90_placey_sessions');
+%         pipe.executePerSessionTask('plot_bfo_90_placey_session_grouped');
         
         %pipe.executeExperimentTask('plot_bfo_90_averaged_across_sessions');
 

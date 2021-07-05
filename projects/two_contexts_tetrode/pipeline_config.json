@@ -9,7 +9,7 @@
         "smoothingKernelGaussianSigma_cm": 3,
         "cm_per_bin_rect_both_dim": 1,
         "cm_per_bin_square_smallest_dim": 1,
-        "smoothingProtocol": "SmoothBeforeDivision",
+        "smoothingProtocol": "SmoothAfterDivision",
         "criteria_dwell_time_seconds_per_bin_minimum": 0.05,
         "criteria_spikes_per_bin_minimum": 0,
         "criteria_spikes_per_map_minimum": 2,
