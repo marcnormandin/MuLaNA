@@ -1,6 +1,6 @@
-function [sliceIndices] = ml_nlx_nvt_find_slice_indices(nlxTimeStamps, nvt_file_slice_separation_threshold_s)
+function [sliceIndices] = ml_nlx_nvt_find_slice_indices( ts_ms, slice_separation_threshold_s)
 % Convert the threshold in second to microseconds
-endTrialIfGapMoreThanThis = nvt_file_slice_separation_threshold_s * 10^6;
+endTrialIfGapMoreThanThis = slice_separation_threshold_s * 10^6;
 
 breaks = find(diff(nlxTimeStamps) > endTrialIfGapMoreThanThis);
 borders = [1 breaks+1 length(nlxTimeStamps)];
