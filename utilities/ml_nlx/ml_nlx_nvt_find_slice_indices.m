@@ -1,9 +1,9 @@
-function [sliceIndices] = ml_nlx_nvt_find_slice_indices( ts_ms, slice_separation_threshold_s)
+function [sliceIndices] = ml_nlx_nvt_find_slice_indices( nlxTimeStamps_mus, slice_separation_threshold_s)
 % Convert the threshold in second to microseconds
 endTrialIfGapMoreThanThis = slice_separation_threshold_s * 10^6;
 
-breaks = find(diff(nlxTimeStamps) > endTrialIfGapMoreThanThis);
-borders = [1 breaks+1 length(nlxTimeStamps)];
+breaks = find(diff(nlxTimeStamps_mus) > endTrialIfGapMoreThanThis);
+borders = [1 breaks+1 length(nlxTimeStamps_mus)];
 inds = zeros(2, length(borders)-1);
 N = length(borders)-1;
 for i = 1:N
