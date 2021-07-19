@@ -32,7 +32,7 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     pfStats = load(pfStatsFilename);
     pfStats = pfStats.pfStats;
     
-    fprintf('Processing session: %s\n', sessionName);
+    fprintf('Processing session: %s for %s\n', sessionName, pfStatsField);
 
     % Get the number of trials to process because that is all that the
     % pfStats contains. It doesn't contain any data from trials not
@@ -139,22 +139,36 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
     % Now sort them by the contexts
     seqNum = seqNum(tids); % get the sequences like 1,3,5,...
     labels = cell(1, maxTrialId);
-    for iTrial = 1:maxTrialId
-        labels{iTrial} = num2str(seqNum(iTrial));
+    % THIS is the old way
+%     for iTrial = 1:maxTrialId
+%         labels{iTrial} = num2str(seqNum(iTrial));
+%     end
+    % This is the new and improved way.
+    for iLabel = 1:length(cids)
+       labels{iLabel} = sprintf('C%dT%dS%d', cids(iLabel), sum(cids(1:iLabel)==cids(iLabel)), seqNum(iLabel));
     end
+            
     
     % Plotting
     hpercell = figure('name', sprintf('%s: %s (%s)', obj.Experiment.getAnimalName(), sessionName, figureField), 'Position', get(0,'Screensize'));
-    p = 3; q=ceil(numCells/3); k=1; % maximum of 25 cells on a plot
+    %p = 3; q=ceil(numCells/3); k=1; % maximum of 25 cells on a plot
     cellNames = session.getTFilesFilenamePrefixes();
     for iCell = 1:numCells
         cellName = cellNames{iCell};
+        
+        clf(hpercell, 'reset');
+
+            
         %
-        subplot(p,q,k);
-        k = k + 1;
+        %subplot(p,q,k);
+        %k = k + 1;
         DP = DALL{iCell};
         [nr,nc] = size(DP);
-        pcolor( [DP, nan(nr,1); nan(1,nc+1)] );
+        matrixToPlot = [DP, nan(nr,1); nan(1,nc+1)];
+        for i = 1:size(matrixToPlot,1)
+            matrixToPlot(i,i) = nan;
+        end
+        pcolor( matrixToPlot );
         shading flat;
         set(gca, 'ydir', 'reverse');
             
@@ -162,6 +176,7 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
         colormap jet
         xticks(1.5:(maxTrialId+0.5))
         xticklabels(labels);
+        xtickangle(90);
         yticks(1.5:(maxTrialId+0.5))
         yticklabels(labels);
         %title(sprintf('Cell %d', iCell));
@@ -184,32 +199,48 @@ function mltp_plot_rate_difference_matrices_helper(obj, session, pfStatsField, f
 %                   'Curvature',[0,0],...
 %                  'LineWidth',4,'LineStyle','-')
         colorbar
-    end
+        
+        
+        % Save the plots
+        outputFolder = fullfile(tfolder, obj.Config.rate_difference_matrices.outputFolder, 'per_cell');
+        if ~exist(outputFolder,'dir')
+            mkdir(outputFolder)
+        end
 
-    % Save the plots
-    outputFolder = fullfile(tfolder, obj.Config.rate_difference_matrices.outputFolder);
-    if ~exist(outputFolder,'dir')
-        mkdir(outputFolder)
+        F = getframe(hpercell);
+        imwrite(F.cdata, fullfile(outputFolder, sprintf('%s_%s_difference_matrix.png', cellName, pfStatsField)), 'png')
+        savefig(hpercell, fullfile(outputFolder, sprintf('%s_%s_difference_matrix.fig', cellName, pfStatsField)));
+        
+    
     end
-
-    F = getframe(hpercell);
-    imwrite(F.cdata, fullfile(outputFolder, sprintf('%s_difference_matrix_per_cell.png', pfStatsField)), 'png')
-    savefig(hpercell, fullfile(outputFolder, sprintf('%s_difference_matrix_per_cell.fig', pfStatsField)));
     close(hpercell);
 
 
 
 
+    % AVERAGE MATRIX
+    outputFolder = fullfile(tfolder, obj.Config.rate_difference_matrices.outputFolder);
+    if ~exist(outputFolder,'dir')
+        mkdir(outputFolder)
+    end
+
     havg = figure('name', sprintf('%s: %s', obj.Experiment.getAnimalName(), sessionName));
     %imagesc(DAVG)
     [nr,nc] = size(DAVG);
-    pcolor( [DAVG, nan(nr,1); nan(1,nc+1)] );
+    %pcolor( [DAVG, nan(nr,1); nan(1,nc+1)] );
+    matrixToPlot = [DAVG, nan(nr,1); nan(1,nc+1)];
+    for i = 1:size(matrixToPlot,1)
+        matrixToPlot(i,i) = nan;
+    end
+    pcolor( matrixToPlot );
+        
     shading flat;
     set(gca, 'ydir', 'reverse');
         
     colormap jet
     xticks(1.5:(maxTrialId+0.5))
     xticklabels(labels);
+    xtickangle(45);
     yticks(1.5:(maxTrialId+0.5))
     yticklabels(labels);
     title(sprintf('AVERAGE ACROSS CELLS\n(%s: %s)', obj.Experiment.getAnimalName(), sessionName), 'interpreter', 'none')
