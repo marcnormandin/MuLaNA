@@ -22,6 +22,7 @@ classdef MLArena < handle
             obj.shapeTypeStr = shapeTypeStr;
             obj.referencePointsVideo = referencePointsVideo;
             obj.referencePointsCanon = referencePointsCanon;
+            obj.numReferencePoints = size(obj.referencePointsVideo,2);
         end % function
         
         function [numReferencePoints] = getNumReferencePoints(obj)
@@ -39,6 +40,7 @@ classdef MLArena < handle
                 error('Cannot update because the number of reference points has changed.');
             end
             obj.referencePointsVideo = referencePointsVideo;
+            obj.numReferencePoints = size(obj.referencePointsVideo,2);
         end % function
         
         function [referencePointsCanon] = getReferencePointsCanon(obj)
