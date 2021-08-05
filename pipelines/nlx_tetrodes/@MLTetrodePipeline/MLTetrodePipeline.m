@@ -49,6 +49,7 @@ classdef MLTetrodePipeline < MLPipeline
             obj.registerSessionTask('plot_movement', @mltp_plot_movement);
             obj.registerSessionTask('plot_nlx_mclust_plot_spikes_for_checking_bits', @mltp_nlx_mclust_plot_spikes_for_checking_bits);
             
+            % This is the newest version
             obj.registerSessionTask('compute_best_match_rotations', @mltp_compute_best_match_rotation_rect);
             obj.registerExperimentTask('plot_best_match_rotations_rect_per_session', @obj.mltp_plot_best_match_rotations_rect_per_session);
             

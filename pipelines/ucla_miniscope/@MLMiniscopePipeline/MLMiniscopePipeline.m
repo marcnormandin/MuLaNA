@@ -44,24 +44,29 @@ classdef MLMiniscopePipeline < MLPipeline
             
             obj.registerTrialTask('compute_placemaps', @obj.compute_placemaps);
             obj.registerTrialTask('compute_placemaps_shrunk', @obj.compute_placemaps_shrunk);
-            
-            
-            
             obj.registerTrialTask('plot_placemaps', @obj.plot_placemaps);
             
             
-            obj.registerSessionTask('compute_bfo_90', @mlgp_compute_bfo_90);
-            obj.registerExperimentTask('compute_bfo_90_average', @mlgp_compute_bfo_90_average);
+            obj.registerSessionTask('create_placemap_database', @mlgp_create_placemap_database);
+            obj.registerSessionTask('create_placemap_shrunk_database', @mlgp_create_placemap_shrunk_database);
             
-            obj.registerExperimentTask('plot_bfo_90_sessions', @mlgp_plot_bfo_90_sessions);
-            obj.registerSessionTask('plot_bfo_90_session_grouped', @mlgp_plot_bfo_90_session_grouped);
+            obj.registerSessionTask('compute_bfo_percell_90', @mlgp_compute_bfo_percell_90);
+            obj.registerSessionTask('compute_bfo_percell_180', @mlgp_compute_bfo_percell_180);
+
+
             
-            obj.registerSessionTask('plot_cellreg_placemaps', @plot_cellreg_placemaps);
-            obj.registerSessionTask('plot_cellreg_spatialfootprints', @plot_cellreg_spatialfootprints);
-            
-            obj.registerSessionTask('compute_bfo_180', @mlgp_compute_bfo_180);
-            
-            obj.registerSessionTask('plot_cumulative_similarity', @mlgp_plot_cumulative_similarity);
+            %obj.registerSessionTask('compute_bfo_90', @mlgp_compute_bfo_90);
+%             obj.registerExperimentTask('compute_bfo_90_average', @mlgp_compute_bfo_90_average);
+%             
+%             obj.registerExperimentTask('plot_bfo_90_sessions', @mlgp_plot_bfo_90_sessions);
+%             obj.registerSessionTask('plot_bfo_90_session_grouped', @mlgp_plot_bfo_90_session_grouped);
+%             
+%             obj.registerSessionTask('plot_cellreg_placemaps', @plot_cellreg_placemaps);
+%             obj.registerSessionTask('plot_cellreg_spatialfootprints', @plot_cellreg_spatialfootprints);
+%             
+%             obj.registerSessionTask('compute_bfo_180', @mlgp_compute_bfo_180);
+%             
+%             obj.registerSessionTask('plot_cumulative_similarity', @mlgp_plot_cumulative_similarity);
             
         end % function
         

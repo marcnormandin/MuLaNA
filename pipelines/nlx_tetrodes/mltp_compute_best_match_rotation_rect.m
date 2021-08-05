@@ -1,4 +1,4 @@
-function mltp_compute_best_match_rotation_rect(obj, session)
+ function mltp_compute_best_match_rotation_rect(obj, session)
     [bfo_dist, angleCorrelations, angleCounts] = compute_best_match_rotation_rect(obj, session);
     
     best_match_rotations.bfo_dist = bfo_dist;
