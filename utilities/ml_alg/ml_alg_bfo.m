@@ -68,10 +68,10 @@ function [v_max, vind_max, rotationsDegUsed ] = ml_alg_bfo(rotationsDeg, maps1, 
 %             end
 
             if length(mi) > 1
-                warning('highly unlikely event has occurred. Seek wisdom.');
+                warning('more than one rotation amount is equally likely so the maps are most likely too sparse.');
             end
 
-            if isfinite(vn)
+            if isfinite(vn) && length(mi) == 1
                 v_max = [v_max, vn];
                 vind_max = [vind_max, vindn];
             end

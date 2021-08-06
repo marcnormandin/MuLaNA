@@ -4,6 +4,7 @@ classdef MLMiniscopePipeline < MLPipeline
     
     properties
         CnmfeOptions
+        SpatialFootprintTrainedModel
     end % properties
     
     methods
@@ -22,6 +23,15 @@ classdef MLMiniscopePipeline < MLPipeline
         
         function initialize(obj)
             obj.CnmfeOptions = men_cnmfe_options_create('framesPerSecond', 30, 'verbose', obj.isVerbose());
+            
+            sfpTrainedModelFilename = obj.Config.sfp_trained_model_filename;
+            if isfile(sfpTrainedModelFilename)
+                tmp = load(sfpTrainedModelFilename, 'trainedModel');
+                obj.SpatialFootprintTrainedModel = tmp.trainedModel;
+            else
+                warning('config.sfp_trained_model_filename refers to a nonexistent file (%s). cannot load model.', sfpTrainedModelFilename);
+                obj.SpatialFootprintTrainedModel = [];
+            end
         end % function
 
         function obj = registerAvailableTasks(obj)
@@ -37,14 +47,27 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerTrialTask('scopecam_cnmfe_run', @obj.scopecam_cnmfe_run);
             obj.registerTrialTask('cnfme_spatial_footprints_save_to_cellreg', @obj.cnfme_spatial_footprints_save_to_cellreg);
             obj.registerTrialTask('cnmfe_to_neuron', @obj.cnmfe_to_neuron);
+            
             obj.registerTrialTask('compactify_sfp', @obj.compactify_sfp);
+            obj.registerTrialTask('compute_sfp_celllike', @obj.compute_sfp_celllike);
             
-            
-            
+            obj.registerSessionTask('create_sfp_celllike_database', @create_sfp_celllike_database);
             
             obj.registerTrialTask('compute_placemaps', @obj.compute_placemaps);
             obj.registerTrialTask('compute_placemaps_shrunk', @obj.compute_placemaps_shrunk);
             obj.registerTrialTask('plot_placemaps', @obj.plot_placemaps);
+            
+            %obj.registerTrialTask('compute_trace_placemaps', @obj.compute_trace_placemaps);
+
+            obj.registerTrialTask('compute_smoothed_behaviour', @obj.compute_smoothed_behaviour);
+            obj.registerTrialTask('compute_mcmappy', @obj.compute_mcmappy);
+            obj.registerTrialTask('compute_mcmappy_shrunk', @obj.compute_mcmappy_shrunk);
+            obj.registerSessionTask('create_mcmappy_database', @mlgp_create_mcmappy_database);
+            obj.registerSessionTask('create_mcmappy_shrunk_database', @mlgp_create_mcmappy_shrunk_database);
+            obj.registerSessionTask('create_climerics_database', @mlgp_create_climerics_database);
+
+            obj.registerSessionTask('create_climerics_matrix_average', @create_climerics_matrix_average);
+            obj.registerSessionTask('plot_and_save_cellreg_placemaps', @plot_and_save_cellreg_placemaps);
             
             
             obj.registerSessionTask('create_placemap_database', @mlgp_create_placemap_database);
@@ -79,21 +102,21 @@ classdef MLMiniscopePipeline < MLPipeline
         % FUNCTION SIGNATURES
         %
         
-        checkDataIntegrity( obj, session, trial );
-        camerasdat_create( obj, session, trial );
-        behavcam_referenceframe_create( obj, session, trial );
-        behavcam_roi_create( obj, session, trial );
-        
-        convert_dlc_to_mlbehaviourtrack_per_trial( obj, session, trial );
-        
-        scopecam_alignvideo( obj, session, trial );
-        scopecam_cnmfe_run( obj, session, trial );
-        cnfme_spatial_footprints_save_to_cellreg(obj, session, trial);
-        cnmfe_to_neuron( obj, session, trial );
-        
-        compute_placemaps(obj, session, trial);
-        compute_placemaps_shrunk(obj, session, trial);
-        plot_placemaps(obj, session, trial);
+%         checkDataIntegrity( obj, session, trial );
+%         camerasdat_create( obj, session, trial );
+%         behavcam_referenceframe_create( obj, session, trial );
+%         behavcam_roi_create( obj, session, trial );
+%         
+%         convert_dlc_to_mlbehaviourtrack_per_trial( obj, session, trial );
+%         
+%         scopecam_alignvideo( obj, session, trial );
+%         scopecam_cnmfe_run( obj, session, trial );
+%         cnfme_spatial_footprints_save_to_cellreg(obj, session, trial);
+%         cnmfe_to_neuron( obj, session, trial );
+%         
+%         compute_placemaps(obj, session, trial);
+%         compute_placemaps_shrunk(obj, session, trial);
+%         plot_placemaps(obj, session, trial);
 
     end % methods
 end % classdef
