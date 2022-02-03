@@ -1,25 +1,18 @@
-function [trackedPoints] = ml_cai_dlc_load_all(trialDLCFolder)
+function [trackedPoints] = ml_cai_dlc_load_all(containerFolder, filenamePrefix)
 % This code reads in the multiple h5 files produced by DeepLabCut
 
-numBehavCamFiles = length(dir(fullfile(trialDLCFolder, 'behavCam*_DLC.h5')));
-if numBehavCamFiles == 0
-    error('Unable to read any behavCam#DLC...h5 files from %s', trialDLCFolder);
+% Get a list of matching filenames
+h5Files = ml_cai_dlc_get_h5_filenames(containerFolder, filenamePrefix);
+
+numH5Files = length(h5Files);
+if numH5Files == 0
+    error('Unable to read any behavCam#DLC...h5 files from %s', containerFolder);
 end
 
 numTrackedPoints = [];
 trackedPoints = [];
-for iBehavCamNum = 1:numBehavCamFiles
-    % We don't know what the specific name of the file will be, but know
-    % what it will start with
-    fnPrefix = sprintf('behavCam%d_DLC.h5', iBehavCamNum);
-    fnn = dir(fullfile(trialDLCFolder, fnPrefix));
-    
-    if isempty(fnn)
-        error('Error! Unable to find %s for reading!', fnPrefix);
-    end
-    
-    fn = fullfile(fnn.folder, fnn.name);
-    %fprintf('Reading %s to get the tracking data from DeepLabCut\n', fn);
+for iFileNum = 1:numH5Files
+    fn = h5Files(iFileNum).filename;
     
     data = h5read(fn, '/df_with_missing/table');
     

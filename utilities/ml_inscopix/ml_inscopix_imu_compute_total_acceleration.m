@@ -1,4 +1,4 @@
-function [regular_timestamps_s, regular_totalAcceleration, imuFs] = ml_inscopix_imu_compute_total_acceleration( imuData )
+function [regular_timestamps_s, regular_ax, regular_ay, regular_az, regular_totalAcceleration, imuFs] = ml_inscopix_imu_compute_total_acceleration( imuData )
     imuFs = 50; % Sampling rate of the IMU in Hz
 
     numSamples = length(imuData.IMU_Time_s);

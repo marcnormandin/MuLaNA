@@ -1,4 +1,4 @@
-function [exportedFilename] = ml_freezeframe_export_video(freezeframeFilename, frameRate_hz)
+function [exportedFilename] = ml_freezeframe_export_video(freezeframeFilename, frameRate_hz, exportFolder)
     %frameRate_hz = 15;
 
     [filepath, name, ext] = fileparts(freezeframeFilename);
@@ -10,7 +10,7 @@ function [exportedFilename] = ml_freezeframe_export_video(freezeframeFilename, f
         error('The file (%s) can not be exported as it does not exist.\n', freezeframeFilename);
     end
     
-    exportedFilename = fullfile(filepath, sprintf('%s.avi', name));
+    exportedFilename = fullfile(exportFolder, sprintf('%s.avi', name));
 
     % Read in the limelight video data
     videoFrames = ml_freezeframe_read_video(freezeframeFilename);

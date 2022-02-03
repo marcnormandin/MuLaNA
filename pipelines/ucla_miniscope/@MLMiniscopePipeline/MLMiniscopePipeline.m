@@ -51,7 +51,7 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerTrialTask('compactify_sfp', @obj.compactify_sfp);
             obj.registerTrialTask('compute_sfp_celllike', @obj.compute_sfp_celllike);
             
-            obj.registerSessionTask('create_sfp_celllike_database', @create_sfp_celllike_database);
+            obj.registerSessionTask('create_sfp_celllike_database', @mlgp_create_sfp_celllike_database);
             
             obj.registerTrialTask('compute_placemaps', @obj.compute_placemaps);
             obj.registerTrialTask('compute_placemaps_shrunk', @obj.compute_placemaps_shrunk);
@@ -69,12 +69,26 @@ classdef MLMiniscopePipeline < MLPipeline
             obj.registerSessionTask('create_climerics_matrix_average', @create_climerics_matrix_average);
             obj.registerSessionTask('plot_and_save_cellreg_placemaps', @plot_and_save_cellreg_placemaps);
             
+            obj.registerSessionTask('compute_placemaps_inclusion', @mlgp_compute_placemaps_inclusion);
             
-            obj.registerSessionTask('create_placemap_database', @mlgp_create_placemap_database);
-            obj.registerSessionTask('create_placemap_shrunk_database', @mlgp_create_placemap_shrunk_database);
+            
+            % DONT USE THIS.. OLD
+%             obj.registerSessionTask('create_placemap_database', @mlgp_create_placemap_database);
+%             obj.registerSessionTask('create_placemap_shrunk_database', @mlgp_create_placemap_shrunk_database);
             
             obj.registerSessionTask('compute_bfo_percell_90', @mlgp_compute_bfo_percell_90);
             obj.registerSessionTask('compute_bfo_percell_180', @mlgp_compute_bfo_percell_180);
+            
+            obj.registerSessionTask('compute_average_ratemap_difference_matrix', @compute_average_ratemap_difference_matrix);
+            
+            obj.registerSessionTask('compute_peak_difference_matrix', @compute_peak_difference_matrix);
+
+            
+            
+            obj.registerSessionTask('compute_fluorescence_rate_scatterplots', @compute_fluorescence_rate_scatterplots);
+
+
+            obj.registerSessionTask('compute_popvectors_dotproduct_cumulative', @compute_popvectors_dotproduct_cumulative);
 
 
             

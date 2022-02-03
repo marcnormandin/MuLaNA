@@ -2,6 +2,10 @@ function [Z] = ml_bs_accumulate_xy(bs, x, y, v)
     % This function discretizes the position values using the bin system
     % and then accumulates the associated value into the respective
     % locations. If v is nan, it will not be added.
+    if isempty(x) && isempty(y)
+        Z = zeros(size(bs.XX));
+        return
+    end
     
     if size(x,1) ~= 1 && size(x,2) ~= 1
         error('Invalid size of x. Should be 1xN.');

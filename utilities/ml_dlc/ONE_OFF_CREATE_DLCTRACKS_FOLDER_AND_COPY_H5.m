@@ -8,7 +8,7 @@
 %     pwd, '../../analysis/chengs_task_2c' );
 
 
-mainDir = 'M:/Minimice/CMG169_CA1/recordings/chengs_task_2c';
+mainDir = 'R:/chengs_task_2c/data/minimice/feature_rich/CMG087_CA1/recordings_sep';
 %cfg = jsondecode(fileread(fullfile(pwd, 'pipeline_config.json')));
 cfg = jsondecode(fileread(fullfile(mainDir, 'experiment_description.json'))); % Should be pipeline
 

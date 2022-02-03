@@ -7,13 +7,21 @@ clc
 frameRate_hz = 15;
 
 % Select a folder that contains the video
-msg = 'Select the folder containing the FreezeFrame-formatted videos';
-fprintf('%s\n\n', msg);
+msg1 = 'Select the folder containing the FreezeFrame-formatted videos';
+fprintf('%s\n\n', msg1);
+inputFolder = uigetdir(pwd, msg1);
+
+
+% Select a folder that contains the video
+msg2 = 'Select the folder that you want to save the converted files to';
+fprintf('%s\n\n', msg2);
+exportFolder = uigetdir(pwd, msg2);
+
 
 numErrors = 0;
 numExported = 0;
 
-inputFolder = uigetdir(pwd, msg);
+
 if inputFolder ~= 0
     fileList = dir(fullfile(inputFolder, '*.ffii'));
     fprintf('Found %d files to be exported.\n\n', length(fileList));
@@ -24,7 +32,7 @@ if inputFolder ~= 0
         fprintf('Exporting the FreezeFrame file (%s) ...\n', freezeframeFilename);
    
         try
-            exportedFilename = ml_freezeframe_export_video(freezeframeFilename, frameRate_hz);
+            exportedFilename = ml_freezeframe_export_video(freezeframeFilename, frameRate_hz, exportFolder);
             fprintf('\tExported file saved (%s)\n\n', exportedFilename);
             numExported = numExported + 1;
         catch e

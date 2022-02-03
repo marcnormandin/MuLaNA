@@ -9,12 +9,14 @@ function [v_max, vind_max, rotationsDegUsed ] = ml_alg_bfo(rotationsDeg, maps1, 
     v_max = [];
     vind_max = [];
 
+    
     for iMap1 = 1:numMaps1
         pm1 = maps1(:,:, iMap1);
 
         if isempty(pm1) || ~any(pm1, 'all')
             continue; % skip
         end
+        
 
         for iMap2 = 1:numMaps2
             pm2 = maps2(:,:, iMap2);

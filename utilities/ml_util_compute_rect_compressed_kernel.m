@@ -15,4 +15,7 @@ function [mySquareKernel] = ml_util_compute_rect_compressed_kernel(arenaLengthRa
     s2 = sigma_cm / cmperbin_square_smallest * arenaLengthRatio;
 
     mySquareKernel = ml_util_bivariatepdf(s1,s2,0,0,0,xx,yy);
+    
+    % Normalize
+    mySquareKernel = mySquareKernel ./ max(mySquareKernel, [], 'all');
 end

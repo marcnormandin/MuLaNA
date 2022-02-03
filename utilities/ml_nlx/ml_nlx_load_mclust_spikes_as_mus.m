@@ -1,5 +1,5 @@
 function spikeTimes_mus = ml_nlx_load_mclust_spikes_as_mus(nlxNvtTimeStamps_mus, tFilename, numBits)
-    isVerbose = true; % Set to true for debugging.
+    isVerbose = false; % Set to true for debugging.
     
     if numBits == 32
         spikeTimes_mclust = ml_nlx_mclust_load_spikes_32bit(tFilename);

@@ -14,6 +14,60 @@ function mlgp_compute_bfo_percell_90(obj, session)
     % All of the cell ids stored in the placemap database are local to the trial
     placemapData = load(placemapDatabaseFilename);
     
+    % We will set the not included maps to be all zeros
+    mapType = obj.Config.bfo_percell_90.map_name_to_use;
+    maps = placemapData.(mapType);
+    
+    % Not using shrunk is okay
+        % Check if we will apply any filters
+    % Load the inclusion data
+    placemapsInclude = true(size(maps,3),1); % by default include everything
+    APPLY_FILTER = obj.Config.best_fit_orientation.apply_filter_information_content | ...
+        obj.Config.best_fit_orientation.apply_filter_celllike_spatial_footprint;
+    if APPLY_FILTER
+        inclusionFilename = fullfile(session.getAnalysisDirectory(), sprintf('%s_placemaps_inclusion.mat', session.getName()));
+        if isfile(inclusionFilename)
+            inclusionData = load(inclusionFilename);
+            inclusionData = inclusionData.inclusionData;
+            
+            %inclusion = true(size(avgF));
+
+            if obj.Config.best_fit_orientation.apply_filter_information_content
+                placemapsInclude = placemapsInclude & inclusionData.passedInformationContentFilter;
+            end
+            
+            if obj.Config.best_fit_orientation.apply_filter_celllike_spatial_footprint
+                placemapsInclude = placemapsInclude & inclusionData.passedCelllikeSpatialFootprintFilter;
+            end
+        else
+            warning('Filtering of cells enabled for fluorescence, but %s is not found so filtering will not be applied.', inclusionFilename);
+        end
+    end
+    
+    
+    % old version
+%     placemapInclusionFilename = fullfile(session.getAnalysisDirectory(), sprintf('%s_placemaps_inclusion.mat', session.getName()));
+%     if ~isfile(placemapInclusionFilename)
+%         warning('The placemap inclusion database file (%s) does not exist. It must be created.', placemapInclusionFilename);
+%         return;
+%     end
+%     tmp = load(placemapInclusionFilename);
+%     placemapsInclude = tmp.inclusionData.include; % should check that ids match the maps
+    
+    
+    % Perform the filtering. We set maps that are not include to all zeros
+    % so that the subsequent code does not use them.
+    if size(maps,3) ~= length(placemapsInclude)
+        error('Inconsistent dimensions. placemap database has (%d) maps, but inclusion database has (%d).\n', size(maps,3), length(placemapsInclude));
+    end
+    for i = 1:length(placemapsInclude)
+       if placemapsInclude(i) == 0
+           maps(:,:,i) = zeros(size(maps,1), size(maps,2));
+       end
+    end
+    
+    
+    
     % Because the miniscope cell data could be run as separate trials,
     % instead of being concatenated, we need to use the cell registration
     % structure. Tetrode data doesn't have that issue so we just use the
@@ -54,7 +108,7 @@ function mlgp_compute_bfo_percell_90(obj, session)
        cellIds = localCellIds; 
     end
     
-    [perCell, uniqueCellIds] = ml_algo_bfo_percell_general(placemapData.maps, cellIds, placemapData.contextIds, placemapData.trialIds, rotationsDeg);
+    [perCell, uniqueCellIds] = ml_algo_bfo_percell_general(maps, cellIds, placemapData.contextIds, placemapData.trialIds, rotationsDeg);
     
     animalName = obj.Experiment.getAnimalName();
         
@@ -62,5 +116,5 @@ function mlgp_compute_bfo_percell_90(obj, session)
     numTrials = length(unique(placemapData.trialIds));
     numContexts = length(unique(placemapData.contextIds));
     
-    save(fullfile(session.getAnalysisDirectory(), sprintf('%s_bfo_percell_90.mat', session.getName())), 'rotationsDeg', 'perCell', 'animalName', 'sessionName', 'numCells', 'uniqueCellIds', 'numTrials', 'numContexts');
+    save(fullfile(session.getAnalysisDirectory(), sprintf('%s_bfo_percell_90.mat', session.getName())), 'mapType', 'rotationsDeg', 'perCell', 'animalName', 'sessionName', 'numCells', 'uniqueCellIds', 'numTrials', 'numContexts');
 end % function

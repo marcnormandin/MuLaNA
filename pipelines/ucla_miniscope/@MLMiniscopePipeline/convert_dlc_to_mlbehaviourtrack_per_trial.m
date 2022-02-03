@@ -8,7 +8,8 @@ function convert_dlc_to_mlbehaviourtrack_per_trial( obj, session, trial )
     trialDLCFolder = strrep(trial.getTrialDirectory(), 'recordings', 'dlc_tracks');
 
     % Perform the main conversion
-    track = ml_cai_dlc_to_mlbehaviourtrack_with_heading(trialDLCFolder, mlvidrec.timestamp_ms);
+   % track = ml_cai_dlc_to_mlbehaviourtrack_with_heading(trialDLCFolder, mlvidrec.timestamp_ms);
+    track = ml_cai_dlc_to_mlbehaviourtrack(trialDLCFolder, mlvidrec.timestamp_ms);
 
     % Save the track
     outputFilename = fullfile(trial.getAnalysisDirectory(), 'behav_track_vid.hdf5');
